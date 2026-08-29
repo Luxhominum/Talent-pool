@@ -552,13 +552,13 @@ const publicHtml = `<!DOCTYPE html>
     .drawer-backdrop {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
       background: rgba(0, 0, 0, 0.4);
-      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+      z-index: 1500; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
     }
     .drawer-backdrop.active { opacity: 1; pointer-events: auto; }
     .drawer {
       position: fixed; top: 0; right: 0; bottom: 0; width: 640px; max-width: 95vw;
       background: var(--bg-surface); border-left: 1px solid var(--border-light);
-      z-index: 1001; transform: translateX(100%);
+      z-index: 1501; transform: translateX(100%);
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: var(--shadow-drawer); display: flex; flex-direction: column;
     }
@@ -569,8 +569,17 @@ const publicHtml = `<!DOCTYPE html>
     }
     .drawer-body { padding: 24px; overflow-y: auto; flex: 1; }
     .drawer-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
       padding: 16px 24px; border-top: 1px solid var(--border-light);
-      background: #F9FAFB; display: flex; justify-content: space-between; align-items: center;
+      background: #FFFFFF; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.06);
+    }
+    body.drawer-open .messenger-trigger,
+    body.drawer-open .messenger-panel,
+    .drawer-backdrop.active ~ .messenger-trigger {
+      display: none !important;
     }
 
     /* Form Elements */
@@ -892,13 +901,25 @@ const publicHtml = `<!DOCTYPE html>
       box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.35);
     }
     .messenger-unread-badge {
+      position: absolute;
+      top: -7px;
+      right: -5px;
       background: #EF4444;
       color: #FFFFFF;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 9999px;
-      line-height: 1;
+      line-height: 1.2;
+      min-width: 20px;
+      text-align: center;
+      box-shadow: 0 0 0 2px #111827, 0 2px 8px rgba(239, 68, 68, 0.7);
+      animation: pulseRedBadge 1.5s infinite;
+    }
+    @keyframes pulseRedBadge {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
     }
     .messenger-panel {
       position: fixed;
@@ -2598,11 +2619,13 @@ const publicHtml = `<!DOCTYPE html>
     /* DRAWER LOGIC                                         */
     /* ---------------------------------------------------- */
     function openDrawer() {
+      document.body.classList.add('drawer-open');
       if (el.talentDrawer) el.talentDrawer.classList.add('open');
       if (el.drawerBackdrop) el.drawerBackdrop.classList.add('active');
     }
 
     function closeDrawer() {
+      document.body.classList.remove('drawer-open');
       if (el.talentDrawer) el.talentDrawer.classList.remove('open');
       if (el.drawerBackdrop) el.drawerBackdrop.classList.remove('active');
       state.selectedTalent = null;
@@ -3440,6 +3463,8 @@ const publicHtml = `<!DOCTYPE html>
       setTimeout(doScroll, 150);
     }
 
+    const clientSessionId = 'sess_' + Math.random().toString(36).substring(2, 9) + '_' + Date.now();
+
     function listenTeamChat() {
       try {
         rtdb.ref('/team_chat/messages').limitToLast(50).on('value', (snapshot) => {
@@ -3449,7 +3474,7 @@ const publicHtml = `<!DOCTYPE html>
 
           if (initialChatLoaded && list.length > lastChatCount) {
             const latestMsg = list[list.length - 1];
-            const isFromOther = (latestMsg.senderEmail || '').toLowerCase() !== curEmail;
+            const isFromOther = (latestMsg.senderEmail || '').toLowerCase() !== curEmail || (latestMsg.sessionId && latestMsg.sessionId !== clientSessionId);
 
             if (isFromOther) {
               playChimeSound();
@@ -3466,7 +3491,7 @@ const publicHtml = `<!DOCTYPE html>
             }
           } else if (!initialChatLoaded) {
             // Check unread count on initial load
-            const unreadOnLoad = list.filter(m => (m.timestamp || 0) > lastSeenChatTimestamp && (m.senderEmail || '').toLowerCase() !== curEmail).length;
+            const unreadOnLoad = list.filter(m => (m.timestamp || 0) > lastSeenChatTimestamp && ((m.senderEmail || '').toLowerCase() !== curEmail || (m.sessionId && m.sessionId !== clientSessionId))).length;
             if (unreadOnLoad > 0 && (!messengerOpen || messengerCurrentTab !== 'chat')) {
               unreadCount = unreadOnLoad;
               const badge = document.getElementById('messengerUnreadBadge');
@@ -3499,7 +3524,7 @@ const publicHtml = `<!DOCTYPE html>
       const list = Object.values(data).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
       const bubblesHtml = list.map(msg => {
-        const isMe = (msg.senderEmail || '').toLowerCase() === curEmail;
+        const isMe = (msg.senderEmail || '').toLowerCase() === curEmail && (!msg.sessionId || msg.sessionId === clientSessionId);
         const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
         const roleBadge = msg.isSuperAdmin ? '👑 Admin' : 'HR';
 
@@ -3536,6 +3561,7 @@ const publicHtml = `<!DOCTYPE html>
         senderName: state.currentUser.displayName || state.currentUser.email || 'HR Member',
         senderPhoto: state.currentUser.photoURL || '',
         text: text,
+        sessionId: clientSessionId,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         isSuperAdmin: isSuperAdmin()
       };
