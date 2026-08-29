@@ -1,0 +1,102 @@
+const XLSX = require('xlsx');
+
+const filePath = 'C:/Users/User/Documents/HRD/Resa/Recruitment/Freelance Content Creator/PGE_Talent_Pool_Freelance_Content_Creator.xlsx';
+
+const workbook = XLSX.readFile(filePath);
+const sheet = workbook.Sheets['Talent Pool'];
+const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+console.log(`Found ${rows.length} candidates in 'Talent Pool' sheet.\n`);
+
+function convertRating(level) {
+  const l = String(level).toLowerCase().trim();
+  if (l.includes('advanced') || l.includes('ahli')) return 5;
+  if (l.includes('intermediate') || l.includes('menengah')) return 4;
+  if (l.includes('basic') || l.includes('dasar')) return 3;
+  return 3;
+}
+
+function convertStage(panggilan, status) {
+  const p = String(panggilan).toLowerCase().trim();
+  const s = String(status).toLowerCase().trim();
+  if (s.includes('hired') || s.includes('diterima')) return 'Hired';
+  if (s.includes('interview') || p.includes('prioritas') || p.includes('panggil')) return 'Interviewed';
+  if (s.includes('test')) return 'Screening';
+  if (s.includes('cadangan') || p.includes('cadangan')) return 'Prospect';
+  if (s.includes('reject') || s.includes('ditolak')) return 'Archived';
+  return 'Interviewed';
+}
+
+function cleanPhone(p) {
+  if (!p) return '';
+  let str = String(p).replace(/[^0-9]/g, '');
+  if (str.startsWith('0')) {
+    str = '62' + str.substring(1);
+  }
+  if (!str.startsWith('+') && str.length > 0) {
+    str = '+' + str;
+  }
+  return str;
+}
+
+const formattedTalents = rows.map((r, i) => {
+  const name = r['Nama Kandidat'] ? String(r['Nama Kandidat']).trim() : `Kandidat ${i + 1}`;
+  if (!name || name === 'Nama Kandidat') return null;
+
+  const phone = cleanPhone(r['No. WA']);
+  const email = r['Email'] ? String(r['Email']).trim() : '';
+  const education = r['Pendidikan'] || 'Fresh Graduate';
+  const campus = r['Asal Sekolah/Kampus'] || '';
+  const domisili = r['Domisili'] || '';
+  const portfolioLink = r['Portfolio Link'] || r['CV'] || '';
+  
+  const skills = [
+    { name: 'Foto Produk', rating: convertRating(r['Basic Foto']) },
+    { name: 'Video Produk', rating: convertRating(r['Basic Video']) },
+    { name: 'Video Editing', rating: convertRating(r['Basic Editing']) },
+    { name: 'Content Sense', rating: convertRating(r['Content Sense']) }
+  ];
+
+  const avgScore = Math.round(skills.reduce((acc, s) => acc + s.rating, 0) / skills.length);
+  const overallRating = Math.max(3, Math.min(5, avgScore));
+
+  const stage = convertStage(r['Panggilan Wawancara'], r['Status']);
+  const expectedSalary = r['Expected Uang Saku'] ? String(r['Expected Uang Saku']).trim() : '';
+
+  const notesArr = [];
+  if (education) notesArr.push(`Pendidikan: ${education} (${campus})`);
+  if (domisili) notesArr.push(`Domisili: ${domisili}`);
+  if (r['Source']) notesArr.push(`Source: ${r['Source']}`);
+  if (r['Panggilan Wawancara']) notesArr.push(`Status Panggilan: ${r['Panggilan Wawancara']}`);
+  if (r['Notes']) notesArr.push(`Catatan Tambahan: ${r['Notes']}`);
+  const notes = notesArr.join('\n');
+
+  return {
+    id: 'PGE-' + String(i + 1).padStart(3, '0'),
+    name: name,
+    role: 'Freelance Content Creator',
+    phone: phone,
+    email: email,
+    experienceLevel: education.includes('Fresh') ? 'Junior' : (education.includes('Mahasiswa') ? 'Junior' : 'Mid'),
+    overallRating: overallRating,
+    skills: skills,
+    stage: stage,
+    expectedSalary: expectedSalary || 'Standard Uang Saku',
+    cvUrl: portfolioLink.startsWith('http') ? portfolioLink : '',
+    cvFileId: '',
+    portfolioUrl: portfolioLink.startsWith('http') ? portfolioLink : '',
+    portfolioFileId: '',
+    links: {
+      portfolio: portfolioLink.startsWith('http') ? portfolioLink : ''
+    },
+    notes: notes,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+}).filter(Boolean);
+
+console.log(`Transformed ${formattedTalents.length} valid candidates.`);
+console.log('Sample Candidate:\n', JSON.stringify(formattedTalents[0], null, 2));
+
+const fs = require('fs');
+fs.writeFileSync('imported_pge_talents.json', JSON.stringify(formattedTalents, null, 2));

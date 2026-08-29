@@ -1,0 +1,1328 @@
+[
+  {
+    "id": "PGE-001",
+    "name": "Lia Ana Pratama",
+    "role": "Freelance Content Creator",
+    "phone": "+6281323319026",
+    "email": "liaanapratama21@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 5,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 5
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 5
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\CV - Portofolio (Lia Ana Pratama).pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\CV - Portofolio (Lia Ana Pratama).pdf"
+    },
+    "notes": "Pendidikan: Fresh Graduate (Duta Bangsa)\nDomisili: Banjarsari\nSource: Email",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-002",
+    "name": "Rizky Abdullah",
+    "role": "Freelance Content Creator",
+    "phone": "+6285157199358",
+    "email": "riskiabdulah112@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 5,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 5
+      },
+      {
+        "name": "Video Produk",
+        "rating": 5
+      },
+      {
+        "name": "Video Editing",
+        "rating": 5
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Latest Personal Portfolio_Rizky Abdullah_ July 26.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Latest Personal Portfolio_Rizky Abdullah_ July 26.pdf"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif (Universitas terbuka)\nDomisili: Jebres\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-003",
+    "name": "Deviana Putri Wahyudi",
+    "role": "Freelance Content Creator",
+    "phone": "+6281237707919",
+    "email": "devianapw@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "https://drive.google.com/drive/folders/1rysH8kTC2aBwUOgxOdbdHGsSIQsiBYCA",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "https://drive.google.com/drive/folders/1rysH8kTC2aBwUOgxOdbdHGsSIQsiBYCA"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif (USB)\nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-004",
+    "name": "Rahdan Hutama",
+    "role": "Freelance Content Creator",
+    "phone": "+6282276022168",
+    "email": "rahdanvol11@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 5
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO RAHDAN HUTAMA.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO RAHDAN HUTAMA.pdf"
+    },
+    "notes": "Pendidikan: Fresh Graduate (ISI)\nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-005",
+    "name": "Abdul Rouf Alghofar",
+    "role": "Freelance Content Creator",
+    "phone": "+6285867405226",
+    "email": "",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "https://drive.google.com/drive/folders/1PusfLcxfuI0vH-Ne79MrhylkuooJGiaL",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "https://drive.google.com/drive/folders/1PusfLcxfuI0vH-Ne79MrhylkuooJGiaL"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Kartosuro\nSource: Email",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-006",
+    "name": "Dini Ayu Milany",
+    "role": "Freelance Content Creator",
+    "phone": "+6285642359407",
+    "email": "dinimilany@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "https://drive.google.com/drive/folders/19AXdnLvjvxRAnKGBb1LxpGJQoBxO-wdc?usp=sharing",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "https://drive.google.com/drive/folders/19AXdnLvjvxRAnKGBb1LxpGJQoBxO-wdc?usp=sharing"
+    },
+    "notes": "Pendidikan: SMA/SMK \nDomisili: Surakarta\nSource: Email",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-007",
+    "name": "Anggun Permatasari",
+    "role": "Freelance Content Creator",
+    "phone": "+6281252080760",
+    "email": "anggunpermatasariasli@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO CONTENT CREATOR .pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO CONTENT CREATOR .pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Karanganyar\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-008",
+    "name": "Putri Pandu Pertiwi",
+    "role": "Freelance Content Creator",
+    "phone": "+6287775884427",
+    "email": "pertiwiputri218@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "https://sawlader.my.canva.site/portoputripandu",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "https://sawlader.my.canva.site/portoputripandu"
+    },
+    "notes": "Pendidikan: SMA/SMK \nDomisili: Karanggede\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-009",
+    "name": "Alvie Chasanah",
+    "role": "Freelance Content Creator",
+    "phone": "+6285867107306",
+    "email": "salma.alvie99@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 5,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 5
+      },
+      {
+        "name": "Video Produk",
+        "rating": 5
+      },
+      {
+        "name": "Video Editing",
+        "rating": 5
+      },
+      {
+        "name": "Content Sense",
+        "rating": 5
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "https://salmaal.my.canva.site/",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "https://salmaal.my.canva.site/"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-010",
+    "name": "Nabilla Nur Azizah",
+    "role": "Freelance Content Creator",
+    "phone": "+62882007676522",
+    "email": "nabillaazizah4@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio Nura konten.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio Nura konten.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: -\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-011",
+    "name": "Galih Adhi S",
+    "role": "Freelance Content Creator",
+    "phone": "+62882006619182",
+    "email": "adhigalih40@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio konten_Galih adhi.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio konten_Galih adhi.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-012",
+    "name": "Indah Chahyanti",
+    "role": "Freelance Content Creator",
+    "phone": "+628971506347",
+    "email": "Chahyantii806@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\WhatsApp Video 2026-07-27 at 13.25.49.mp4",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\WhatsApp Video 2026-07-27 at 13.25.49.mp4"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-013",
+    "name": "Vika Nindhi",
+    "role": "Freelance Content Creator",
+    "phone": "+6282172111836",
+    "email": "nindyvika18@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "https://vt.tiktok.com/ZS41JjvFo/",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "https://vt.tiktok.com/ZS41JjvFo/"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Sukoharjo\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-014",
+    "name": "Melinia Eka Budianti",
+    "role": "Freelance Content Creator",
+    "phone": "+6283110801114",
+    "email": "meliniaeka@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\ssstik.io_@cilopimshop_1783661279088.mp4",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\ssstik.io_@cilopimshop_1783661279088.mp4"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-015",
+    "name": "elvira romadhony",
+    "role": "Freelance Content Creator",
+    "phone": "+6285117392229",
+    "email": "elvirapromadhony18@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 5,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 5
+      },
+      {
+        "name": "Content Sense",
+        "rating": 5
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO ELVIRA P.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO ELVIRA P.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-016",
+    "name": "Siti Aisiah",
+    "role": "Freelance Content Creator",
+    "phone": "+6289520133438",
+    "email": "",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio_.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio_.pdf"
+    },
+    "notes": "Pendidikan: Fresh Graduate \nDomisili: Sukoharjo\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-017",
+    "name": "Putri Nanda Ika",
+    "role": "Freelance Content Creator",
+    "phone": "+6285743718396",
+    "email": "putriinandaika@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO PUTRI NANDA .pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO PUTRI NANDA .pdf"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-018",
+    "name": "Bayu Badra",
+    "role": "Freelance Content Creator",
+    "phone": "+6287879675744",
+    "email": "bayubadras7@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 5
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO CONTENT SPECIALIST_BAYU BADRA.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO CONTENT SPECIALIST_BAYU BADRA.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Sukoharjo\nSource: Email",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-019",
+    "name": "Indra Kurniawan",
+    "role": "Freelance Content Creator",
+    "phone": "+6289690892458",
+    "email": "indrakurniawann60@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\CV Indra Kurniawan.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\CV Indra Kurniawan.pdf"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif \nDomisili: Sukoharjo\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-020",
+    "name": "Mei Widyaningsih",
+    "role": "Freelance Content Creator",
+    "phone": "+6281927911302",
+    "email": "Meiwidya624@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio Mei Widyaningsih_20251012_031617_0000.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio Mei Widyaningsih_20251012_031617_0000.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-021",
+    "name": "Karen Gita",
+    "role": "Freelance Content Creator",
+    "phone": "+6285803693744",
+    "email": "gitakaren6@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 4,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 4
+      },
+      {
+        "name": "Content Sense",
+        "rating": 4
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Karen Portfolio_.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Karen Portfolio_.pdf"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta\nSource: email",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-022",
+    "name": "Wulan Yuniarti",
+    "role": "Freelance Content Creator",
+    "phone": "+6283124089877",
+    "email": "Wulanyunisa59@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\WULAN (Freelance Content Creator).pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\WULAN (Freelance Content Creator).pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Karanganyar",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-023",
+    "name": "Aprilia Widyaningtyas",
+    "role": "Freelance Content Creator",
+    "phone": "+62895384204646",
+    "email": "aprillia65277@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 5,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Produk",
+        "rating": 4
+      },
+      {
+        "name": "Video Editing",
+        "rating": 5
+      },
+      {
+        "name": "Content Sense",
+        "rating": 5
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio Aprillia W (1)_compressed (1).pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio Aprillia W (1)_compressed (1).pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Sukoharjo\nSource: email",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-024",
+    "name": "BERLIANA ZAHARA QONITA",
+    "role": "Freelance Content Creator",
+    "phone": "+6289630031932",
+    "email": "berlianazahara7@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\CV BERLIANA ZAHARA QONITA (1).pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\CV BERLIANA ZAHARA QONITA (1).pdf"
+    },
+    "notes": "Pendidikan: Fresh Graduate \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-025",
+    "name": "Sekar arum",
+    "role": "Freelance Content Creator",
+    "phone": "+62882003776620",
+    "email": "sekarum31@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portfolio Sekar Arum.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portfolio Sekar Arum.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-026",
+    "name": "Wahyu setyo Nugroho",
+    "role": "Freelance Content Creator",
+    "phone": "+6281912046596",
+    "email": "FORBUSSINESAJALAH@GMAIL.COM",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "link",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "link"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Sragen",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-027",
+    "name": "Sulva Inggriani",
+    "role": "Freelance Content Creator",
+    "phone": "+6289639328080",
+    "email": "sulvainggriani@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio_Content_Creator_Sulva_Inggriani_Update 2.docx",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio_Content_Creator_Sulva_Inggriani_Update 2.docx"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-028",
+    "name": "Nadila laras Suci",
+    "role": "Freelance Content Creator",
+    "phone": "+6282197044209",
+    "email": "nadilalarassuci@student.uns.ac.id",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO_NADILA LARAS SUCI (1).pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO_NADILA LARAS SUCI (1).pdf"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-029",
+    "name": "Erza Rizki Akbar",
+    "role": "Freelance Content Creator",
+    "phone": "+62895335452860",
+    "email": "erzarizky22@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\WhatsApp Video 2026-08-26 at 12.18.42.mp4",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\WhatsApp Video 2026-08-26 at 12.18.42.mp4"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-030",
+    "name": "Sinta Rahmalia",
+    "role": "Freelance Content Creator",
+    "phone": "+62882007567394",
+    "email": "sintarahmalia44@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "link",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "link"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-031",
+    "name": "Bertha Damara",
+    "role": "Freelance Content Creator",
+    "phone": "+6285198507192",
+    "email": "damarabertha549@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "LINK",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "LINK"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Sragen",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-032",
+    "name": "Abdurohman Alharits",
+    "role": "Freelance Content Creator",
+    "phone": "+6285894047244",
+    "email": "abdurrohmanalharits@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "LINK",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "LINK"
+    },
+    "notes": "Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-033",
+    "name": "Fitria Nofvita Paramitha",
+    "role": "Freelance Content Creator",
+    "phone": "+6283141644178",
+    "email": "nofvitafitria11@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\Portofolio_Fitria N.P..pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\Portofolio_Fitria N.P..pdf"
+    },
+    "notes": "Pendidikan: Fresh Graduate \nDomisili: surakarta",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  },
+  {
+    "id": "PGE-034",
+    "name": "Mutia zulfa nur fadhila",
+    "role": "Freelance Content Creator",
+    "phone": "+6285869505546",
+    "email": "mutiazulfanf@gmail.com",
+    "experienceLevel": "Junior",
+    "overallRating": 3,
+    "skills": [
+      {
+        "name": "Foto Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Produk",
+        "rating": 3
+      },
+      {
+        "name": "Video Editing",
+        "rating": 3
+      },
+      {
+        "name": "Content Sense",
+        "rating": 3
+      }
+    ],
+    "stage": "Prospect",
+    "expectedSalary": "Standard Uang Saku",
+    "cvUrl": "",
+    "cvFileId": "",
+    "portfolioUrl": "CV\\PORTOFOLIO MUTIA ZULFA.pdf",
+    "portfolioFileId": "",
+    "links": {
+      "portfolio": "CV\\PORTOFOLIO MUTIA ZULFA.pdf"
+    },
+    "notes": "Pendidikan: Profesional \nDomisili: Sukoharjo",
+    "createdAt": "2026-08-27T01:58:21.840Z",
+    "updatedAt": "2026-08-27T01:58:21.840Z"
+  }
+]

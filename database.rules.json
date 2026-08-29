@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "presence": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "team_chat": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "talents": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "metadata": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "authorizedUsers": {
+      ".read": true,
+      ".write": "auth != null"
+    }
+  }
+}

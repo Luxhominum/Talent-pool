@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PGE Talent Pool | Candidate Repository</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-canvas: #FBFBFA;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #F4F4F2;
+      --border-light: #E8E8E4;
+      --border-focus: #111827;
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #9CA3AF;
+      
+      --pastel-blue-bg: #E8F0FE;
+      --pastel-blue-text: #1967D2;
+      --pastel-green-bg: #E6F4EA;
+      --pastel-green-text: #137333;
+      --pastel-yellow-bg: #FEF7E0;
+      --pastel-yellow-text: #B06000;
+      --pastel-purple-bg: #F3E8FD;
+      --pastel-purple-text: #7627BB;
+      --pastel-red-bg: #FCE8E6;
+      --pastel-red-text: #C5221F;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
+      --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+      --shadow-drawer: -4px 0 24px rgba(0, 0, 0, 0.08);
+
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-serif: 'Newsreader', Georgia, serif;
+      --font-mono: 'Geist Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px 80px;
+    }
+
+    /* Header */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 32px;
+    }
+    .brand-group { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 32px; height: 32px;
+      background: var(--text-primary);
+      color: #FFF;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; font-family: var(--font-mono);
+    }
+    .brand-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+    .brand-badge {
+      font-family: var(--font-mono); font-size: 11px;
+      background: var(--pastel-green-bg); color: var(--pastel-green-text);
+      padding: 3px 8px; border-radius: var(--radius-pill); font-weight: 500;
+    }
+
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+      padding: 8px 14px; border-radius: var(--radius-sm);
+      border: 1px solid transparent; cursor: pointer;
+      transition: all 0.15s ease; text-decoration: none;
+    }
+    .btn-primary { background: var(--text-primary); color: #FFF; }
+    .btn-primary:hover { background: #000; }
+    .btn-secondary { background: var(--bg-surface); border-color: var(--border-light); color: var(--text-secondary); }
+    .btn-secondary:hover { background: var(--bg-subtle); color: var(--text-primary); border-color: #D1D5DB; }
+    .btn-danger { background: var(--pastel-red-bg); color: var(--pastel-red-text); border-color: #F87171; }
+    .btn-danger:hover { background: #F87171; color: #FFF; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn-icon { padding: 6px 8px; }
+
+    /* Hero Section */
+    .hero-section { margin-bottom: 28px; }
+    .hero-meta {
+      font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .hero-heading {
+      font-family: var(--font-serif); font-size: 32px; font-weight: 400;
+      letter-spacing: -0.02em; color: var(--text-primary);
+    }
+    .hero-heading em { font-style: italic; font-weight: 400; color: #374151; }
+
+    /* Metrics Bar */
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 28px;
+    }
+    .metric-card {
+      background: var(--bg-surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); padding: 16px 20px;
+      box-shadow: var(--shadow-subtle);
+    }
+    .metric-label {
+      font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 28px; font-weight: 600; letter-spacing: -0.02em;
+      color: var(--text-primary); line-height: 1;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .search-box {
+      position: relative; flex: 1; min-width: 280px;
+    }
+    .search-box svg {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); width: 16px; height: 16px;
+    }
+    .search-box input {
+      width: 100%; padding: 9px 12px 9px 36px;
+      background: var(--bg-surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); font-family: var(--font-sans);
+      font-size: 13px; color: var(--text-primary); outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-box input:focus { border-color: var(--border-focus); }
+
+    .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .select-filter {
+      padding: 8px 12px; background: var(--bg-surface);
+      border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+      font-family: var(--font-sans); font-size: 13px; color: var(--text-primary);
+      outline: none; cursor: pointer;
+    }
+
+    /* View Switcher */
+    .view-switcher {
+      display: inline-flex; background: var(--bg-subtle);
+      border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+      padding: 2px;
+    }
+    .view-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 10px; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); background: transparent;
+      border: none; border-radius: 4px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .view-btn.active {
+      background: var(--bg-surface); color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* Bento Grid */
+    .bento-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+    .talent-card {
+      background: var(--bg-surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); padding: 18px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      cursor: pointer; position: relative;
+    }
+    .talent-card:hover {
+      transform: translateY(-2px); border-color: #D1D5DB;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    }
+    .talent-card-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .talent-id {
+      font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);
+      letter-spacing: 0.05em; margin-bottom: 2px; display: block;
+    }
+    .talent-name { font-size: 16px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+    .talent-role { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+    .talent-rating-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+      color: #D97706; background: #FEF3C7; padding: 3px 8px; border-radius: var(--radius-pill);
+    }
+
+    .meta-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .meta-tag {
+      font-size: 11px; padding: 2px 7px; border-radius: 4px;
+      background: var(--bg-subtle); color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+    }
+    .tag-stage { font-weight: 500; }
+    .stage-prospect { background: var(--pastel-blue-bg); color: var(--pastel-blue-text); border-color: transparent; }
+    .stage-screening { background: var(--pastel-yellow-bg); color: var(--pastel-yellow-text); border-color: transparent; }
+    .stage-interviewed { background: var(--pastel-purple-bg); color: var(--pastel-purple-text); border-color: transparent; }
+    .stage-shortlisted { background: #D1FAE5; color: #065F46; border-color: transparent; }
+    .stage-offered { background: #FEF3C7; color: #92400E; border-color: transparent; }
+    .stage-hired { background: var(--pastel-green-bg); color: var(--pastel-green-text); border-color: transparent; }
+    .stage-archived { background: #F3F4F6; color: #6B7280; border-color: transparent; }
+
+    .skills-wrapper { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+    .skill-tag {
+      font-family: var(--font-mono); font-size: 11px; background: #F9FAFB;
+      border: 1px solid var(--border-light); color: var(--text-secondary);
+      padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .skill-tag-rating { color: #F59E0B; font-size: 9px; }
+
+    .talent-card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 12px; border-top: 1px solid var(--border-light);
+      margin-top: auto;
+    }
+    .contact-links { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .contact-badge {
+      font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: var(--radius-pill);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border-light);
+      transition: background 0.15s;
+    }
+    .contact-badge:hover { background: #E5E7EB; color: var(--text-primary); }
+    .doc-badge {
+      font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: var(--radius-pill);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .doc-badge-cv { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .doc-badge-cv:hover { background: #DBEAFE; }
+    .doc-badge-porto { background: #F5F3FF; color: #6D28D9; border: 1px solid #DDD6FE; }
+    .doc-badge-porto:hover { background: #EDE9FE; }
+
+    /* Table View */
+    .table-container {
+      background: var(--bg-surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); overflow-x: auto; box-shadow: var(--shadow-subtle);
+    }
+    .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .data-table th {
+      background: var(--bg-subtle); font-family: var(--font-mono); font-size: 11px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); padding: 12px 16px; border-bottom: 1px solid var(--border-light);
+    }
+    .data-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border-light);
+      font-size: 13px; color: var(--text-secondary); vertical-align: middle;
+    }
+    .data-table tr:hover { background: #F9FAFB; cursor: pointer; }
+
+    /* Kanban View */
+    .kanban-board {
+      display: grid; grid-template-columns: repeat(7, minmax(200px, 1fr));
+      gap: 12px; overflow-x: auto; padding-bottom: 16px;
+    }
+    .kanban-column {
+      background: var(--bg-subtle); border-radius: var(--radius-md);
+      padding: 12px; border: 1px solid var(--border-light); min-height: 400px;
+    }
+    .kanban-column-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-light);
+    }
+    .kanban-column-title { font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .kanban-column-count {
+      font-size: 10px; font-weight: 600; background: var(--bg-surface);
+      padding: 1px 6px; border-radius: var(--radius-pill); border: 1px solid var(--border-light);
+    }
+    .kanban-card {
+      background: var(--bg-surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03); cursor: pointer;
+    }
+    .kanban-card:hover { border-color: #CBD5E1; }
+
+    /* Slide-over Drawer */
+    .drawer-backdrop {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(2px); z-index: 1000; opacity: 0;
+      pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 95vw;
+      background: var(--bg-surface); z-index: 1001;
+      transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column; box-shadow: var(--shadow-drawer);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 24px; border-bottom: 1px solid var(--border-light);
+    }
+    .drawer-body { padding: 24px; overflow-y: auto; flex: 1; }
+    .drawer-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 24px; border-top: 1px solid var(--border-light);
+      background: var(--bg-canvas);
+    }
+
+    /* Forms */
+    .form-group { margin-bottom: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-label {
+      display: block; font-family: var(--font-mono); font-size: 11px;
+      font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--text-secondary); margin-bottom: 5px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 8px 12px; background: var(--bg-surface);
+      border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+      font-family: var(--font-sans); font-size: 13px; color: var(--text-primary);
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--border-focus); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+
+    /* Dropzones */
+    .file-dropzone {
+      border: 1.5px dashed var(--border-light); border-radius: var(--radius-sm);
+      padding: 16px; text-align: center; cursor: pointer;
+      background: var(--bg-subtle); transition: all 0.15s;
+    }
+    .file-dropzone:hover, .file-dropzone.drag-over {
+      background: #EFF6FF; border-color: #3B82F6;
+    }
+    .dropzone-text { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+    .dropzone-subtext { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    /* Portfolio Chips */
+    .portfolio-files-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .portfolio-chip {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 6px 10px;
+    }
+    .portfolio-chip-info { display: flex; align-items: center; gap: 8px; font-size: 12px; overflow: hidden; }
+    .portfolio-chip-name { color: var(--text-primary); text-decoration: none; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 380px; }
+    .portfolio-chip-name:hover { text-decoration: underline; color: #2563EB; }
+    .portfolio-chip-remove { background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 14px; }
+    .portfolio-chip-remove:hover { color: #EF4444; }
+
+    /* Skills Builder */
+    .skills-builder-row { display: flex; gap: 8px; margin-bottom: 6px; }
+
+    /* Center Toast */
+    .toast-container {
+      position: fixed; top: 24px; left: 50%; transform: translateX(-50%);
+      z-index: 2000; pointer-events: none;
+    }
+    .toast {
+      background: #111827; color: #FFF; padding: 10px 20px; border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 8px; pointer-events: auto;
+      animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="brand-group">
+        <div class="brand-logo">P</div>
+        <span class="brand-title">PGE Talent Pool</span>
+        <span class="brand-badge" id="syncStatus">Connected</span>
+      </div>
+
+      <div class="nav-actions">
+        <a href="#" id="linkGoogleSheet" href="https://docs.google.com/spreadsheets/d/14e8zSKkqBXmgQwzmZv_mvSS4xitximZLmInZXoUAAdQ/edit?gid=0#gid=0" target="_blank" class="btn btn-secondary btn-sm" style="display: inline-flex;" title="Open Google Sheet">📊 Open Google Sheet ↗</a>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAnalytics" onclick="toggleAnalyticsDashboard()">📊 Visual Analytics</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnRefresh" onclick="loadTalents(true)" title="Sync with Google Sheet">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          Sync Sheet
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV" onclick="handleExportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Export CSV
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnAddTalent" onclick="openAddCandidateDrawer()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          + New Candidate
+        </button>
+      </div>
+    </header>
+
+    <!-- Editorial Hero -->
+    <section class="hero-section">
+      <div class="hero-meta">Candidate Management Index</div>
+      <h1 class="hero-heading">Curated talent index & <em>skills repository</em>.</h1>
+    </section>
+
+    <!-- Metrics Grid -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Total Candidates</div>
+        <div class="metric-value" id="metricTotal">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">In Active Pipeline</div>
+        <div class="metric-value" id="metricPipeline">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Shortlisted</div>
+        <div class="metric-value" id="metricShortlisted">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Top Rated (5★)</div>
+        <div class="metric-value" id="metricTopRated">0</div>
+      </div>
+    </section>
+
+    <!-- Collapsible Visual Analytics Dashboard -->
+    <section class="analytics-dashboard" id="analyticsDashboard" style="display: none; background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px 24px; margin-bottom: 28px; box-shadow: var(--shadow-subtle);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">Executive Overview</span>
+          <h2 style="font-family: var(--font-serif); font-size: 20px; font-weight: 500; color: var(--text-primary);">Talent Pool Analytics Dashboard</h2>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAnalyticsDashboard()">Hide Analytics ✕</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+        <!-- Funnel Column -->
+        <div style="background: var(--bg-subtle); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Recruitment Pipeline Funnel</div>
+          <div id="analyticsFunnelContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <!-- Rating Distribution -->
+        <div style="background: var(--bg-subtle); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Overall Star Rating Distribution</div>
+          <div id="analyticsRatingsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <!-- Skill Averages -->
+        <div style="background: var(--bg-subtle); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Skill Benchmark Averages</div>
+          <div id="analyticsSkillsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <!-- Domisili Breakdown -->
+        <div style="background: var(--bg-subtle); padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+          <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Top Candidate Domisili</div>
+          <div id="analyticsLocationContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls Bar -->
+    <section class="controls-bar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Search candidate by name, role, skill, or notes...">
+      </div>
+
+      <div class="filter-group">
+        <select class="select-filter" id="filterStage">
+          <option value="ALL">All Stages</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Screening">Screening</option>
+          <option value="Interviewed">Interviewed</option>
+          <option value="Shortlisted">Shortlisted</option>
+          <option value="Offered">Offered</option>
+          <option value="Hired">Hired</option>
+          <option value="Archived">Archived</option>
+        </select>
+
+        <select class="select-filter" id="filterRating">
+          <option value="0">All Ratings</option>
+          <option value="5">5 Stars Only</option>
+          <option value="4">4+ Stars</option>
+          <option value="3">3+ Stars</option>
+        </select>
+
+        <div class="view-switcher">
+          <button type="button" class="view-btn active" data-view="bento" onclick="switchView('bento')">Grid</button>
+          <button type="button" class="view-btn" data-view="table" onclick="switchView('table')">Table</button>
+          <button type="button" class="view-btn" data-view="kanban" onclick="switchView('kanban')">Pipeline</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Views Container -->
+    <main id="mainViewArea">
+      <div id="bentoContainer" class="bento-grid"></div>
+
+      <div id="tableContainer" class="table-container" style="display: none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Candidate</th>
+              <th>Stage</th>
+              <th>Level</th>
+              <th>Rating</th>
+              <th>Contact & Documents</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="kanbanContainer" class="kanban-board" style="display: none;"></div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <p style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">No candidates match your filter.</p>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset Filters</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Slide-over Drawer -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+  <aside class="drawer" id="talentDrawer">
+    <div class="drawer-header">
+      <div>
+        <span id="drawerId" class="talent-id"></span>
+        <h2 id="drawerTitle" style="font-size: 18px; font-weight: 600;">Candidate Profile</h2>
+      </div>
+      <button type="button" class="btn btn-secondary btn-icon" onclick="closeDrawer()">✕</button>
+    </div>
+
+    <div class="drawer-body" id="drawerBody"></div>
+
+    <div class="drawer-footer">
+      <button type="button" class="btn btn-danger btn-sm" id="btnDeleteDrawer" onclick="handleDeleteCurrentCandidate()" style="display: none;">Delete</button>
+      <div style="display: flex; gap: 8px; margin-left: auto;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeDrawer()">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveDrawer" onclick="handleSaveCandidate()">Save Candidate</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Notification Toasts -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const INITIAL_SEED_DATA = [{"id":"PGE-001","name":"Lia Ana Pratama","role":"Freelance Content Creator","phone":"+6281323319026","email":"liaanapratama21@gmail.com","experienceLevel":"Junior","overallRating":5,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":5},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":5}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\CV - Portofolio (Lia Ana Pratama).pdf","portfolioFileId":"","links":{"portfolio":"CV\\CV - Portofolio (Lia Ana Pratama).pdf"},"notes":"Pendidikan: Fresh Graduate (Duta Bangsa)\nDomisili: Banjarsari\nSource: Email","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-002","name":"Rizky Abdullah","role":"Freelance Content Creator","phone":"+6285157199358","email":"riskiabdulah112@gmail.com","experienceLevel":"Junior","overallRating":5,"skills":[{"name":"Foto Produk","rating":5},{"name":"Video Produk","rating":5},{"name":"Video Editing","rating":5},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Latest Personal Portfolio_Rizky Abdullah_ July 26.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Latest Personal Portfolio_Rizky Abdullah_ July 26.pdf"},"notes":"Pendidikan: Mahasiswa Aktif (Universitas terbuka)\nDomisili: Jebres\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-003","name":"Deviana Putri Wahyudi","role":"Freelance Content Creator","phone":"+6281237707919","email":"devianapw@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"https://drive.google.com/drive/folders/1rysH8kTC2aBwUOgxOdbdHGsSIQsiBYCA","portfolioFileId":"","links":{"portfolio":"https://drive.google.com/drive/folders/1rysH8kTC2aBwUOgxOdbdHGsSIQsiBYCA"},"notes":"Pendidikan: Mahasiswa Aktif (USB)\nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-004","name":"Rahdan Hutama","role":"Freelance Content Creator","phone":"+6282276022168","email":"rahdanvol11@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":5},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO RAHDAN HUTAMA.pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO RAHDAN HUTAMA.pdf"},"notes":"Pendidikan: Fresh Graduate (ISI)\nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-005","name":"Abdul Rouf Alghofar","role":"Freelance Content Creator","phone":"+6285867405226","email":"","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"https://drive.google.com/drive/folders/1PusfLcxfuI0vH-Ne79MrhylkuooJGiaL","portfolioFileId":"","links":{"portfolio":"https://drive.google.com/drive/folders/1PusfLcxfuI0vH-Ne79MrhylkuooJGiaL"},"notes":"Pendidikan: Profesional \nDomisili: Kartosuro\nSource: Email","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-006","name":"Dini Ayu Milany","role":"Freelance Content Creator","phone":"+6285642359407","email":"dinimilany@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"https://drive.google.com/drive/folders/19AXdnLvjvxRAnKGBb1LxpGJQoBxO-wdc?usp=sharing","portfolioFileId":"","links":{"portfolio":"https://drive.google.com/drive/folders/19AXdnLvjvxRAnKGBb1LxpGJQoBxO-wdc?usp=sharing"},"notes":"Pendidikan: SMA/SMK \nDomisili: Surakarta\nSource: Email","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-007","name":"Anggun Permatasari","role":"Freelance Content Creator","phone":"+6281252080760","email":"anggunpermatasariasli@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO CONTENT CREATOR .pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO CONTENT CREATOR .pdf"},"notes":"Pendidikan: Profesional \nDomisili: Karanganyar\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-008","name":"Putri Pandu Pertiwi","role":"Freelance Content Creator","phone":"+6287775884427","email":"pertiwiputri218@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"https://sawlader.my.canva.site/portoputripandu","portfolioFileId":"","links":{"portfolio":"https://sawlader.my.canva.site/portoputripandu"},"notes":"Pendidikan: SMA/SMK \nDomisili: Karanggede\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-009","name":"Alvie Chasanah","role":"Freelance Content Creator","phone":"+6285867107306","email":"salma.alvie99@gmail.com","experienceLevel":"Junior","overallRating":5,"skills":[{"name":"Foto Produk","rating":5},{"name":"Video Produk","rating":5},{"name":"Video Editing","rating":5},{"name":"Content Sense","rating":5}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"https://salmaal.my.canva.site/","portfolioFileId":"","links":{"portfolio":"https://salmaal.my.canva.site/"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-010","name":"Nabilla Nur Azizah","role":"Freelance Content Creator","phone":"+62882007676522","email":"nabillaazizah4@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio Nura konten.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio Nura konten.pdf"},"notes":"Pendidikan: Profesional \nDomisili: -\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-011","name":"Galih Adhi S","role":"Freelance Content Creator","phone":"+62882006619182","email":"adhigalih40@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio konten_Galih adhi.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio konten_Galih adhi.pdf"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-012","name":"Indah Chahyanti","role":"Freelance Content Creator","phone":"+628971506347","email":"Chahyantii806@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\WhatsApp Video 2026-07-27 at 13.25.49.mp4","portfolioFileId":"","links":{"portfolio":"CV\\WhatsApp Video 2026-07-27 at 13.25.49.mp4"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-013","name":"Vika Nindhi","role":"Freelance Content Creator","phone":"+6282172111836","email":"nindyvika18@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"https://vt.tiktok.com/ZS41JjvFo/","portfolioFileId":"","links":{"portfolio":"https://vt.tiktok.com/ZS41JjvFo/"},"notes":"Pendidikan: Profesional \nDomisili: Sukoharjo\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-014","name":"Melinia Eka Budianti","role":"Freelance Content Creator","phone":"+6283110801114","email":"meliniaeka@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\ssstik.io_@cilopimshop_1783661279088.mp4","portfolioFileId":"","links":{"portfolio":"CV\\ssstik.io_@cilopimshop_1783661279088.mp4"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-015","name":"elvira romadhony","role":"Freelance Content Creator","phone":"+6285117392229","email":"elvirapromadhony18@gmail.com","experienceLevel":"Junior","overallRating":5,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":5},{"name":"Content Sense","rating":5}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO ELVIRA P.pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO ELVIRA P.pdf"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-016","name":"Siti Aisiah","role":"Freelance Content Creator","phone":"+6289520133438","email":"","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio_.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio_.pdf"},"notes":"Pendidikan: Fresh Graduate \nDomisili: Sukoharjo\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-017","name":"Putri Nanda Ika","role":"Freelance Content Creator","phone":"+6285743718396","email":"putriinandaika@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO PUTRI NANDA .pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO PUTRI NANDA .pdf"},"notes":"Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-018","name":"Bayu Badra","role":"Freelance Content Creator","phone":"+6287879675744","email":"bayubadras7@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":5},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO CONTENT SPECIALIST_BAYU BADRA.pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO CONTENT SPECIALIST_BAYU BADRA.pdf"},"notes":"Pendidikan: Profesional \nDomisili: Sukoharjo\nSource: Email","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-019","name":"Indra Kurniawan","role":"Freelance Content Creator","phone":"+6289690892458","email":"indrakurniawann60@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\CV Indra Kurniawan.pdf","portfolioFileId":"","links":{"portfolio":"CV\\CV Indra Kurniawan.pdf"},"notes":"Pendidikan: Mahasiswa Aktif \nDomisili: Sukoharjo\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-020","name":"Mei Widyaningsih","role":"Freelance Content Creator","phone":"+6281927911302","email":"Meiwidya624@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio Mei Widyaningsih_20251012_031617_0000.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio Mei Widyaningsih_20251012_031617_0000.pdf"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta\nSource: WhatsApp","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-021","name":"Karen Gita","role":"Freelance Content Creator","phone":"+6285803693744","email":"gitakaren6@gmail.com","experienceLevel":"Junior","overallRating":4,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":4},{"name":"Content Sense","rating":4}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Karen Portfolio_.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Karen Portfolio_.pdf"},"notes":"Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta\nSource: email","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-022","name":"Wulan Yuniarti","role":"Freelance Content Creator","phone":"+6283124089877","email":"Wulanyunisa59@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\WULAN (Freelance Content Creator).pdf","portfolioFileId":"","links":{"portfolio":"CV\\WULAN (Freelance Content Creator).pdf"},"notes":"Pendidikan: Profesional \nDomisili: Karanganyar","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-023","name":"Aprilia Widyaningtyas","role":"Freelance Content Creator","phone":"+62895384204646","email":"aprillia65277@gmail.com","experienceLevel":"Junior","overallRating":5,"skills":[{"name":"Foto Produk","rating":4},{"name":"Video Produk","rating":4},{"name":"Video Editing","rating":5},{"name":"Content Sense","rating":5}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio Aprillia W (1)_compressed (1).pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio Aprillia W (1)_compressed (1).pdf"},"notes":"Pendidikan: Profesional \nDomisili: Sukoharjo\nSource: email","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-024","name":"BERLIANA ZAHARA QONITA","role":"Freelance Content Creator","phone":"+6289630031932","email":"berlianazahara7@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\CV BERLIANA ZAHARA QONITA (1).pdf","portfolioFileId":"","links":{"portfolio":"CV\\CV BERLIANA ZAHARA QONITA (1).pdf"},"notes":"Pendidikan: Fresh Graduate \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-025","name":"Sekar arum","role":"Freelance Content Creator","phone":"+62882003776620","email":"sekarum31@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portfolio Sekar Arum.pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portfolio Sekar Arum.pdf"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-026","name":"Wahyu setyo Nugroho","role":"Freelance Content Creator","phone":"+6281912046596","email":"FORBUSSINESAJALAH@GMAIL.COM","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"link","portfolioFileId":"","links":{"portfolio":"link"},"notes":"Pendidikan: Profesional \nDomisili: Sragen","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-027","name":"Sulva Inggriani","role":"Freelance Content Creator","phone":"+6289639328080","email":"sulvainggriani@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio_Content_Creator_Sulva_Inggriani_Update 2.docx","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio_Content_Creator_Sulva_Inggriani_Update 2.docx"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-028","name":"Nadila laras Suci","role":"Freelance Content Creator","phone":"+6282197044209","email":"nadilalarassuci@student.uns.ac.id","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO_NADILA LARAS SUCI (1).pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO_NADILA LARAS SUCI (1).pdf"},"notes":"Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-029","name":"Erza Rizki Akbar","role":"Freelance Content Creator","phone":"+62895335452860","email":"erzarizky22@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\WhatsApp Video 2026-08-26 at 12.18.42.mp4","portfolioFileId":"","links":{"portfolio":"CV\\WhatsApp Video 2026-08-26 at 12.18.42.mp4"},"notes":"Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-030","name":"Sinta Rahmalia","role":"Freelance Content Creator","phone":"+62882007567394","email":"sintarahmalia44@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"link","portfolioFileId":"","links":{"portfolio":"link"},"notes":"Pendidikan: Profesional \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-031","name":"Bertha Damara","role":"Freelance Content Creator","phone":"+6285198507192","email":"damarabertha549@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"LINK","portfolioFileId":"","links":{"portfolio":"LINK"},"notes":"Pendidikan: Profesional \nDomisili: Sragen","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-032","name":"Abdurohman Alharits","role":"Freelance Content Creator","phone":"+6285894047244","email":"abdurrohmanalharits@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"LINK","portfolioFileId":"","links":{"portfolio":"LINK"},"notes":"Pendidikan: Mahasiswa Aktif \nDomisili: Surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-033","name":"Fitria Nofvita Paramitha","role":"Freelance Content Creator","phone":"+6283141644178","email":"nofvitafitria11@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\Portofolio_Fitria N.P..pdf","portfolioFileId":"","links":{"portfolio":"CV\\Portofolio_Fitria N.P..pdf"},"notes":"Pendidikan: Fresh Graduate \nDomisili: surakarta","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"},{"id":"PGE-034","name":"Mutia zulfa nur fadhila","role":"Freelance Content Creator","phone":"+6285869505546","email":"mutiazulfanf@gmail.com","experienceLevel":"Junior","overallRating":3,"skills":[{"name":"Foto Produk","rating":3},{"name":"Video Produk","rating":3},{"name":"Video Editing","rating":3},{"name":"Content Sense","rating":3}],"stage":"Prospect","expectedSalary":"Standard Uang Saku","cvUrl":"","cvFileId":"","portfolioUrl":"CV\\PORTOFOLIO MUTIA ZULFA.pdf","portfolioFileId":"","links":{"portfolio":"CV\\PORTOFOLIO MUTIA ZULFA.pdf"},"notes":"Pendidikan: Profesional \nDomisili: Sukoharjo","createdAt":"2026-08-27T01:58:21.840Z","updatedAt":"2026-08-27T01:58:21.840Z"}];
+    const STAGES = ['Prospect', 'Screening', 'Interviewed', 'Shortlisted', 'Offered', 'Hired', 'Archived'];
+
+    const state = {
+      talents: [...INITIAL_SEED_DATA],
+      filtered: [...INITIAL_SEED_DATA],
+      activeView: 'bento',
+      selectedTalent: null,
+      filters: { search: '', stage: 'ALL', rating: 0 },
+      stagedPortfolioItems: []
+    };
+
+    let el = {};
+
+    function cacheDOMElements() {
+      el = {
+        bentoContainer: document.getElementById('bentoContainer'),
+        tableContainer: document.getElementById('tableContainer'),
+        tableBody: document.getElementById('tableBody'),
+        kanbanContainer: document.getElementById('kanbanContainer'),
+        emptyState: document.getElementById('emptyState'),
+        searchInput: document.getElementById('searchInput'),
+        filterStage: document.getElementById('filterStage'),
+        filterRating: document.getElementById('filterRating'),
+        syncStatus: document.getElementById('syncStatus'),
+        toastContainer: document.getElementById('toastContainer'),
+        metricTotal: document.getElementById('metricTotal'),
+        metricPipeline: document.getElementById('metricPipeline'),
+        metricShortlisted: document.getElementById('metricShortlisted'),
+        metricTopRated: document.getElementById('metricTopRated'),
+        talentDrawer: document.getElementById('talentDrawer'),
+        drawerBackdrop: document.getElementById('drawerBackdrop'),
+        drawerId: document.getElementById('drawerId'),
+        drawerTitle: document.getElementById('drawerTitle'),
+        drawerBody: document.getElementById('drawerBody'),
+        btnDeleteDrawer: document.getElementById('btnDeleteDrawer'),
+        btnSaveDrawer: document.getElementById('btnSaveDrawer')
+      };
+    }
+
+    function bootApp() {
+      cacheDOMElements();
+      initEventListeners();
+      applyFilters();
+      loadTalents();
+    }
+
+    function initEventListeners() {
+      if (el.searchInput) {
+        el.searchInput.addEventListener('input', (e) => {
+          state.filters.search = e.target.value.toLowerCase().trim();
+          applyFilters();
+        });
+      }
+      if (el.filterStage) {
+        el.filterStage.addEventListener('change', (e) => {
+          state.filters.stage = e.target.value;
+          applyFilters();
+        });
+      }
+      if (el.filterRating) {
+        el.filterRating.addEventListener('change', (e) => {
+          state.filters.rating = Number(e.target.value);
+          applyFilters();
+        });
+      }
+    }
+
+    function loadTalents(manualTrigger) {
+      if (el.syncStatus) {
+        el.syncStatus.textContent = 'Syncing... ⏳';
+        el.syncStatus.style.background = 'var(--pastel-yellow-bg)';
+        el.syncStatus.style.color = 'var(--pastel-yellow-text)';
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((response) => {
+            if (response && response.success) {
+              if (Array.isArray(response.data) && response.data.length > 0) {
+                state.talents = response.data;
+              } else if (!state.talents || state.talents.length === 0) {
+                state.talents = [...INITIAL_SEED_DATA];
+              }
+              applyFilters();
+              if (el.syncStatus) {
+                el.syncStatus.textContent = `Connected (${state.talents.length})`;
+                el.syncStatus.style.background = 'var(--pastel-green-bg)';
+                el.syncStatus.style.color = 'var(--pastel-green-text)';
+              }
+              if (manualTrigger) showToast(`Synced ${state.talents.length} candidates from Google Sheet`);
+              if (response.spreadsheetUrl) {
+                const slink = document.getElementById('linkGoogleSheet');
+                if (slink) {
+                  slink.href = response.spreadsheetUrl;
+                  slink.style.display = 'inline-flex';
+                }
+              }
+            } else {
+              console.warn('Backend returned error:', response);
+              if (el.syncStatus) {
+                el.syncStatus.textContent = 'Sync Error: ' + (response ? (response.error || 'Failed') : 'Unknown');
+                el.syncStatus.style.background = 'var(--pastel-red-bg)';
+                el.syncStatus.style.color = 'var(--pastel-red-text)';
+              }
+              applyFilters();
+              if (manualTrigger) showToast('Sync error: ' + (response ? response.error : 'Server error'));
+            }
+          })
+          .withFailureHandler((err) => {
+            console.error('Google Apps Script RPC error:', err);
+            if (el.syncStatus) {
+              el.syncStatus.textContent = 'RPC Error: ' + (err.message || err.toString());
+              el.syncStatus.style.background = 'var(--pastel-red-bg)';
+              el.syncStatus.style.color = 'var(--pastel-red-text)';
+            }
+            applyFilters();
+            if (manualTrigger) showToast('RPC failed: ' + (err.message || err.toString()));
+          })
+          .getTalents();
+      } else {
+        applyFilters();
+        if (el.syncStatus) {
+          el.syncStatus.textContent = `Local Preview (${state.talents.length})`;
+          el.syncStatus.style.background = 'var(--pastel-green-bg)';
+          el.syncStatus.style.color = 'var(--pastel-green-text)';
+        }
+      }
+    }
+
+    function applyFilters() {
+      const { search, stage, rating } = state.filters;
+
+      state.filtered = state.talents.filter(t => {
+        if (stage !== 'ALL' && t.stage !== stage) return false;
+        if (rating > 0 && Number(t.overallRating) < rating) return false;
+
+        if (search) {
+          const nameMatch = (t.name || '').toLowerCase().includes(search);
+          const roleMatch = (t.role || '').toLowerCase().includes(search);
+          const notesMatch = (t.notes || '').toLowerCase().includes(search);
+          const skillsMatch = (t.skills || []).some(s => s.name.toLowerCase().includes(search));
+          if (!nameMatch && !roleMatch && !notesMatch && !skillsMatch) return false;
+        }
+        return true;
+      });
+
+      updateMetrics();
+      renderActiveView();
+    }
+
+    function resetFilters() {
+      state.filters = { search: '', stage: 'ALL', rating: 0 };
+      if (el.searchInput) el.searchInput.value = '';
+      if (el.filterStage) el.filterStage.value = 'ALL';
+      if (el.filterRating) el.filterRating.value = '0';
+      applyFilters();
+    }
+
+    function updateMetrics() {
+      const total = state.talents.length;
+      const active = state.talents.filter(t => ['Screening', 'Interviewed', 'Shortlisted', 'Offered'].includes(t.stage)).length;
+      const shortlisted = state.talents.filter(t => t.stage === 'Shortlisted').length;
+      const topRated = state.talents.filter(t => Number(t.overallRating) === 5).length;
+
+      if (el.metricTotal) el.metricTotal.textContent = total;
+      if (el.metricPipeline) el.metricPipeline.textContent = active;
+      if (el.metricShortlisted) el.metricShortlisted.textContent = shortlisted;
+      if (el.metricTopRated) el.metricTopRated.textContent = topRated;
+
+      renderAnalyticsDashboard();
+    }
+
+    function toggleAnalyticsDashboard() {
+      const dash = document.getElementById('analyticsDashboard');
+      if (!dash) return;
+      const isHidden = dash.style.display === 'none';
+      dash.style.display = isHidden ? 'block' : 'none';
+      const btn = document.getElementById('btnToggleAnalytics');
+      if (btn) {
+        btn.textContent = isHidden ? '📊 Hide Analytics' : '📊 Visual Analytics';
+        if (isHidden) btn.classList.add('btn-primary');
+        else btn.classList.remove('btn-primary');
+      }
+      if (isHidden) renderAnalyticsDashboard();
+    }
+
+    function renderAnalyticsDashboard() {
+      const dash = document.getElementById('analyticsDashboard');
+      if (!dash || dash.style.display === 'none') return;
+
+      const talents = state.talents;
+      const total = Math.max(1, talents.length);
+
+      // 1. Pipeline Funnel
+      const funnelContainer = document.getElementById('analyticsFunnelContainer');
+      if (funnelContainer) {
+        const stageColors = {
+          Prospect: '#E8F0FE', Screening: '#FEF7E0', Interviewed: '#F3E8FD',
+          Shortlisted: '#D1FAE5', Offered: '#FEF3C7', Hired: '#E6F4EA', Archived: '#F3F4F6'
+        };
+        const stageTextColors = {
+          Prospect: '#1967D2', Screening: '#B06000', Interviewed: '#7627BB',
+          Shortlisted: '#065F46', Offered: '#92400E', Hired: '#137333', Archived: '#6B7280'
+        };
+
+        funnelContainer.innerHTML = STAGES.map(st => {
+          const count = talents.filter(t => (t.stage || 'Prospect') === st).length;
+          const pct = Math.round((count / total) * 100);
+          return `
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; margin-bottom: 2px;">
+                <span style="color: ${stageTextColors[st] || 'var(--text-primary)'};">${st}</span>
+                <span style="color: var(--text-muted); font-family: var(--font-mono);">${count} (${pct}%)</span>
+              </div>
+              <div style="height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: ${stageTextColors[st] || '#111827'}; border-radius: 3px; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 2. Rating Breakdown
+      const ratingsContainer = document.getElementById('analyticsRatingsContainer');
+      if (ratingsContainer) {
+        const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        talents.forEach(t => {
+          const r = Math.round(Number(t.overallRating) || 3);
+          if (counts[r] !== undefined) counts[r]++;
+          else counts[3]++;
+        });
+
+        ratingsContainer.innerHTML = [5, 4, 3].map(stars => {
+          const c = counts[stars] || 0;
+          const pct = Math.round((c / total) * 100);
+          return `
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; margin-bottom: 2px;">
+                <span style="color: #D97706;">${'★'.repeat(stars)} (${stars}.0)</span>
+                <span style="color: var(--text-muted); font-family: var(--font-mono);">${c} candidates (${pct}%)</span>
+              </div>
+              <div style="height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: #F59E0B; border-radius: 3px; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 3. Skill Averages
+      const skillsContainer = document.getElementById('analyticsSkillsContainer');
+      if (skillsContainer) {
+        const skillTotals = { 'Foto Produk': 0, 'Video Produk': 0, 'Video Editing': 0, 'Content Sense': 0 };
+        const skillCounts = { 'Foto Produk': 0, 'Video Produk': 0, 'Video Editing': 0, 'Content Sense': 0 };
+
+        talents.forEach(t => {
+          (t.skills || []).forEach(s => {
+            if (skillTotals[s.name] !== undefined) {
+              skillTotals[s.name] += (Number(s.rating) || 4);
+              skillCounts[s.name]++;
+            }
+          });
+        });
+
+        skillsContainer.innerHTML = Object.keys(skillTotals).map(sk => {
+          const avg = skillCounts[sk] > 0 ? (skillTotals[sk] / skillCounts[sk]).toFixed(1) : '4.0';
+          const pct = Math.round((Number(avg) / 5) * 100);
+          return `
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; margin-bottom: 2px;">
+                <span style="color: var(--text-primary);">${sk}</span>
+                <span style="color: var(--text-muted); font-family: var(--font-mono);">${avg} / 5.0</span>
+              </div>
+              <div style="height: 6px; background: rgba(0,0,0,0.05); border-radius: 3px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: #2563EB; border-radius: 3px; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 4. Domisili Breakdown
+      const locContainer = document.getElementById('analyticsLocationContainer');
+      if (locContainer) {
+        const locMap = {};
+        talents.forEach(t => {
+          let dom = 'Surakarta';
+          if (t.notes) {
+            const mDom = t.notes.match(/Domisili:\s*([^\n]+)/i);
+            if (mDom) dom = mDom[1].trim();
+          }
+          if (dom === '-') dom = 'Surakarta';
+          locMap[dom] = (locMap[dom] || 0) + 1;
+        });
+
+        const sortedLocs = Object.entries(locMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        locContainer.innerHTML = sortedLocs.map(([loc, count]) => {
+          const pct = Math.round((count / total) * 100);
+          return `
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 3px 0; border-bottom: 1px solid var(--border-light);">
+              <span style="font-weight: 500; color: var(--text-primary);">📍 ${escapeHtml(loc)}</span>
+              <span style="font-family: var(--font-mono); color: var(--text-muted);">${count} (${pct}%)</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function switchView(viewName) {
+      state.activeView = viewName;
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        if (btn.dataset.view === viewName) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+
+      if (el.bentoContainer) el.bentoContainer.style.display = viewName === 'bento' ? 'grid' : 'none';
+      if (el.tableContainer) el.tableContainer.style.display = viewName === 'table' ? 'block' : 'none';
+      if (el.kanbanContainer) el.kanbanContainer.style.display = viewName === 'kanban' ? 'grid' : 'none';
+
+      renderActiveView();
+    }
+
+    function renderActiveView() {
+      const hasData = state.filtered.length > 0;
+      if (el.emptyState) el.emptyState.style.display = hasData ? 'none' : 'block';
+
+      if (state.activeView === 'bento') {
+        if (el.bentoContainer) el.bentoContainer.style.display = hasData ? 'grid' : 'none';
+        renderBentoGrid();
+      } else if (state.activeView === 'table') {
+        if (el.tableContainer) el.tableContainer.style.display = hasData ? 'block' : 'none';
+        renderTableView();
+      } else if (state.activeView === 'kanban') {
+        if (el.kanbanContainer) el.kanbanContainer.style.display = hasData ? 'grid' : 'none';
+        renderKanbanBoard();
+      }
+    }
+
+    function renderBentoGrid() {
+      if (!el.bentoContainer) return;
+      if (!state.filtered.length) { el.bentoContainer.innerHTML = ''; return; }
+
+      const iconLocation = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:inline; vertical-align:middle; margin-right:3px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+      const iconEdu = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:inline; vertical-align:middle; margin-right:3px;"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>`;
+      const iconChat = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; vertical-align:middle; margin-right:3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+      const iconCv = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; vertical-align:middle; margin-right:3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
+      const iconPorto = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; vertical-align:middle; margin-right:3px;"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`;
+      const iconEdit = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+      const iconTrash = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
+      el.bentoContainer.innerHTML = state.filtered.map(t => {
+        const skills = t.skills || [];
+        const skillPills = skills.slice(0, 3).map(s => `
+          <span class="skill-tag">
+            ${escapeHtml(s.name)}
+            <span class="skill-tag-rating">${'★'.repeat(s.rating || 3)}</span>
+          </span>
+        `).join('');
+
+        let education = '';
+        let domisili = '';
+        if (t.notes) {
+          const mEdu = t.notes.match(/Pendidikan:\s*([^\n]+)/i);
+          if (mEdu) education = mEdu[1].trim();
+          const mDom = t.notes.match(/Domisili:\s*([^\n]+)/i);
+          if (mDom) domisili = mDom[1].trim();
+        }
+
+        const intPhone = formatToInternationalPhone(t.phone);
+        const cleanPhoneDigits = intPhone.replace(/[^0-9]/g, '');
+        const waLink = cleanPhoneDigits ? `https://wa.me/${cleanPhoneDigits}` : '';
+        const stageClass = 'stage-' + (t.stage || 'prospect').toLowerCase();
+
+        return `
+          <div class="talent-card" onclick="openTalentDetail('${t.id}')">
+            <div class="talent-card-header">
+              <div>
+                <span class="talent-id">${t.id}</span>
+                <h3 class="talent-name">${escapeHtml(t.name)}</h3>
+                <p class="talent-role">${escapeHtml(t.role)}</p>
+              </div>
+              <div class="talent-rating-badge">
+                <span>★</span>
+                <span>${t.overallRating || 3}.0</span>
+              </div>
+            </div>
+
+            <div class="meta-row">
+              ${domisili ? `<span class="meta-tag">${iconLocation}${escapeHtml(domisili)}</span>` : ''}
+              ${education ? `<span class="meta-tag">${iconEdu}${escapeHtml(education)}</span>` : ''}
+              <span class="meta-tag tag-stage ${stageClass}">${escapeHtml(t.stage || 'Prospect')}</span>
+            </div>
+
+            <div class="skills-wrapper">
+              ${skillPills}
+            </div>
+
+            <div class="talent-card-footer" onclick="event.stopPropagation()">
+              <div class="contact-links">
+                ${waLink ? `
+                  <a href="${waLink}" target="_blank" class="contact-badge" title="Chat WhatsApp">
+                    ${iconChat}${escapeHtml(intPhone)}
+                  </a>
+                ` : ''}
+                ${t.cvUrl ? `
+                  <a href="${t.cvUrl}" target="_blank" class="doc-badge doc-badge-cv" title="Open CV">
+                    ${iconCv}CV ↗
+                  </a>
+                ` : ''}
+                ${t.portfolioItems && t.portfolioItems.length > 1 ? `
+                  <a href="${t.portfolioItems[0].url}" target="_blank" class="doc-badge doc-badge-porto" title="Open ${t.portfolioItems.length} files">
+                    ${iconPorto}Porto (${t.portfolioItems.length}) ↗
+                  </a>
+                ` : (t.portfolioUrl ? `
+                  <a href="${t.portfolioUrl}" target="_blank" class="doc-badge doc-badge-porto" title="Open Portfolio">
+                    ${iconPorto}Porto ↗
+                  </a>
+                ` : '')}
+              </div>
+
+              <div style="display: flex; gap: 4px;">
+                <button type="button" class="btn btn-secondary btn-icon" onclick="openTalentDetail('${t.id}')" title="Edit">${iconEdit}</button>
+                <button type="button" class="btn btn-secondary btn-icon" onclick="deleteCandidate('${t.id}', '${escapeHtml(t.name)}')" title="Delete" style="color: var(--pastel-red-text);">${iconTrash}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderTableView() {
+      if (!el.tableBody) return;
+      if (!state.filtered.length) {
+        el.tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px;">No candidates found.</td></tr>';
+        return;
+      }
+
+      const iconChat = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; vertical-align:middle; margin-right:3px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+      const iconCv = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; vertical-align:middle; margin-right:3px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
+      const iconPorto = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline; vertical-align:middle; margin-right:3px;"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`;
+      const iconEdit = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+      const iconTrash = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
+      el.tableBody.innerHTML = state.filtered.map(t => {
+        const intPhone = formatToInternationalPhone(t.phone);
+        const cleanPhoneDigits = intPhone.replace(/[^0-9]/g, '');
+        const waLink = cleanPhoneDigits ? `https://wa.me/${cleanPhoneDigits}` : '';
+        const stageClass = 'stage-' + (t.stage || 'prospect').toLowerCase();
+
+        return `
+          <tr onclick="openTalentDetail('${t.id}')">
+            <td><span class="talent-id">${t.id}</span></td>
+            <td>
+              <div style="font-weight: 600; color: var(--text-primary);">${escapeHtml(t.name)}</div>
+              <div style="font-size: 11px; color: var(--text-muted);">${escapeHtml(t.role)}</div>
+            </td>
+            <td><span class="meta-tag tag-stage ${stageClass}">${escapeHtml(t.stage || 'Prospect')}</span></td>
+            <td><span class="meta-tag">${escapeHtml(t.experienceLevel || 'Junior')}</span></td>
+            <td><span style="color: #F59E0B;">★</span> ${t.overallRating || 3}.0</td>
+            <td onclick="event.stopPropagation()">
+              <div style="display: flex; gap: 6px; align-items: center;">
+                ${waLink ? `<a href="${waLink}" target="_blank" class="contact-badge">${iconChat}${escapeHtml(intPhone)}</a>` : '-'}
+                ${t.cvUrl ? `<a href="${t.cvUrl}" target="_blank" class="doc-badge doc-badge-cv">${iconCv}CV ↗</a>` : ''}
+                ${t.portfolioUrl ? `<a href="${t.portfolioUrl}" target="_blank" class="doc-badge doc-badge-porto">${iconPorto}Porto ↗</a>` : ''}
+              </div>
+            </td>
+            <td onclick="event.stopPropagation()" style="text-align: right;">
+              <div style="display: inline-flex; gap: 4px;">
+                <button type="button" class="btn btn-secondary btn-icon" onclick="openTalentDetail('${t.id}')">${iconEdit}</button>
+                <button type="button" class="btn btn-secondary btn-icon" onclick="deleteCandidate('${t.id}', '${escapeHtml(t.name)}')" style="color: var(--pastel-red-text);">${iconTrash}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderKanbanBoard() {
+      if (!el.kanbanContainer) return;
+
+      const iconChat = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+      const iconCv = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
+      const iconPorto = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`;
+      const iconTrash = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
+      el.kanbanContainer.innerHTML = STAGES.map(stage => {
+        const stageTalents = state.filtered.filter(t => (t.stage || 'Prospect') === stage);
+        const cardsHtml = stageTalents.map(t => {
+          const intPhone = formatToInternationalPhone(t.phone);
+          const cleanPhoneDigits = intPhone.replace(/[^0-9]/g, '');
+          const waLink = cleanPhoneDigits ? `https://wa.me/${cleanPhoneDigits}` : '';
+
+          return `
+            <div class="kanban-card" onclick="openTalentDetail('${t.id}')">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                <span class="talent-id">${t.id}</span>
+                <span style="font-size: 11px; font-weight: 600; color: #F59E0B;">★ ${t.overallRating || 3}.0</span>
+              </div>
+              <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${escapeHtml(t.name)}</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">${escapeHtml(t.role)}</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;" onclick="event.stopPropagation()">
+                <div style="display: flex; gap: 4px;">
+                  ${waLink ? `<a href="${waLink}" target="_blank" class="contact-badge" style="font-size: 10px; padding: 2px 5px;">${iconChat} WA</a>` : ''}
+                  ${t.cvUrl ? `<a href="${t.cvUrl}" target="_blank" class="doc-badge doc-badge-cv" style="font-size: 10px; padding: 2px 5px;">${iconCv} CV</a>` : ''}
+                  ${t.portfolioUrl ? `<a href="${t.portfolioUrl}" target="_blank" class="doc-badge doc-badge-porto" style="font-size: 10px; padding: 2px 5px;">${iconPorto} Porto</a>` : ''}
+                </div>
+                <button type="button" class="btn btn-secondary btn-icon" onclick="deleteCandidate('${t.id}', '${escapeHtml(t.name)}')" style="padding: 2px 4px; font-size: 10px; color: var(--pastel-red-text);">${iconTrash}</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="kanban-column">
+            <div class="kanban-column-header">
+              <span class="kanban-column-title">${stage}</span>
+              <span class="kanban-column-count">${stageTalents.length}</span>
+            </div>
+            <div>${cardsHtml || '<div style="font-size: 11px; color: var(--text-muted); text-align: center; padding: 20px 0;">No candidates</div>'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openDrawer() {
+      if (el.talentDrawer) el.talentDrawer.classList.add('open');
+      if (el.drawerBackdrop) el.drawerBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (el.talentDrawer) el.talentDrawer.classList.remove('open');
+      if (el.drawerBackdrop) el.drawerBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function openTalentDetail(id) {
+      const candidate = state.talents.find(t => t.id === id);
+      if (!candidate) return;
+
+      state.selectedTalent = candidate;
+      if (el.drawerId) el.drawerId.textContent = candidate.id;
+      if (el.drawerTitle) el.drawerTitle.textContent = candidate.name;
+      if (el.btnDeleteDrawer) el.btnDeleteDrawer.style.display = 'inline-flex';
+      if (el.btnSaveDrawer) el.btnSaveDrawer.textContent = 'Save Changes';
+
+      renderDrawerForm(candidate);
+      openDrawer();
+    }
+
+    function openAddCandidateDrawer() {
+      state.selectedTalent = null;
+      if (el.drawerId) el.drawerId.textContent = 'NEW CANDIDATE';
+      if (el.drawerTitle) el.drawerTitle.textContent = 'Add Talent Profile';
+      if (el.btnDeleteDrawer) el.btnDeleteDrawer.style.display = 'none';
+      if (el.btnSaveDrawer) el.btnSaveDrawer.textContent = 'Save Candidate';
+
+      renderDrawerForm({
+        name: '',
+        role: 'Freelance Content Creator',
+        phone: '',
+        email: '',
+        experienceLevel: 'Junior',
+        overallRating: 4,
+        stage: 'Prospect',
+        expectedSalary: 'Standard Uang Saku',
+        skills: [
+          { name: 'Foto Produk', rating: 4 },
+          { name: 'Video Produk', rating: 4 },
+          { name: 'Video Editing', rating: 4 },
+          { name: 'Content Sense', rating: 4 }
+        ],
+        notes: ''
+      });
+      openDrawer();
+    }
+
+    function renderDrawerForm(data) {
+      if (!el.drawerBody) return;
+
+      if (data.portfolioItems && Array.isArray(data.portfolioItems) && data.portfolioItems.length > 0) {
+        state.stagedPortfolioItems = [...data.portfolioItems];
+      } else if (data.portfolioUrl) {
+        state.stagedPortfolioItems = [{ name: 'Portfolio Link', url: data.portfolioUrl, type: 'document' }];
+      } else {
+        state.stagedPortfolioItems = [];
+      }
+
+      let education = '';
+      let domisili = '';
+      let cleanNotes = data.notes || '';
+      if (cleanNotes) {
+        const mEdu = cleanNotes.match(/Pendidikan:\s*([^\n]+)/i);
+        if (mEdu) education = mEdu[1].trim();
+        const mDom = cleanNotes.match(/Domisili:\s*([^\n]+)/i);
+        if (mDom) domisili = mDom[1].trim();
+      }
+
+      const cleanCvUrl = data.cvUrl && data.cvUrl.startsWith('http') ? data.cvUrl : '';
+
+      const skillsRows = (data.skills && data.skills.length > 0 ? data.skills : [
+        { name: 'Foto Produk', rating: 4 },
+        { name: 'Video Produk', rating: 4 }
+      ]).map(s => `
+        <div class="skills-builder-row">
+          <input type="text" class="form-input skill-name-input" value="${escapeHtml(s.name)}" placeholder="Skill name">
+          <select class="form-select skill-rating-select">
+            <option value="5" ${s.rating === 5 ? 'selected' : ''}>5 ★</option>
+            <option value="4" ${s.rating === 4 ? 'selected' : ''}>4 ★</option>
+            <option value="3" ${s.rating === 3 ? 'selected' : ''}>3 ★</option>
+            <option value="2" ${s.rating === 2 ? 'selected' : ''}>2 ★</option>
+            <option value="1" ${s.rating === 1 ? 'selected' : ''}>1 ★</option>
+          </select>
+          <button type="button" class="btn btn-secondary btn-icon" onclick="this.parentElement.remove()" style="color: var(--pastel-red-text);">✕</button>
+        </div>
+      `).join('');
+
+      el.drawerBody.innerHTML = `
+        <form id="talentForm" onsubmit="event.preventDefault(); handleSaveCandidate();">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="inputName" class="form-input" value="${escapeHtml(data.name || '')}" required placeholder="Candidate full name">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Role / Position *</label>
+              <input type="text" id="inputRole" class="form-input" value="${escapeHtml(data.role || '')}" required placeholder="e.g. Content Creator">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Experience Level</label>
+              <select id="inputLevel" class="form-select">
+                <option value="Junior" ${data.experienceLevel === 'Junior' ? 'selected' : ''}>Junior</option>
+                <option value="Mid" ${data.experienceLevel === 'Mid' ? 'selected' : ''}>Mid</option>
+                <option value="Senior" ${data.experienceLevel === 'Senior' ? 'selected' : ''}>Senior</option>
+                <option value="Lead" ${data.experienceLevel === 'Lead' ? 'selected' : ''}>Lead</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Domisili / Location</label>
+              <input type="text" id="inputDomisili" class="form-input" value="${escapeHtml(domisili)}" placeholder="e.g. Surakarta, Sukoharjo">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pendidikan / Education</label>
+              <input type="text" id="inputEducation" class="form-input" value="${escapeHtml(education)}" placeholder="e.g. Mahasiswa Aktif (UNS)">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">WhatsApp Number</label>
+              <input type="text" id="inputPhone" class="form-input" value="${escapeHtml(data.phone || '')}" placeholder="+628..." onblur="this.value = formatToInternationalPhone(this.value)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="inputEmail" class="form-input" value="${escapeHtml(data.email || '')}" placeholder="name@email.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Overall Rating (1-5)</label>
+              <select id="inputOverallRating" class="form-select">
+                <option value="5" ${data.overallRating === 5 ? 'selected' : ''}>5 Stars (Top Rated)</option>
+                <option value="4" ${data.overallRating === 4 ? 'selected' : ''}>4 Stars (Strong)</option>
+                <option value="3" ${data.overallRating === 3 ? 'selected' : ''}>3 Stars (Competent)</option>
+                <option value="2" ${data.overallRating === 2 ? 'selected' : ''}>2 Stars (Developing)</option>
+                <option value="1" ${data.overallRating === 1 ? 'selected' : ''}>1 Star</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pipeline Stage</label>
+              <select id="inputStage" class="form-select">
+                ${STAGES.map(st => `<option value="${st}" ${data.stage === st ? 'selected' : ''}>${st}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Expected Salary / Uang Saku</label>
+            <input type="text" id="inputSalary" class="form-input" value="${escapeHtml(data.expectedSalary || '')}" placeholder="e.g. Standard Uang Saku">
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" style="margin-bottom: 0;">Skill Ratings</label>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addSkillRow()">+ Add Skill</button>
+            </div>
+            <div id="skillsBuilderContainer">${skillsRows}</div>
+          </div>
+
+          <!-- CV Section -->
+          <div class="form-group" style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            <label class="form-label">CV / Resume Document</label>
+            <div class="file-dropzone" onclick="document.getElementById('inputCvFile').click()">
+              <input type="file" id="inputCvFile" style="display: none;" accept=".pdf,.doc,.docx" onchange="uploadFileDirect(event, 'cv')">
+              <div class="dropzone-text" id="cvDropText">${cleanCvUrl ? 'CV Attached ↗' : 'Drop CV file or click to browse'}</div>
+              <div class="dropzone-subtext" id="cvDropSubtext">${cleanCvUrl ? '<a href="' + cleanCvUrl + '" target="_blank">Open existing file ↗</a>' : 'Uploaded directly to Drive'}</div>
+            </div>
+            <input type="url" id="inputCvUrl" class="form-input" value="${escapeHtml(cleanCvUrl)}" placeholder="Or paste CV Drive URL..." style="margin-top: 8px;">
+          </div>
+
+          <!-- Multi-Upload Portfolio -->
+          <div class="form-group" style="background: var(--bg-subtle); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            <label class="form-label">Portfolio (Multi-File, Videos, Images)</label>
+            <div class="file-dropzone" onclick="document.getElementById('inputPortoFile').click()">
+              <input type="file" id="inputPortoFile" style="display: none;" multiple accept=".pdf,.mp4,.mov,.png,.jpg,.jpeg,.zip" onchange="uploadMultiplePortoFiles(event)">
+              <div class="dropzone-text" id="portoDropText">Drop multiple portfolio files or click to browse</div>
+              <div class="dropzone-subtext">Supports Videos, PDFs, Images</div>
+            </div>
+            <div id="portfolioFilesContainer" class="portfolio-files-list"></div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <input type="url" id="inputManualPortoUrl" class="form-input" placeholder="Or paste extra link (Drive, YouTube, TikTok)...">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addManualPortoLink()" style="white-space: nowrap;">+ Add Link</button>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label">Notes & Interview Remarks</label>
+            <textarea id="inputNotes" class="form-textarea" placeholder="Catatan interview, kelebihan kandidat, status panggilan...">${escapeHtml(cleanNotes)}</textarea>
+          </div>
+        </form>
+      `;
+      renderPortfolioChips();
+    }
+
+    function addSkillRow() {
+      const container = document.getElementById('skillsBuilderContainer');
+      if (!container) return;
+      const row = document.createElement('div');
+      row.className = 'skills-builder-row';
+      row.innerHTML = `
+        <input type="text" class="form-input skill-name-input" placeholder="Skill name">
+        <select class="form-select skill-rating-select">
+          <option value="5">5 ★</option>
+          <option value="4" selected>4 ★</option>
+          <option value="3">3 ★</option>
+          <option value="2">2 ★</option>
+          <option value="1">1 ★</option>
+        </select>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="this.parentElement.remove()" style="color: var(--pastel-red-text);">✕</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function renderPortfolioChips() {
+      const container = document.getElementById('portfolioFilesContainer');
+      if (!container) return;
+      if (!state.stagedPortfolioItems.length) {
+        container.innerHTML = '<div style="font-size: 11px; color: var(--text-muted); font-style: italic;">No portfolio files attached.</div>';
+        return;
+      }
+      container.innerHTML = state.stagedPortfolioItems.map((item, idx) => `
+        <div class="portfolio-chip">
+          <div class="portfolio-chip-info">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${item.type === 'video' ? '<polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>' : '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>'}</svg>
+            <a href="${item.url}" target="_blank" class="portfolio-chip-name">${escapeHtml(item.name)} ↗</a>
+          </div>
+          <button type="button" class="portfolio-chip-remove" onclick="removePortoItem(${idx})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function addManualPortoLink() {
+      const input = document.getElementById('inputManualPortoUrl');
+      if (!input || !input.value.trim()) return;
+      const url = input.value.trim();
+      const isVid = url.toLowerCase().includes('.mp4') || url.toLowerCase().includes('youtube') || url.toLowerCase().includes('tiktok');
+      state.stagedPortfolioItems.push({
+        name: isVid ? 'Video Link' : 'Portfolio Link',
+        url: url,
+        type: isVid ? 'video' : 'document'
+      });
+      input.value = '';
+      renderPortfolioChips();
+    }
+
+    function removePortoItem(idx) {
+      state.stagedPortfolioItems.splice(idx, 1);
+      renderPortfolioChips();
+    }
+
+    function uploadFileDirect(event, type) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const dropText = document.getElementById('cvDropText');
+      if (dropText) dropText.textContent = 'Uploading ' + file.name + '... ⏳';
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        const fileObj = { name: file.name, type: file.type, base64: base64Data };
+
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler((res) => {
+              if (res && res.success && res.url) {
+                document.getElementById('inputCvUrl').value = res.url;
+                if (dropText) dropText.textContent = '✅ ' + file.name;
+                showToast('CV uploaded to Drive successfully!');
+              } else {
+                showToast('Upload failed: ' + (res ? res.error : 'Server error'));
+              }
+            })
+            .uploadSingleFileToDrive(fileObj, 'CV');
+        } else {
+          document.getElementById('inputCvUrl').value = '#' + file.name;
+          if (dropText) dropText.textContent = '✅ ' + file.name;
+          showToast('Local file attached: ' + file.name);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function uploadMultiplePortoFiles(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      files.forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const base64Data = e.target.result.split(',')[1];
+          const fileObj = { name: file.name, type: file.type, base64: base64Data };
+          const isVid = file.name.toLowerCase().endsWith('.mp4') || file.name.toLowerCase().endsWith('.mov');
+
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run
+              .withSuccessHandler((res) => {
+                if (res && res.success && res.url) {
+                  state.stagedPortfolioItems.push({
+                    name: file.name,
+                    url: res.url,
+                    type: isVid ? 'video' : 'document'
+                  });
+                  renderPortfolioChips();
+                  showToast('Uploaded ' + file.name);
+                }
+              })
+              .uploadSingleFileToDrive(fileObj, 'Porto');
+          } else {
+            state.stagedPortfolioItems.push({
+              name: file.name,
+              url: '#' + file.name,
+              type: isVid ? 'video' : 'document'
+            });
+            renderPortfolioChips();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      event.target.value = '';
+    }
+
+    function handleSaveCandidate() {
+      const name = document.getElementById('inputName').value.trim();
+      if (!name) { showToast('Please enter candidate name'); return; }
+
+      const role = document.getElementById('inputRole').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+      const email = document.getElementById('inputEmail').value.trim();
+      const experienceLevel = document.getElementById('inputLevel').value;
+      const domisili = document.getElementById('inputDomisili') ? document.getElementById('inputDomisili').value.trim() : '';
+      const education = document.getElementById('inputEducation') ? document.getElementById('inputEducation').value.trim() : '';
+      const overallRating = Number(document.getElementById('inputOverallRating').value);
+      const stage = document.getElementById('inputStage').value;
+      const expectedSalary = document.getElementById('inputSalary').value.trim();
+      const notes = document.getElementById('inputNotes').value.trim();
+      const cvUrl = document.getElementById('inputCvUrl').value.trim();
+
+      const skills = [];
+      document.querySelectorAll('.skills-builder-row').forEach(row => {
+        const sName = row.querySelector('.skill-name-input').value.trim();
+        const sRating = Number(row.querySelector('.skill-rating-select').value);
+        if (sName) skills.push({ name: sName, rating: sRating });
+      });
+
+      let structuredNotes = notes;
+      if (education && !structuredNotes.toLowerCase().includes('pendidikan:')) {
+        structuredNotes = `Pendidikan: ${education}\n` + structuredNotes;
+      }
+      if (domisili && !structuredNotes.toLowerCase().includes('domisili:')) {
+        structuredNotes = `Domisili: ${domisili}\n` + structuredNotes;
+      }
+
+      const payload = {
+        id: state.selectedTalent ? state.selectedTalent.id : null,
+        name,
+        role,
+        phone: formatToInternationalPhone(phone),
+        email,
+        experienceLevel,
+        overallRating,
+        stage,
+        expectedSalary,
+        skills,
+        notes: structuredNotes.trim(),
+        cvUrl,
+        portfolioUrl: state.stagedPortfolioItems.length > 0 ? state.stagedPortfolioItems[0].url : '',
+        portfolioItems: state.stagedPortfolioItems
+      };
+
+      if (el.btnSaveDrawer) {
+        el.btnSaveDrawer.disabled = true;
+        el.btnSaveDrawer.textContent = 'Saving...';
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (el.btnSaveDrawer) {
+              el.btnSaveDrawer.disabled = false;
+              el.btnSaveDrawer.textContent = 'Save Candidate';
+            }
+            if (res && res.success) {
+              closeDrawer();
+              showToast('✅ Candidate profile saved successfully!');
+              loadTalents();
+            } else {
+              showToast('Save error: ' + (res ? res.error : 'Server error'));
+            }
+          })
+          .withFailureHandler((err) => {
+            if (el.btnSaveDrawer) {
+              el.btnSaveDrawer.disabled = false;
+              el.btnSaveDrawer.textContent = 'Save Candidate';
+            }
+            showToast('Save failed: ' + err.toString());
+          })
+          .saveTalent(payload);
+      } else {
+        if (state.selectedTalent) {
+          const idx = state.talents.findIndex(t => t.id === state.selectedTalent.id);
+          if (idx !== -1) state.talents[idx] = { ...state.talents[idx], ...payload };
+        } else {
+          payload.id = 'PGE-' + String(state.talents.length + 1).padStart(3, '0');
+          state.talents.unshift(payload);
+        }
+        if (el.btnSaveDrawer) {
+          el.btnSaveDrawer.disabled = false;
+          el.btnSaveDrawer.textContent = 'Save Candidate';
+        }
+        closeDrawer();
+        showToast('✅ Candidate profile saved successfully!');
+        applyFilters();
+      }
+    }
+
+    function deleteCandidate(id, name) {
+      if (!confirm('Are you sure you want to delete ' + (name || id) + ' from the talent pool?')) return;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            if (res && res.success) {
+              showToast('Deleted candidate: ' + (name || id));
+              loadTalents();
+            } else {
+              showToast('Delete error: ' + (res ? res.error : 'Failed'));
+            }
+          })
+          .deleteTalent(id);
+      } else {
+        state.talents = state.talents.filter(t => t.id !== id);
+        showToast('Deleted candidate: ' + (name || id));
+        applyFilters();
+      }
+    }
+
+    function handleDeleteCurrentCandidate() {
+      if (!state.selectedTalent) return;
+      deleteCandidate(state.selectedTalent.id, state.selectedTalent.name);
+      closeDrawer();
+    }
+
+    function handleExportCSV() {
+      if (!state.talents.length) { showToast('No data to export'); return; }
+      const headers = ['ID', 'Nama', 'Role', 'WhatsApp', 'Email', 'Level', 'Rating', 'Stage', 'Gaji', 'CV URL', 'Portfolio URL', 'Notes'];
+      const rows = state.talents.map(t => [
+        t.id,
+        `"${(t.name || '').replace(/"/g, '""')}"`,
+        `"${(t.role || '').replace(/"/g, '""')}"`,
+        `"${(formatToInternationalPhone(t.phone) || '').replace(/"/g, '""')}"`,
+        `"${(t.email || '').replace(/"/g, '""')}"`,
+        t.experienceLevel || '',
+        t.overallRating || '',
+        t.stage || '',
+        `"${(t.expectedSalary || '').replace(/"/g, '""')}"`,
+        `"${(t.cvUrl || '').replace(/"/g, '""')}"`,
+        `"${(t.portfolioUrl || '').replace(/"/g, '""')}"`,
+        `"${(t.notes || '').replace(/"/g, '""')}"`
+      ]);
+      const csv = 'data:text/csv;charset=utf-8,' + encodeURIComponent([headers.join(','), ...rows.map(r => r.join(','))].join('\n'));
+      const a = document.createElement('a');
+      a.href = csv;
+      a.download = `PGE_Talent_Pool_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('Exported CSV successfully!');
+    }
+
+    function showToast(msg) {
+      if (!el.toastContainer) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = msg;
+      el.toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.2s';
+        setTimeout(() => toast.remove(), 200);
+      }, 3000);
+    }
+
+    function formatToInternationalPhone(rawPhone) {
+      if (!rawPhone) return '';
+      let cleaned = String(rawPhone).replace(/[^0-9+]/g, '');
+      if (cleaned.startsWith('08')) cleaned = '+628' + cleaned.substring(2);
+      else if (cleaned.startsWith('628')) cleaned = '+' + cleaned;
+      else if (cleaned.startsWith('8') && !cleaned.startsWith('+')) cleaned = '+62' + cleaned;
+      return cleaned;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Export handlers to window for reliable onclick triggers
+    window.openAddCandidateDrawer = openAddCandidateDrawer;
+    window.openTalentDetail = openTalentDetail;
+    window.closeDrawer = closeDrawer;
+    window.handleSaveCandidate = handleSaveCandidate;
+    window.deleteCandidate = deleteCandidate;
+    window.handleDeleteCurrentCandidate = handleDeleteCurrentCandidate;
+    window.switchView = switchView;
+    window.resetFilters = resetFilters;
+    window.loadTalents = loadTalents;
+    window.handleExportCSV = handleExportCSV;
+    window.toggleAnalyticsDashboard = toggleAnalyticsDashboard;
+    window.renderAnalyticsDashboard = renderAnalyticsDashboard;
+    window.addSkillRow = addSkillRow;
+    window.addManualPortoLink = addManualPortoLink;
+    window.removePortoItem = removePortoItem;
+    window.uploadFileDirect = uploadFileDirect;
+    window.uploadMultiplePortoFiles = uploadMultiplePortoFiles;
+    window.formatToInternationalPhone = formatToInternationalPhone;
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootApp);
+    } else {
+      bootApp();
+    }
+  </script>
+</body>
+</html>
