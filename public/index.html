@@ -3469,7 +3469,7 @@
 
           if (initialChatLoaded && list.length > lastChatCount) {
             const latestMsg = list[list.length - 1];
-            const isFromOther = (latestMsg.senderEmail || '').toLowerCase() !== curEmail || (latestMsg.sessionId && latestMsg.sessionId !== clientSessionId);
+            const isFromOther = (latestMsg.senderEmail || '').toLowerCase().trim() !== curEmail;
 
             if (isFromOther) {
               playChimeSound();
@@ -3486,7 +3486,7 @@
             }
           } else if (!initialChatLoaded) {
             // Check unread count on initial load
-            const unreadOnLoad = list.filter(m => (m.timestamp || 0) > lastSeenChatTimestamp && ((m.senderEmail || '').toLowerCase() !== curEmail || (m.sessionId && m.sessionId !== clientSessionId))).length;
+            const unreadOnLoad = list.filter(m => (m.timestamp || 0) > lastSeenChatTimestamp && (m.senderEmail || '').toLowerCase().trim() !== curEmail).length;
             if (unreadOnLoad > 0 && (!messengerOpen || messengerCurrentTab !== 'chat')) {
               unreadCount = unreadOnLoad;
               const badge = document.getElementById('messengerUnreadBadge');
@@ -3515,11 +3515,11 @@
         return;
       }
 
-      const curEmail = state.currentUser ? (state.currentUser.email || '').toLowerCase() : '';
+      const curEmail = state.currentUser ? (state.currentUser.email || '').toLowerCase().trim() : '';
       const list = Object.values(data).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
       const bubblesHtml = list.map(msg => {
-        const isMe = (msg.senderEmail || '').toLowerCase() === curEmail && (!msg.sessionId || msg.sessionId === clientSessionId);
+        const isMe = (msg.senderEmail || '').toLowerCase().trim() === curEmail;
         const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
         const roleBadge = msg.isSuperAdmin ? '👑 Admin' : 'HR';
 
