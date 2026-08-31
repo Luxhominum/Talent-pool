@@ -2002,6 +2002,13 @@ const publicHtml = `<!DOCTYPE html>
     const auth = firebase.auth();
     const rtdb = firebase.database();
 
+    // Enable Persistent Local Auth across page refreshes
+    try {
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(err => {
+        console.warn('Auth persistence config:', err);
+      });
+    } catch (e) {}
+
     // 2. Authorized HR Super Admin Whitelist & Cloud Sync
     const SUPER_ADMIN_EMAILS = [
       'hrdcvpge@gmail.com'
@@ -2038,10 +2045,13 @@ const publicHtml = `<!DOCTYPE html>
         return cloudWhitelist;
       }
       try {
-        return JSON.parse(localStorage.getItem('pge_auth_whitelist') || '[]');
-      } catch (e) {
-        return [];
-      }
+        const stored = JSON.parse(localStorage.getItem('pge_auth_whitelist') || '[]');
+        if (stored && stored.length > 0) {
+          cloudWhitelist = stored;
+          return stored;
+        }
+      } catch (e) {}
+      return [];
     }
 
     async function saveCustomWhitelist(list) {
@@ -2356,13 +2366,24 @@ const publicHtml = `<!DOCTYPE html>
     }
 
     async function handleGoogleSignIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+      const btn = document.querySelector('#authGate button');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spin-icon" style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Menghubungkan ke Google...</span>';
+      }
       try {
+        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         await auth.signInWithPopup(provider);
       } catch (err) {
         console.error('Google Sign-In Error:', err);
-        showToast('Login failed: ' + (err.message || 'Please try again'));
+        showToast('Login: ' + (err.message || 'Please try again'));
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
       }
     }
 
