@@ -2016,7 +2016,8 @@ const publicHtml = `<!DOCTYPE html>
       if (url.startsWith('javascript:') || url.startsWith('data:')) return url;
       if (url.startsWith('mailto:') || url.startsWith('tel:')) return url;
       if (url.startsWith('#')) return url;
-      if (!/^https?:\/\//i.test(url)) {
+      const lower = url.toLowerCase();
+      if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
         url = 'https://' + url;
       }
       return url;
