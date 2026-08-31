@@ -1035,6 +1035,27 @@ const publicHtml = `<!DOCTYPE html>
       align-items: center;
       gap: 4px;
     }
+    .chat-date-separator {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 14px 0 6px;
+      position: sticky;
+      top: -6px;
+      z-index: 5;
+    }
+    .chat-date-separator span {
+      background: #E5E7EB;
+      color: #4B5563;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      padding: 3px 12px;
+      border-radius: 9999px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
 
     .empty-state { text-align: center; padding: 48px 24px; color: var(--text-secondary); }
   </style>
@@ -3512,6 +3533,32 @@ const publicHtml = `<!DOCTYPE html>
       }
     }
 
+    function formatChatDateSeparator(timestamp) {
+      if (!timestamp) return '';
+      const msgDate = new Date(timestamp);
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      const isSameDay = (d1, d2) => 
+        d1.getDate() === d2.getDate() && 
+        d1.getMonth() === d2.getMonth() && 
+        d1.getFullYear() === d2.getFullYear();
+
+      if (isSameDay(msgDate, today)) {
+        return 'HARI INI';
+      } else if (isSameDay(msgDate, yesterday)) {
+        return 'KEMARIN';
+      } else {
+        return msgDate.toLocaleDateString('id-ID', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }).toUpperCase();
+      }
+    }
+
     function renderChatMessages(data) {
       const body = document.getElementById('messengerChatBody');
       if (!body) return;
@@ -3523,12 +3570,24 @@ const publicHtml = `<!DOCTYPE html>
       const curEmail = state.currentUser ? (state.currentUser.email || '').toLowerCase().trim() : '';
       const list = Object.values(data).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
-      const bubblesHtml = list.map(msg => {
+      let lastDateKey = null;
+      let bubblesHtml = '';
+
+      list.forEach(msg => {
         const isMe = (msg.senderEmail || '').toLowerCase().trim() === curEmail;
         const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '';
         const roleBadge = msg.isSuperAdmin ? '👑 Admin' : 'HR';
 
-        return \`
+        const msgDateKey = msg.timestamp ? new Date(msg.timestamp).toDateString() : 'unknown';
+        if (msg.timestamp && msgDateKey !== lastDateKey) {
+          lastDateKey = msgDateKey;
+          bubblesHtml += \`
+            <div class="chat-date-separator">
+              <span>\${formatChatDateSeparator(msg.timestamp)}</span>
+            </div>\`;
+        }
+
+        bubblesHtml += \`
           <div class="chat-msg \${isMe ? 'me' : 'them'}">
             \${!isMe ? \`
               <div style="font-size: 10px; font-weight: 600; color: var(--text-secondary); margin-bottom: 2px; display: flex; align-items: center; gap: 4px;">
@@ -3543,7 +3602,7 @@ const publicHtml = `<!DOCTYPE html>
               \${timeStr}
             </div>
           </div>\`;
-      }).join('');
+      });
 
       body.innerHTML = bubblesHtml + '<div id="chatScrollAnchor" style="height: 1px; width: 100%;"></div>';
       scrollChatToBottom();
