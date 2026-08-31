@@ -467,8 +467,203 @@ const publicHtml = `<!DOCTYPE html>
     .doc-badge-wa { background: var(--pastel-green-bg); color: var(--pastel-green-text); border-color: var(--pastel-green-border); }
     .doc-badge-cv { background: var(--pastel-blue-bg); color: var(--pastel-blue-text); border-color: var(--pastel-blue-border); }
     .doc-badge-porto { background: var(--pastel-purple-bg); color: var(--pastel-purple-text); border-color: var(--pastel-purple-border); }
+    .doc-badge-discuss { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
+    .doc-badge-discuss:hover { background: #FDE68A; color: #92400E; }
+    .doc-badge-discuss.has-comments { background: #F59E0B; color: #FFFFFF; border-color: #D97706; font-weight: 600; box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3); }
 
-    /* Table View */
+    /* Profile Modal Segmented Tabs */
+    .profile-tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      background: #F3F4F6;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      border: 1px solid var(--border-light);
+    }
+    .profile-tab-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      border-radius: calc(var(--radius-sm) - 2px);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .profile-tab-btn.active {
+      background: #FFFFFF;
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .profile-tab-btn:hover:not(.active) {
+      color: var(--text-primary);
+    }
+
+    /* Discussion Container & Message Stream */
+    .discussion-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .quick-decision-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: #F9FAFB;
+      border: 1px dashed var(--border-light);
+      border-radius: var(--radius-sm);
+      align-items: center;
+    }
+    .quick-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .quick-tag-chip:hover {
+      background: #111827;
+      color: #FFFFFF;
+      border-color: #111827;
+      transform: translateY(-1px);
+    }
+    .quick-tag-chip.tag-fit:hover { background: #059669; border-color: #059669; color: #FFFFFF; }
+    .quick-tag-chip.tag-warn:hover { background: #DC2626; border-color: #DC2626; color: #FFFFFF; }
+    .quick-tag-chip.tag-rate:hover { background: #D97706; border-color: #D97706; color: #FFFFFF; }
+    .quick-tag-chip.tag-art:hover { background: #7C3AED; border-color: #7C3AED; color: #FFFFFF; }
+
+    .discussion-list-stream {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+      max-height: 330px;
+      min-height: 180px;
+      margin-bottom: 14px;
+    }
+    .discuss-card {
+      background: #F9FAFB;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .discuss-card:hover {
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .discuss-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .discuss-author {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .discuss-author-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #374151;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+    }
+    .discuss-role-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: #E5E7EB;
+      color: #374151;
+      font-family: var(--font-sans);
+    }
+    .discuss-role-badge.admin {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+    .discuss-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .discuss-decision-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .decision-pill-fit { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+    .decision-pill-warn { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .decision-pill-rate { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .decision-pill-art { background: #F3E8FF; color: #6B21A8; border: 1px solid #E9D5FF; }
+    .decision-pill-call { background: #EFF6FF; color: #1E40AF; border: 1px solid #DBEAFE; }
+
+    .discuss-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .discuss-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .discuss-delete-btn {
+      font-size: 10px;
+      color: var(--pastel-red-text);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .discuss-delete-btn:hover {
+      text-decoration: underline;
+    }
+
+    .discuss-composer-box {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
     .table-container {
       background: var(--bg-surface);
       border: 1px solid var(--border-light);
@@ -1960,6 +2155,11 @@ const publicHtml = `<!DOCTYPE html>
       comparedTalentIds: new Set(),
       broadcastSelectedIds: new Set(),
       broadcastSentHistory: {},
+      candidateDiscussions: {},
+      candidateCommentCounts: {},
+      activeProfileTalentId: null,
+      activeProfileTab: 'portfolio',
+      selectedDecisionTag: '',
       analyticsOpen: false
     };
 
@@ -2198,6 +2398,7 @@ const publicHtml = `<!DOCTYPE html>
         setupPresence(user);
         listenTeamPresence();
         listenTeamChat();
+        listenCandidateDiscussions();
 
         if (state.talents.length === 0) {
           loadAppwriteTalents();
@@ -2899,6 +3100,13 @@ const publicHtml = `<!DOCTYPE html>
           </a>\`;
         }
 
+        // Discuss badge
+        const discussCount = state.candidateCommentCounts[talent.id] || 0;
+        const discussLink = \`<span class="doc-badge doc-badge-discuss \${discussCount > 0 ? 'has-comments' : ''}" onclick="event.stopPropagation(); openCandidateDiscussion('\${talent.id}')" title="Buka ruang diskusi & evaluasi tim">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          \${discussCount > 0 ? \`Diskusi (\${discussCount})\` : '💬 Diskusi'}
+        </span>\`;
+
         // Interactive stage selector
         const stageSelectHtml = \`
           <select class="stage-select-pill \${stageClass}" 
@@ -2938,6 +3146,7 @@ const publicHtml = `<!DOCTYPE html>
                 \${waLink}
                 \${cvLink}
                 \${portoLink}
+                \${discussLink}
               </div>
               <div style="display: flex; gap: 6px;">
                 <button type="button" class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); \${isSuperAdmin() ? \`openTalentDetail('\${talent.id}')\` : \`openCandidateProfileModal('\${talent.id}')\`}" title="\${isSuperAdmin() ? 'Edit candidate' : 'View full profile'}">
@@ -2974,6 +3183,9 @@ const publicHtml = `<!DOCTYPE html>
           livePortoUrlHtml = \`<a href="\${normalizeExternalUrl(directUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-porto" onclick="event.stopPropagation()">Porto ↗</a>\`;
         }
 
+        const discussCount = state.candidateCommentCounts[talent.id] || 0;
+        const discussTableHtml = \`<span class="doc-badge doc-badge-discuss \${discussCount > 0 ? 'has-comments' : ''}" onclick="event.stopPropagation(); openCandidateDiscussion('\${talent.id}')">💬 \${discussCount > 0 ? discussCount : 'Diskusi'}</span>\`;
+
         const stageSelectTableHtml = \`
           <select class="stage-select-pill \${stageClass}" 
                   onchange="updateCandidateStage('\${talent.id}', this.value, event)" 
@@ -3000,6 +3212,7 @@ const publicHtml = `<!DOCTYPE html>
                 \${phoneClean ? \`<a href="https://wa.me/\${phoneClean.replace(/\\+/g, '')}" target="_blank" class="doc-badge doc-badge-wa" onclick="event.stopPropagation()">\${phoneClean}</a>\` : ''}
                 \${isValidDisplayUrl(talent.cvUrl) ? \`<a href="\${normalizeExternalUrl(talent.cvUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-cv" onclick="event.stopPropagation()">CV ↗</a>\` : ''}
                 \${livePortoUrlHtml}
+                \${discussTableHtml}
               </div>
             </td>
             <td style="text-align: right;">
@@ -3021,7 +3234,9 @@ const publicHtml = `<!DOCTYPE html>
       if (!el.kanbanContainer) return;
       el.kanbanContainer.innerHTML = STAGES.map(stage => {
         const stageTalents = state.filteredTalents.filter(t => t.stage === stage);
-        const cardsHtml = stageTalents.map(t => \`
+        const cardsHtml = stageTalents.map(t => {
+          const discussCount = state.candidateCommentCounts[t.id] || 0;
+          return \`
           <div class="kanban-card" onclick="handleCandidateCardClick('\${t.id}')">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">\${t.id}</span>
@@ -3029,15 +3244,19 @@ const publicHtml = `<!DOCTYPE html>
             </div>
             <div style="font-weight: 600; font-size: 13px;">\${escapeHtml(t.name)}</div>
             <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">\${escapeHtml(t.role || 'Content Creator')}</div>
-            <div style="margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 6px;">
               <select class="stage-select-pill stage-\${(t.stage || 'prospect').toLowerCase()}" 
-                      style="width: 100%; font-size: 10px; padding: 2px 18px 2px 6px;"
+                      style="flex: 1; font-size: 10px; padding: 2px 18px 2px 6px;"
                       onchange="updateCandidateStage('\${t.id}', this.value, event)" 
                       onclick="event.stopPropagation()">
                 \${STAGES.map(st => \`<option value="\${st}" \${(t.stage || 'Prospect') === st ? 'selected' : ''}>\${st}</option>\`).join('')}
               </select>
+              <span class="doc-badge doc-badge-discuss \${discussCount > 0 ? 'has-comments' : ''}" style="font-size: 9px; padding: 2px 6px;" onclick="event.stopPropagation(); openCandidateDiscussion('\${t.id}')" title="Diskusi tim">
+                💬 \${discussCount > 0 ? discussCount : '0'}
+              </span>
             </div>
-          </div>\`).join('');
+          </div>\`;
+        }).join('');
 
         return \`
           <div class="kanban-col">
@@ -3271,10 +3490,180 @@ const publicHtml = `<!DOCTYPE html>
       }
     }
 
-    function openCandidateProfileModal(id) {
+    function openCandidateDiscussion(id) {
+      openCandidateProfileModal(id, 'discussion');
+    }
+
+    function switchProfileTab(tabName) {
+      state.activeProfileTab = tabName;
+      const btnPorto = document.getElementById('profTabBtnPorto');
+      const btnDiscuss = document.getElementById('profTabBtnDiscuss');
+      const contentPorto = document.getElementById('profTabPortoContent');
+      const contentDiscuss = document.getElementById('profTabDiscussContent');
+
+      if (btnPorto) btnPorto.classList.toggle('active', tabName === 'portfolio');
+      if (btnDiscuss) btnDiscuss.classList.toggle('active', tabName === 'discussion');
+      if (contentPorto) contentPorto.style.display = tabName === 'portfolio' ? 'flex' : 'none';
+      if (contentDiscuss) {
+        contentDiscuss.style.display = tabName === 'discussion' ? 'flex' : 'none';
+        if (tabName === 'discussion' && state.activeProfileTalentId) {
+          renderCandidateDiscussionMessages(state.activeProfileTalentId);
+          setTimeout(() => {
+            const stream = document.getElementById('candidateDiscussStream');
+            if (stream) stream.scrollTop = stream.scrollHeight;
+            const input = document.getElementById('candidateDiscussInput');
+            if (input) input.focus();
+          }, 50);
+        }
+      }
+    }
+
+    function selectDecisionTag(tagText) {
+      if (state.selectedDecisionTag === tagText) {
+        state.selectedDecisionTag = '';
+      } else {
+        state.selectedDecisionTag = tagText;
+      }
+      updateQuickDecisionPillsUI();
+      const input = document.getElementById('candidateDiscussInput');
+      if (input) input.focus();
+    }
+
+    function updateQuickDecisionPillsUI() {
+      const container = document.getElementById('quickDecisionPillsContainer');
+      if (!container) return;
+      container.querySelectorAll('.quick-tag-chip').forEach(chip => {
+        const text = chip.getAttribute('data-tag');
+        const isSelected = (state.selectedDecisionTag === text);
+        chip.style.fontWeight = isSelected ? '700' : '500';
+        chip.style.borderColor = isSelected ? '#111827' : '#E5E7EB';
+        chip.style.background = isSelected ? '#111827' : '#FFFFFF';
+        chip.style.color = isSelected ? '#FFFFFF' : '#374151';
+        chip.style.transform = isSelected ? 'scale(1.04)' : 'scale(1)';
+      });
+    }
+
+    function renderCandidateDiscussionMessages(talentId) {
+      const stream = document.getElementById('candidateDiscussStream');
+      const countEl = document.getElementById('profModalDiscussCount');
+      if (!stream) return;
+
+      const talentData = state.candidateDiscussions[talentId];
+      const messagesObj = (talentData && talentData.messages) ? talentData.messages : {};
+      const list = Object.entries(messagesObj).map(([key, val]) => ({ key, ...val }));
+      list.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+      if (countEl) countEl.textContent = list.length;
+
+      if (list.length === 0) {
+        const talent = state.talents.find(t => t.id === talentId || t.$id === talentId);
+        const name = talent ? talent.name : 'Kandidat';
+        stream.innerHTML = \`
+          <div style="background: #F9FAFB; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding: 28px 16px; text-align: center; color: var(--text-muted); font-size: 12px; margin: auto 0;">
+            <div style="font-size: 28px; margin-bottom: 8px;">💬</div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 4px;">Belum Ada Catatan Evaluasi Tim</div>
+            <div>Bagikan catatan review, catatan interview, atau feedback untuk <strong>\${escapeHtml(name)}</strong> di bawah ini.</div>
+          </div>
+        \`;
+        return;
+      }
+
+      const curEmail = state.currentUser ? (state.currentUser.email || '').toLowerCase().trim() : '';
+
+      stream.innerHTML = list.map(msg => {
+        const isAuthor = (msg.senderEmail || '').toLowerCase().trim() === curEmail;
+        const canDelete = isAuthor || isSuperAdmin();
+        const timeStr = msg.timestamp ? new Date(msg.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+        const initial = (msg.senderName || msg.senderEmail || 'U').charAt(0).toUpperCase();
+
+        let decisionTagHtml = '';
+        if (msg.tag) {
+          let pillClass = 'decision-pill-fit';
+          if (msg.tag.includes('Kurang') || msg.tag.includes('Drop') || msg.tag.includes('Tolak')) pillClass = 'decision-pill-warn';
+          else if (msg.tag.includes('Overbudget') || msg.tag.includes('Rate')) pillClass = 'decision-pill-rate';
+          else if (msg.tag.includes('Aesthetic') || msg.tag.includes('Porto')) pillClass = 'decision-pill-art';
+          else if (msg.tag.includes('Hubungi') || msg.tag.includes('Interview')) pillClass = 'decision-pill-call';
+
+          decisionTagHtml = \`<div class="discuss-decision-pill \${pillClass}">\${escapeHtml(msg.tag)}</div>\`;
+        }
+
+        return \`
+          <div class="discuss-card">
+            <div class="discuss-header">
+              <div class="discuss-author">
+                <div class="discuss-author-avatar">\${initial}</div>
+                <span>\${escapeHtml(msg.senderName || msg.senderEmail)}</span>
+                <span class="discuss-role-badge \${msg.isSuperAdmin ? 'admin' : ''}">\${msg.isSuperAdmin ? '👑 Admin' : 'HR'}</span>
+              </div>
+              <div class="discuss-time">\${timeStr}</div>
+            </div>
+            \${decisionTagHtml}
+            \${msg.text ? \`<div class="discuss-text">\${escapeHtml(msg.text)}</div>\` : ''}
+            \${canDelete ? \`
+              <div class="discuss-footer">
+                <button type="button" class="discuss-delete-btn" onclick="handleDeleteCandidateComment('\${talentId}', '\${msg.key}')">Hapus Catatan</button>
+              </div>
+            \` : ''}
+          </div>
+        \`;
+      }).join('');
+
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    async function handleSendCandidateComment() {
+      const talentId = state.activeProfileTalentId;
+      if (!talentId || !state.currentUser) return;
+      const input = document.getElementById('candidateDiscussInput');
+      if (!input) return;
+      const text = input.value.trim();
+      const tag = state.selectedDecisionTag || '';
+
+      if (!text && !tag) {
+        showToast('Ketik catatan atau pilih tag evaluasi.');
+        return;
+      }
+
+      const newMsg = {
+        senderEmail: state.currentUser.email || 'anonymous',
+        senderName: state.currentUser.displayName || state.currentUser.email || 'HR Member',
+        senderPhoto: state.currentUser.photoURL || '',
+        text: text,
+        tag: tag,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        isSuperAdmin: isSuperAdmin()
+      };
+
+      try {
+        input.value = '';
+        state.selectedDecisionTag = '';
+        updateQuickDecisionPillsUI();
+        await rtdb.ref(\`/candidate_discussions/\${talentId}/messages\`).push(newMsg);
+        showToast('✅ Catatan evaluasi tim tersimpan!');
+        playChimeSound();
+      } catch (err) {
+        console.error('Send comment error:', err);
+        showToast('Gagal menyimpan catatan: ' + err.message);
+      }
+    }
+
+    async function handleDeleteCandidateComment(talentId, commentKey) {
+      if (!confirm('Apakah Anda yakin ingin menghapus catatan evaluasi ini?')) return;
+      try {
+        await rtdb.ref(\`/candidate_discussions/\${talentId}/messages/\${commentKey}\`).remove();
+        showToast('Catatan berhasil dihapus.');
+      } catch (err) {
+        showToast('Gagal menghapus catatan: ' + err.message);
+      }
+    }
+
+    function openCandidateProfileModal(id, defaultTab = 'portfolio') {
       const talent = state.talents.find(t => t.id === id || t.$id === id);
       if (!talent) return;
       currentProfileTalentId = talent.id;
+      state.activeProfileTalentId = talent.id;
+      state.activeProfileTab = defaultTab;
+      state.selectedDecisionTag = '';
 
       const modal = document.getElementById('candidateProfileModalBackdrop');
       const avatarEl = document.getElementById('profModalAvatar');
@@ -3391,7 +3780,7 @@ const publicHtml = `<!DOCTYPE html>
         \` : ''}
       \`;
 
-      // Right Column: CV & Portfolio Media Showcase
+      // Right Column: Tabbed Media Showcase & Team Discussion
       let cvBlockHtml = '';
       if (isValidDisplayUrl(talent.cvUrl)) {
         const cvHref = normalizeExternalUrl(talent.cvUrl);
@@ -3504,27 +3893,77 @@ const publicHtml = `<!DOCTYPE html>
         \`;
       }
 
+      const commentCount = (state.candidateDiscussions[talent.id] && state.candidateDiscussions[talent.id].messages) ? Object.keys(state.candidateDiscussions[talent.id].messages).length : (state.candidateCommentCounts[talent.id] || 0);
+
       rightCol.innerHTML = \`
-        <div>
-          <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">
-            1. Curriculum Vitae Document
-          </div>
-          \${cvBlockHtml}
+        <!-- Tab Navigation -->
+        <div class="profile-tabs-nav">
+          <button type="button" id="profTabBtnPorto" class="profile-tab-btn \${state.activeProfileTab === 'portfolio' ? 'active' : ''}" onclick="switchProfileTab('portfolio')">
+            📁 Portfolio &amp; CV (\${validPortoList.length + (isValidDisplayUrl(talent.cvUrl) ? 1 : 0)})
+          </button>
+          <button type="button" id="profTabBtnDiscuss" class="profile-tab-btn \${state.activeProfileTab === 'discussion' ? 'active' : ''}" onclick="switchProfileTab('discussion')">
+            💬 Tim Diskusi &amp; Evaluasi (<span id="profModalDiscussCount">\${commentCount}</span>)
+          </button>
         </div>
 
-        <div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600;">
-              2. Creative Portfolio Works &amp; Media (\${validPortoList.length})
+        <!-- Tab 1: Portfolio & CV Content -->
+        <div id="profTabPortoContent" style="display: \${state.activeProfileTab === 'portfolio' ? 'flex' : 'none'}; flex-direction: column; gap: 20px;">
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">
+              1. Curriculum Vitae Document
+            </div>
+            \${cvBlockHtml}
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600;">
+                2. Creative Portfolio Works &amp; Media (\${validPortoList.length})
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              \${portoBlockHtml}
             </div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            \${portoBlockHtml}
+        </div>
+
+        <!-- Tab 2: Candidate Discussion & Team Evaluation Content -->
+        <div id="profTabDiscussContent" class="discussion-container" style="display: \${state.activeProfileTab === 'discussion' ? 'flex' : 'none'};">
+          <!-- Preset Quick Decision Pills Bar -->
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 6px;">
+              Quick Decision Tag:
+            </div>
+            <div class="quick-decision-bar" id="quickDecisionPillsContainer">
+              <span class="quick-tag-chip tag-fit" data-tag="✅ Strong Fit" onclick="selectDecisionTag('✅ Strong Fit')">✅ Strong Fit</span>
+              <span class="quick-tag-chip tag-fit" data-tag="⭐ Prioritas Interview" onclick="selectDecisionTag('⭐ Prioritas Interview')">⭐ Prioritas Interview</span>
+              <span class="quick-tag-chip tag-art" data-tag="🎨 Aesthetic Bagus" onclick="selectDecisionTag('🎨 Aesthetic Bagus')">🎨 Aesthetic Bagus</span>
+              <span class="quick-tag-chip tag-warn" data-tag="⚠️ Portofolio Kurang" onclick="selectDecisionTag('⚠️ Portofolio Kurang')">⚠️ Portofolio Kurang</span>
+              <span class="quick-tag-chip tag-rate" data-tag="💰 Overbudget" onclick="selectDecisionTag('💰 Overbudget')">💰 Overbudget</span>
+              <span class="quick-tag-chip" data-tag="📞 Hubungi Segera" onclick="selectDecisionTag('📞 Hubungi Segera')">📞 Hubungi Segera</span>
+            </div>
           </div>
+
+          <!-- Discussion Stream -->
+          <div class="discussion-list-stream" id="candidateDiscussStream"></div>
+
+          <!-- Composer Box -->
+          <form class="discuss-composer-box" onsubmit="event.preventDefault(); handleSendCandidateComment();">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="candidateDiscussInput" class="form-input" placeholder="Tulis catatan evaluasi tim... (Tekan Enter)" style="flex: 1; font-size: 12px; padding: 8px 12px;" autocomplete="off">
+              <button type="submit" class="btn btn-primary btn-sm" style="padding: 8px 14px; font-size: 12px; font-weight: 600; white-space: nowrap;">
+                + Simpan Catatan
+              </button>
+            </div>
+          </form>
         </div>
       \`;
 
       modal.classList.add('open');
+
+      if (state.activeProfileTab === 'discussion') {
+        renderCandidateDiscussionMessages(talent.id);
+      }
     }
 
     function closeCandidateProfileModal() {
@@ -3534,6 +3973,7 @@ const publicHtml = `<!DOCTYPE html>
         modal.querySelectorAll('video').forEach(v => v.pause());
       }
       currentProfileTalentId = null;
+      state.activeProfileTalentId = null;
     }
 
     function switchToEditDrawer() {
@@ -4655,6 +5095,47 @@ const publicHtml = `<!DOCTYPE html>
       }
     }
 
+    /* ---------------------------------------------------- */
+    /* REALTIME CANDIDATE DISCUSSIONS & EVALUATION LISTENER */
+    /* ---------------------------------------------------- */
+    let initialDiscussionsLoaded = false;
+    let lastTotalDiscussionCommentCount = 0;
+
+    function listenCandidateDiscussions() {
+      try {
+        rtdb.ref('/candidate_discussions').on('value', (snapshot) => {
+          const data = snapshot.val() || {};
+          state.candidateDiscussions = data;
+
+          let updatedCounts = {};
+          let totalCount = 0;
+          Object.keys(data).forEach(talentId => {
+            const msgs = (data[talentId] && data[talentId].messages) ? data[talentId].messages : {};
+            const c = Object.keys(msgs).length;
+            updatedCounts[talentId] = c;
+            totalCount += c;
+          });
+          state.candidateCommentCounts = updatedCounts;
+
+          if (initialDiscussionsLoaded && totalCount > lastTotalDiscussionCommentCount) {
+            playChimeSound();
+          }
+          initialDiscussionsLoaded = true;
+          lastTotalDiscussionCommentCount = totalCount;
+
+          // If Candidate Profile Modal is open on discussion tab, refresh messages live
+          if (state.activeProfileTalentId && state.activeProfileTab === 'discussion') {
+            renderCandidateDiscussionMessages(state.activeProfileTalentId);
+          }
+
+          // Re-render active view to update discussion badge numbers
+          renderActiveView();
+        });
+      } catch (e) {
+        console.warn('Candidate discussions listener error:', e);
+      }
+    }
+
     /* Renders permanent attached CV Card in Drawer */
     function renderAttachedCvCard(url, customName) {
       const container = document.getElementById('cvAttachedContainer');
@@ -5443,6 +5924,11 @@ const publicHtml = `<!DOCTYPE html>
     window.handleCandidateCardClick = handleCandidateCardClick;
     window.openCandidateProfileModal = openCandidateProfileModal;
     window.closeCandidateProfileModal = closeCandidateProfileModal;
+    window.openCandidateDiscussion = openCandidateDiscussion;
+    window.switchProfileTab = switchProfileTab;
+    window.selectDecisionTag = selectDecisionTag;
+    window.handleSendCandidateComment = handleSendCandidateComment;
+    window.handleDeleteCandidateComment = handleDeleteCandidateComment;
     window.switchToEditDrawer = switchToEditDrawer;
     window.requestWindowsDesktopNotification = requestWindowsDesktopNotification;
     window.sendBroadcastSingle = sendBroadcastSingle;
