@@ -808,6 +808,63 @@
       animation: modalScale 0.2s ease;
     }
     .modal-card-lg { max-width: 960px; }
+    .modal-card-xl { max-width: 1040px; width: 95vw; }
+    @media (max-width: 768px) {
+      .modal-split-grid { grid-template-columns: 1fr !important; }
+      .modal-split-left { border-right: none !important; border-bottom: 1px solid var(--border-light); padding-right: 0 !important; padding-bottom: 16px !important; }
+    }
+    .profile-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      padding: 6px 0;
+      border-bottom: 1px dashed var(--border-light);
+    }
+    .profile-meta-item strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .profile-skill-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 8px;
+    }
+    .profile-skill-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .profile-skill-track {
+      height: 6px;
+      background: #E5E7EB;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .profile-skill-fill {
+      height: 100%;
+      background: #10B981;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .media-showcase-card {
+      background: #F9FAFB;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.15s ease;
+    }
+    .media-showcase-card:hover {
+      border-color: #93C5FD;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
     @keyframes modalScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .modal-header {
       padding: 18px 24px; border-bottom: 1px solid var(--border-light);
@@ -1440,6 +1497,43 @@
       <div class="modal-body" id="compareModalBody"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" onclick="closeComparisonModal()">Close Matrix</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Candidate Profile Showcase Modal (2-Column Split for Team Members & Quick Viewing) -->
+  <div class="modal-backdrop" id="candidateProfileModalBackdrop" onclick="if(event.target === this) closeCandidateProfileModal()">
+    <div class="modal-card modal-card-xl" style="max-height: 92vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; border-radius: var(--radius-lg);">
+      <div class="modal-header" style="padding: 16px 24px; border-bottom: 1px solid var(--border-light); background: #F9FAFB;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="profModalAvatar" style="width: 44px; height: 44px; border-radius: 50%; background: #111827; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; font-family: var(--font-mono); box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+            P
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+              <span id="profModalId" class="talent-id" style="font-size: 11px;">PGE-000</span>
+              <span id="profModalStageBadge" class="stage-badge stage-prospect">Prospect</span>
+              <span id="profModalRatingStars" style="color: #D97706; font-size: 12px; font-weight: 700;">★★★★★</span>
+            </div>
+            <h2 id="profModalName" style="font-family: var(--font-serif); font-size: 20px; font-weight: 600; color: var(--text-primary); margin: 0;">
+              Candidate Name
+            </h2>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" id="profModalAdminEditBtn" class="btn btn-secondary btn-sm" style="display: none;" onclick="switchToEditDrawer()">
+            ✏️ Edit Candidate
+          </button>
+          <button type="button" class="btn btn-secondary btn-icon" onclick="closeCandidateProfileModal()">✕</button>
+        </div>
+      </div>
+
+      <div class="modal-body modal-split-grid" style="padding: 24px; overflow-y: auto; display: grid; grid-template-columns: 310px 1fr; gap: 24px; background: #FFFFFF;">
+        <!-- Left Column: Bio Details, Skill Benchmarks & WhatsApp Outreach -->
+        <div id="profModalLeftCol" class="modal-split-left" style="display: flex; flex-direction: column; gap: 16px; border-right: 1px solid var(--border-light); padding-right: 20px;"></div>
+
+        <!-- Right Column: Interactive CV & Multi-Portfolio Media Showcase -->
+        <div id="profModalRightCol" style="display: flex; flex-direction: column; gap: 20px;"></div>
       </div>
     </div>
   </div>
@@ -2435,7 +2529,7 @@
         `;
 
         return `
-          <div class="talent-card ${isCompared ? 'selected-compare' : ''}" onclick="openTalentDetail('${talent.id}')">
+          <div class="talent-card ${isCompared ? 'selected-compare' : ''}" onclick="handleCandidateCardClick('${talent.id}')">
             <div>
               <div class="card-header">
                 <div>
@@ -2466,7 +2560,7 @@
                 ${portoLink}
               </div>
               <div style="display: flex; gap: 6px;">
-                <button type="button" class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); openTalentDetail('${talent.id}')" title="Edit candidate">
+                <button type="button" class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); ${isSuperAdmin() ? `openTalentDetail('${talent.id}')` : `openCandidateProfileModal('${talent.id}')`}" title="${isSuperAdmin() ? 'Edit candidate' : 'View full profile'}">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
                 ${isSuperAdmin() ? `
@@ -2509,7 +2603,7 @@
         `;
 
         return `
-          <tr onclick="openTalentDetail('${talent.id}')" style="cursor: pointer;" class="${isCompared ? 'selected-compare' : ''}">
+          <tr onclick="handleCandidateCardClick('${talent.id}')" style="cursor: pointer;" class="${isCompared ? 'selected-compare' : ''}">
             <td onclick="event.stopPropagation()">
               <input type="checkbox" ${isCompared ? 'checked' : ''} onchange="toggleCompareCandidate('${talent.id}')">
             </td>
@@ -2529,10 +2623,12 @@
               </div>
             </td>
             <td style="text-align: right;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openTalentDetail('${talent.id}')">Edit</button>
               ${isSuperAdmin() ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openTalentDetail('${talent.id}')">Edit</button>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteCandidate('${talent.id}', '${escapeHtml(talent.name)}')" style="color: var(--pastel-red-text); margin-left: 4px;">Delete</button>
-              ` : ''}
+              ` : `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openCandidateProfileModal('${talent.id}')">View Profile ↗</button>
+              `}
             </td>
           </tr>`;
       }).join('');
@@ -2546,7 +2642,7 @@
       el.kanbanContainer.innerHTML = STAGES.map(stage => {
         const stageTalents = state.filteredTalents.filter(t => t.stage === stage);
         const cardsHtml = stageTalents.map(t => `
-          <div class="kanban-card" onclick="openTalentDetail('${t.id}')">
+          <div class="kanban-card" onclick="handleCandidateCardClick('${t.id}')">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">${t.id}</span>
               <span class="rating-badge" style="font-size: 9px; padding: 2px 5px;">★ ${(t.overallRating || 4).toFixed(1)}</span>
@@ -2783,7 +2879,292 @@
     }
 
     /* ---------------------------------------------------- */
-    /* DRAWER LOGIC                                         */
+    /* CANDIDATE PROFILE SHOWCASE MODAL (2-COLUMN SPLIT)    */
+    /* ---------------------------------------------------- */
+    let currentProfileTalentId = null;
+
+    function handleCandidateCardClick(id) {
+      if (isSuperAdmin()) {
+        openTalentDetail(id);
+      } else {
+        openCandidateProfileModal(id);
+      }
+    }
+
+    function openCandidateProfileModal(id) {
+      const talent = state.talents.find(t => t.id === id || t.$id === id);
+      if (!talent) return;
+      currentProfileTalentId = talent.id;
+
+      const modal = document.getElementById('candidateProfileModalBackdrop');
+      const avatarEl = document.getElementById('profModalAvatar');
+      const idEl = document.getElementById('profModalId');
+      const stageBadgeEl = document.getElementById('profModalStageBadge');
+      const ratingStarsEl = document.getElementById('profModalRatingStars');
+      const nameEl = document.getElementById('profModalName');
+      const adminEditBtn = document.getElementById('profModalAdminEditBtn');
+      const leftCol = document.getElementById('profModalLeftCol');
+      const rightCol = document.getElementById('profModalRightCol');
+
+      if (!modal || !leftCol || !rightCol) return;
+
+      // Header info
+      const initials = (talent.name || 'Candidate').split(' ').map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
+      if (avatarEl) avatarEl.textContent = initials;
+      if (idEl) idEl.textContent = talent.id;
+      if (nameEl) nameEl.textContent = talent.name;
+      if (ratingStarsEl) ratingStarsEl.textContent = '★'.repeat(talent.overallRating || 4);
+
+      if (stageBadgeEl) {
+        stageBadgeEl.textContent = talent.stage || 'Prospect';
+        stageBadgeEl.className = 'stage-badge stage-' + (talent.stage || 'prospect').toLowerCase();
+      }
+
+      if (adminEditBtn) {
+        adminEditBtn.style.display = isSuperAdmin() ? 'inline-flex' : 'none';
+      }
+
+      // Left Column: Details & Skill Matrix & WhatsApp
+      const phoneClean = formatToInternationalPhone(talent.phone);
+      const emailClean = cleanEmail(talent.email);
+      const skills = talent.skills && talent.skills.length > 0 ? talent.skills : [
+        { name: 'Foto', rating: 4 },
+        { name: 'Video', rating: 4 },
+        { name: 'Editing', rating: 4 },
+        { name: 'Sense', rating: 4 }
+      ];
+
+      const skillsHtml = skills.map(s => {
+        const pct = Math.round((Number(s.rating || 0) / 5) * 100);
+        return `
+          <div class="profile-skill-row">
+            <div class="profile-skill-header">
+              <span>${escapeHtml(s.name)}</span>
+              <span style="font-family: var(--font-mono); font-weight: 600; color: #059669;">${s.rating} ★ (${pct}%)</span>
+            </div>
+            <div class="profile-skill-track">
+              <div class="profile-skill-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>`;
+      }).join('');
+
+      leftCol.innerHTML = `
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">
+            Candidate Overview
+          </div>
+          <div class="profile-meta-item">
+            <span>💼 <strong>Role:</strong></span>
+            <span>${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
+          </div>
+          <div class="profile-meta-item">
+            <span>📈 <strong>Level:</strong></span>
+            <span>${escapeHtml(talent.experienceLevel || 'Junior')}</span>
+          </div>
+          <div class="profile-meta-item">
+            <span>📍 <strong>Domisili:</strong></span>
+            <span>${escapeHtml(talent.domisili || '-')}</span>
+          </div>
+          <div class="profile-meta-item">
+            <span>🎓 <strong>Pendidikan:</strong></span>
+            <span>${escapeHtml(talent.education || '-')}</span>
+          </div>
+          <div class="profile-meta-item">
+            <span>💰 <strong>Gaji/Uang Saku:</strong></span>
+            <span>${escapeHtml(talent.expectedSalary || 'Standard Uang Saku')}</span>
+          </div>
+          <div class="profile-meta-item">
+            <span>📱 <strong>WhatsApp:</strong></span>
+            ${phoneClean ? `<a href="https://wa.me/${phoneClean.replace(/\+/g, '')}" target="_blank" style="color: #16A34A; font-weight: 600; font-family: var(--font-mono);">${phoneClean} ↗</a>` : '<span style="color: #9CA3AF;">-</span>'}
+          </div>
+          <div class="profile-meta-item">
+            <span>✉️ <strong>Email:</strong></span>
+            ${emailClean ? `<a href="mailto:${emailClean}" style="color: #2563EB; font-family: var(--font-mono); font-size: 11px;">${emailClean}</a>` : '<span style="color: #9CA3AF;">-</span>'}
+          </div>
+        </div>
+
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">
+            Skill Benchmarking Matrix
+          </div>
+          <div style="background: #F9FAFB; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            ${skillsHtml}
+          </div>
+        </div>
+
+        ${talent.notes ? `
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 6px;">
+              Notes &amp; Background
+            </div>
+            <div style="font-size: 12px; color: var(--text-secondary); background: #F9FAFB; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); white-space: pre-wrap; line-height: 1.5; max-height: 110px; overflow-y: auto;">
+              ${escapeHtml(talent.notes)}
+            </div>
+          </div>
+        ` : ''}
+
+        ${phoneClean ? `
+          <a href="https://wa.me/${phoneClean.replace(/\+/g, '')}?text=${encodeURIComponent(`Halo Kak ${talent.name}, kami dari Tim HR PGE Talent Pool ingin mendiskusikan peluang kerja sama terkait posisi ${talent.role || 'Freelance Content Creator'}.`)}" target="_blank" class="btn btn-wa" style="width: 100%; justify-content: center; padding: 9px 14px; font-size: 12px; font-weight: 600; margin-top: 4px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Contact via WhatsApp ↗
+          </a>
+        ` : ''}
+      `;
+
+      // Right Column: CV & Portfolio Media Showcase
+      let cvBlockHtml = '';
+      if (isValidDisplayUrl(talent.cvUrl)) {
+        cvBlockHtml = `
+          <div class="media-showcase-card" style="border-left: 4px solid #2563EB;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 20px;">📄</span>
+                <div>
+                  <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Curriculum Vitae (CV)</div>
+                  <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">Official Resume Document</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <a href="${talent.cvUrl}" target="_blank" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 5px 12px;">
+                  Open CV Fullscreen ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        cvBlockHtml = `
+          <div style="background: #F9FAFB; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding: 14px; text-align: center; color: var(--text-muted); font-size: 12px;">
+            📄 Belum ada Curriculum Vitae (CV) yang dilampirkan.
+          </div>
+        `;
+      }
+
+      const validPortoList = (talent.portfolioItems || []).filter(p => isValidDisplayUrl(p.url));
+      if (validPortoList.length === 0 && isValidDisplayUrl(talent.portfolioUrl)) {
+        validPortoList.push({ name: 'Primary Portfolio Link', url: talent.portfolioUrl, type: 'document' });
+      }
+
+      let portoBlockHtml = '';
+      if (validPortoList.length > 0) {
+        portoBlockHtml = validPortoList.map((item, idx) => {
+          const itemUrl = item.url || '';
+          const isVideo = itemUrl.includes('.mp4') || (item.type === 'video');
+          const isCanva = itemUrl.includes('canva.site') || itemUrl.includes('canva.com');
+          const isDrive = itemUrl.includes('drive.google.com');
+          const isTiktok = itemUrl.includes('tiktok.com') || itemUrl.includes('vt.tiktok');
+          const isYoutube = itemUrl.includes('youtube.com') || itemUrl.includes('youtu.be');
+
+          if (isVideo) {
+            return `
+              <div class="media-showcase-card" style="border-left: 4px solid #7C3AED;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">🎬</span>
+                    <div>
+                      <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">${escapeHtml(item.name || `Video Portfolio #${idx + 1}`)}</div>
+                      <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">MP4 Video Stream</div>
+                    </div>
+                  </div>
+                  <a href="${itemUrl}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 10px; padding: 3px 8px;">
+                    Download / Fullscreen ↗
+                  </a>
+                </div>
+                <video controls style="width: 100%; border-radius: 6px; max-height: 240px; background: #000000; margin-top: 4px;">
+                  <source src="${itemUrl}">
+                  Browser Anda tidak mendukung tag video.
+                </video>
+              </div>`;
+          }
+
+          let badgeIcon = '📁';
+          let badgeColor = '#2563EB';
+          let platformName = 'Document / Portfolio';
+
+          if (isCanva) {
+            badgeIcon = '🎨';
+            badgeColor = '#7C3AED';
+            platformName = 'Canva Design Presentation';
+          } else if (isDrive) {
+            badgeIcon = '☁️';
+            badgeColor = '#059669';
+            platformName = 'Google Drive Storage Folder';
+          } else if (isTiktok) {
+            badgeIcon = '📱';
+            badgeColor = '#111827';
+            platformName = 'TikTok Video / Reel Content';
+          } else if (isYoutube) {
+            badgeIcon = '▶️';
+            badgeColor = '#DC2626';
+            platformName = 'YouTube Video';
+          }
+
+          return `
+            <div class="media-showcase-card" style="border-left: 4px solid ${badgeColor};">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">${badgeIcon}</span>
+                  <div>
+                    <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">${escapeHtml(item.name || `Portfolio Item #${idx + 1}`)}</div>
+                    <div style="font-size: 10px; color: var(--text-muted); font-family: var(--font-mono);">${platformName}</div>
+                  </div>
+                </div>
+                <a href="${itemUrl}" target="_blank" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 4px 10px; background: ${badgeColor}; border-color: ${badgeColor}; color: #FFFFFF;">
+                  Buka Link Portofolio ↗
+                </a>
+              </div>
+            </div>`;
+        }).join('');
+      } else {
+        portoBlockHtml = `
+          <div style="background: #F9FAFB; border: 1px dashed var(--border-light); border-radius: var(--radius-sm); padding: 14px; text-align: center; color: var(--text-muted); font-size: 12px;">
+            🎨 Belum ada item portofolio yang dilampirkan.
+          </div>
+        `;
+      }
+
+      rightCol.innerHTML = `
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">
+            1. Curriculum Vitae Document
+          </div>
+          ${cvBlockHtml}
+        </div>
+
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600;">
+              2. Creative Portfolio Works &amp; Media (${validPortoList.length})
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${portoBlockHtml}
+          </div>
+        </div>
+      `;
+
+      modal.classList.add('open');
+    }
+
+    function closeCandidateProfileModal() {
+      const modal = document.getElementById('candidateProfileModalBackdrop');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.querySelectorAll('video').forEach(v => v.pause());
+      }
+      currentProfileTalentId = null;
+    }
+
+    function switchToEditDrawer() {
+      const targetId = currentProfileTalentId;
+      closeCandidateProfileModal();
+      if (targetId) {
+        openTalentDetail(targetId);
+      }
+    }
+
+    /* ---------------------------------------------------- */
+    /* DRAWER LOGIC (SUPER ADMIN ONLY)                      */
     /* ---------------------------------------------------- */
     function openDrawer() {
       document.body.classList.add('drawer-open');
@@ -2800,6 +3181,10 @@
     }
 
     function openTalentDetail(id) {
+      if (!isSuperAdmin()) {
+        openCandidateProfileModal(id);
+        return;
+      }
       const talent = state.talents.find(t => t.id === id || t.$id === id);
       if (!talent) return;
       state.selectedTalent = talent;
@@ -4551,6 +4936,10 @@
     window.updateBroadcastPreview = updateBroadcastPreview;
     window.toggleBroadcastSelect = toggleBroadcastSelect;
     window.toggleSelectAllBroadcast = toggleSelectAllBroadcast;
+    window.handleCandidateCardClick = handleCandidateCardClick;
+    window.openCandidateProfileModal = openCandidateProfileModal;
+    window.closeCandidateProfileModal = closeCandidateProfileModal;
+    window.switchToEditDrawer = switchToEditDrawer;
     window.sendBroadcastSingle = sendBroadcastSingle;
     window.renderBroadcastTable = renderBroadcastTable;
 
