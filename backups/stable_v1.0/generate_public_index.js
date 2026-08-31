@@ -871,104 +871,6 @@ const publicHtml = `<!DOCTYPE html>
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    /* Candidate Bento Card Team Comments & Remarks */
-    .card-comments-preview {
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
-      padding: 6px 10px;
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 11px;
-      color: #334155;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .card-comments-preview:hover {
-      background: #EFF6FF;
-      border-color: #BFDBFE;
-      color: #1D4ED8;
-    }
-    .card-comments-snippet {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      flex: 1;
-    }
-    .card-comments-count-pill {
-      font-size: 10px;
-      font-weight: 600;
-      font-family: var(--font-mono);
-      background: #E2E8F0;
-      color: #475569;
-      padding: 2px 6px;
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-    .card-comments-preview:hover .card-comments-count-pill {
-      background: #DBEAFE;
-      color: #1E40AF;
-    }
-    .comment-author-avatar-sm {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #3B82F6;
-      color: #FFFFFF;
-      font-size: 9px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .comment-thread-item {
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 10px;
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      transition: all 0.15s ease;
-    }
-    .comment-thread-item:hover {
-      background: #FFFFFF;
-      border-color: #CBD5E1;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    }
-    .comment-thread-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-    }
-    .comment-thread-author {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .comment-thread-time {
-      font-size: 10px;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-    .comment-thread-body {
-      font-size: 12px;
-      color: #334155;
-      line-height: 1.45;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
     /* Vacancy Hub Portal Styles */
     .vacancy-hub-section {
       margin-bottom: 32px;
@@ -1843,45 +1745,6 @@ const publicHtml = `<!DOCTYPE html>
     </div>
   </div>
 
-  <!-- Candidate Team Comments & Remarks Modal -->
-  <div class="modal-backdrop" id="candidateCommentsModalBackdrop">
-    <div class="modal-card" style="max-width: 580px;">
-      <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 36px; height: 36px; border-radius: 10px; background: #EFF6FF; border: 1px solid #BFDBFE; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #2563EB;">
-            💬
-          </div>
-          <div>
-            <h2 style="font-family: var(--font-serif); font-size: 17px; font-weight: 600; color: var(--text-primary); margin: 0;">
-              Catatan &amp; Evaluasi Tim HR
-            </h2>
-            <div id="candidateCommentsSubtitle" style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-              PGE-000 Candidate Name
-            </div>
-          </div>
-        </div>
-        <button type="button" class="btn btn-secondary btn-icon" onclick="closeCandidateCommentsModal()">✕</button>
-      </div>
-
-      <div class="modal-body" style="padding: 16px 20px; max-height: 400px; min-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #FFFFFF;">
-        <div id="candidateCommentsList" style="display: flex; flex-direction: column; gap: 10px;"></div>
-      </div>
-
-      <div class="modal-footer" style="padding: 12px 16px; background: #F8FAFC; border-top: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; gap: 8px; width: 100%;">
-          <input type="text" id="inputCandidateCommentText" class="form-input" placeholder="Tulis catatan evaluasi tim untuk kandidat ini... (Tekan Enter)" style="flex: 1; font-size: 12px;" onkeydown="if(event.key==='Enter') handleAddCandidateCommentFromModal()">
-          <button type="button" class="btn btn-primary btn-sm" onclick="handleAddCandidateCommentFromModal()" style="font-size: 12px; padding: 6px 14px;">
-            Kirim ↵
-          </button>
-        </div>
-        <div style="font-size: 10px; color: var(--text-muted); display: flex; justify-content: space-between;">
-          <span>💡 Catatan tersinkronisasi realtime ke seluruh tim HR.</span>
-          <span id="candidateCommentTypingIndicator"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Team Access & Whitelist Modal -->
   <div class="modal-backdrop" id="whitelistModalBackdrop">
     <div class="modal-card">
@@ -2002,13 +1865,6 @@ const publicHtml = `<!DOCTYPE html>
     const auth = firebase.auth();
     const rtdb = firebase.database();
 
-    // Enable Persistent Local Auth across page refreshes
-    try {
-      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(err => {
-        console.warn('Auth persistence config:', err);
-      });
-    } catch (e) {}
-
     // 2. Authorized HR Super Admin Whitelist & Cloud Sync
     const SUPER_ADMIN_EMAILS = [
       'hrdcvpge@gmail.com'
@@ -2045,13 +1901,10 @@ const publicHtml = `<!DOCTYPE html>
         return cloudWhitelist;
       }
       try {
-        const stored = JSON.parse(localStorage.getItem('pge_auth_whitelist') || '[]');
-        if (stored && stored.length > 0) {
-          cloudWhitelist = stored;
-          return stored;
-        }
-      } catch (e) {}
-      return [];
+        return JSON.parse(localStorage.getItem('pge_auth_whitelist') || '[]');
+      } catch (e) {
+        return [];
+      }
     }
 
     async function saveCustomWhitelist(list) {
@@ -2098,8 +1951,6 @@ const publicHtml = `<!DOCTYPE html>
       currentUser: null,
       talents: [],
       filteredTalents: [],
-      candidateComments: {},
-      activeCommentsTalentId: null,
       currentView: 'bento',
       activeVacancy: localStorage.getItem('pge_active_vacancy') || 'HUB',
       filters: { search: '', stage: 'ALL', rating: 0 },
@@ -2158,22 +2009,24 @@ const publicHtml = `<!DOCTYPE html>
       return str.toLowerCase().trim();
     }
 
-    function normalizeUrl(url) {
-      if (!url || typeof url !== 'string') return '';
-      const trimmed = url.trim();
-      if (!trimmed) return '';
-      const lower = trimmed.toLowerCase();
-      if (['link', 'none', '-', '#', 'n/a', 'null', 'undefined', 'cv', 'porto'].includes(lower)) return '';
-      if (/^(https?:\/\/|mailto:|tel:|data:|blob:)/i.test(trimmed)) {
-        return trimmed;
+    function normalizeExternalUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      let url = rawUrl.trim();
+      if (!url) return '';
+      if (url.startsWith('javascript:') || url.startsWith('data:')) return url;
+      if (url.startsWith('mailto:') || url.startsWith('tel:')) return url;
+      if (url.startsWith('#')) return url;
+      if (!/^https?:\/\//i.test(url)) {
+        url = 'https://' + url;
       }
-      return 'https://' + trimmed;
+      return url;
     }
 
     function isValidDisplayUrl(url) {
       if (!url || typeof url !== 'string') return false;
-      const norm = normalizeUrl(url);
-      return norm.startsWith('http://') || norm.startsWith('https://') || norm.startsWith('data:') || norm.startsWith('blob:');
+      const trimmed = url.trim();
+      if (!trimmed || trimmed === '-' || trimmed.toLowerCase() === 'link' || trimmed.toLowerCase() === 'none') return false;
+      return true;
     }
 
     function formatFileSize(bytes) {
@@ -2306,7 +2159,7 @@ const publicHtml = `<!DOCTYPE html>
       }
     }
 
-    function evaluateUserAccess(user) {
+    async function evaluateUserAccess(user) {
       if (!user) {
         state.currentUser = null;
         if (el.authGate) el.authGate.style.display = 'flex';
@@ -2316,6 +2169,16 @@ const publicHtml = `<!DOCTYPE html>
       }
 
       const userEmail = (user.email || '').toLowerCase().trim();
+
+      // Ensure cloud whitelist is fetched
+      if (!cloudWhitelist || cloudWhitelist.length === 0) {
+        try {
+          const snap = await rtdb.ref('/metadata/authorizedEmails').once('value');
+          const val = snap.val();
+          if (Array.isArray(val)) cloudWhitelist = val;
+          else if (val && typeof val === 'object') cloudWhitelist = Object.values(val);
+        } catch (e) {}
+      }
 
       if (isEmailAuthorized(userEmail)) {
         state.currentUser = user;
@@ -2334,13 +2197,10 @@ const publicHtml = `<!DOCTYPE html>
         setupPresence(user);
         listenTeamPresence();
         listenTeamChat();
-        listenCandidateComments();
 
         if (state.talents.length === 0) {
           loadAppwriteTalents();
           subscribeAppwriteRealtime();
-        } else {
-          selectVacancy(state.activeVacancy);
         }
       } else {
         state.currentUser = null;
@@ -2358,26 +2218,13 @@ const publicHtml = `<!DOCTYPE html>
     }
 
     async function handleGoogleSignIn() {
-      const btn = document.getElementById('btnGoogleSignIn') || document.querySelector('#authGate button');
-      const originalHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spin-icon" style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Menghubungkan ke Google...</span>';
-      }
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        provider.setCustomParameters({ prompt: 'select_account' });
-        const result = await auth.signInWithPopup(provider);
-        if (result && result.user) {
-          evaluateUserAccess(result.user);
-        }
+        await auth.signInWithPopup(provider);
       } catch (err) {
         console.error('Google Sign-In Error:', err);
-        showToast('Login: ' + (err.message || 'Silakan coba lagi'));
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = originalHtml;
-        }
+        showToast('Login failed: ' + (err.message || 'Please try again'));
       }
     }
 
@@ -2533,9 +2380,6 @@ const publicHtml = `<!DOCTYPE html>
       initEventListeners();
       initDefaultBroadcastTemplate();
       initAuthListener();
-      if (auth.currentUser) {
-        evaluateUserAccess(auth.currentUser);
-      }
     }
 
     /* ---------------------------------------------------- */
@@ -3032,8 +2876,7 @@ const publicHtml = `<!DOCTYPE html>
         </a>\` : '';
 
         // CV badge
-        const safeCv = normalizeUrl(talent.cvUrl);
-        const cvLink = isValidDisplayUrl(safeCv) ? \`<a href="\${safeCv}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-cv" onclick="event.stopPropagation()">
+        const cvLink = isValidDisplayUrl(talent.cvUrl) ? \`<a href="\${normalizeExternalUrl(talent.cvUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-cv" onclick="event.stopPropagation()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
           CV ↗
         </a>\` : '';
@@ -3048,9 +2891,8 @@ const publicHtml = `<!DOCTYPE html>
             Porto (\${portoCount}) 📚 ↗
           </span>\`;
         } else if (portoCount === 1) {
-          const rawDirect = validPortoList.length ? validPortoList[0].url : talent.portfolioUrl;
-          const directUrl = normalizeUrl(rawDirect);
-          portoLink = \`<a href="\${directUrl}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-porto" onclick="event.stopPropagation()">
+          const directUrl = validPortoList.length ? validPortoList[0].url : talent.portfolioUrl;
+          portoLink = \`<a href="\${normalizeExternalUrl(directUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-porto" onclick="event.stopPropagation()">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
             Porto ↗
           </a>\`;
@@ -3063,36 +2905,6 @@ const publicHtml = `<!DOCTYPE html>
                   onclick="event.stopPropagation()">
             \${STAGES.map(st => \`<option value="\${st}" \${(talent.stage || 'Prospect') === st ? 'selected' : ''}>\${st}</option>\`).join('')}
           </select>
-        \`;
-
-        // Team Comments & Notes snippet on Bento Card
-        const comments = state.candidateComments[talent.id] || [];
-        let commentSnippetHtml = '';
-        if (comments.length > 0) {
-          const last = comments[comments.length - 1];
-          const authorShort = (last.authorName || 'HR').split(' ')[0];
-          commentSnippetHtml = \`
-            <div class="card-comments-snippet">
-              <span class="comment-author-avatar-sm">\${authorShort.charAt(0).toUpperCase()}</span>
-              <span style="font-weight: 600; color: #1E293B;">\${escapeHtml(authorShort)}:</span>
-              <span style="color: #64748B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">"\${escapeHtml(last.text)}"</span>
-            </div>
-            <span class="card-comments-count-pill">\${comments.length}</span>
-          \`;
-        } else {
-          commentSnippetHtml = \`
-            <div class="card-comments-snippet">
-              <span style="font-size: 13px;">💬</span>
-              <span style="color: #94A3B8; font-style: italic; font-size: 10.5px;">+ Tulis catatan evaluasi tim...</span>
-            </div>
-            <span class="card-comments-count-pill">+ Catatan</span>
-          \`;
-        }
-
-        const commentsBlockHtml = \`
-          <div class="card-comments-preview" data-talent-id="\${talent.id}" onclick="event.stopPropagation(); openCandidateCommentsModal('\${talent.id}')" title="Buka Catatan &amp; Diskusi Tim HR (\${comments.length})">
-            \${commentSnippetHtml}
-          </div>
         \`;
 
         return \`
@@ -3114,7 +2926,6 @@ const publicHtml = `<!DOCTYPE html>
               </div>
 
               <div class="skills-row">\${skillsHtml}</div>
-              \${commentsBlockHtml}
             </div>
 
             <div class="card-footer">
@@ -3158,12 +2969,10 @@ const publicHtml = `<!DOCTYPE html>
         if (portoCount > 1) {
           livePortoUrlHtml = \`<span class="doc-badge doc-badge-porto" onclick="event.stopPropagation(); openPortoGalleryModal('\${talent.id}')">Porto (\${portoCount}) 📚 ↗</span>\`;
         } else if (portoCount === 1) {
-          const rawDirect = validPortoList.length ? validPortoList[0].url : talent.portfolioUrl;
-          const directUrl = normalizeUrl(rawDirect);
-          livePortoUrlHtml = \`<a href="\${directUrl}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-porto" onclick="event.stopPropagation()">Porto ↗</a>\`;
+          const directUrl = validPortoList.length ? validPortoList[0].url : talent.portfolioUrl;
+          livePortoUrlHtml = \`<a href="\${normalizeExternalUrl(directUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-porto" onclick="event.stopPropagation()">Porto ↗</a>\`;
         }
 
-        const safeCvTable = normalizeUrl(talent.cvUrl);
         const stageSelectTableHtml = \`
           <select class="stage-select-pill \${stageClass}" 
                   onchange="updateCandidateStage('\${talent.id}', this.value, event)" 
@@ -3187,8 +2996,8 @@ const publicHtml = `<!DOCTYPE html>
             <td><span class="rating-badge">★ \${(talent.overallRating || 4).toFixed(1)}</span></td>
             <td>
               <div class="doc-badges">
-                \${phoneClean ? \`<a href="https://wa.me/\${phoneClean.replace(/\\+/g, '')}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-wa" onclick="event.stopPropagation()">\${phoneClean}</a>\` : ''}
-                \${isValidDisplayUrl(safeCvTable) ? \`<a href="\${safeCvTable}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-cv" onclick="event.stopPropagation()">CV ↗</a>\` : ''}
+                \${phoneClean ? \`<a href="https://wa.me/\${phoneClean.replace(/\\+/g, '')}" target="_blank" class="doc-badge doc-badge-wa" onclick="event.stopPropagation()">\${phoneClean}</a>\` : ''}
+                \${isValidDisplayUrl(talent.cvUrl) ? \`<a href="\${normalizeExternalUrl(talent.cvUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-cv" onclick="event.stopPropagation()">CV ↗</a>\` : ''}
                 \${livePortoUrlHtml}
               </div>
             </td>
@@ -3583,8 +3392,8 @@ const publicHtml = `<!DOCTYPE html>
 
       // Right Column: CV & Portfolio Media Showcase
       let cvBlockHtml = '';
-      const safeCvUrl = normalizeUrl(talent.cvUrl);
-      if (isValidDisplayUrl(safeCvUrl)) {
+      if (isValidDisplayUrl(talent.cvUrl)) {
+        const cvHref = normalizeExternalUrl(talent.cvUrl);
         cvBlockHtml = \`
           <div class="media-showcase-card" style="border-left: 4px solid #2563EB;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -3596,7 +3405,7 @@ const publicHtml = `<!DOCTYPE html>
                 </div>
               </div>
               <div style="display: flex; gap: 6px;">
-                <a href="\${safeCvUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 5px 12px;">
+                <a href="\${cvHref}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="font-size: 11px; padding: 5px 12px;">
                   Open CV Fullscreen ↗
                 </a>
               </div>
@@ -3613,13 +3422,13 @@ const publicHtml = `<!DOCTYPE html>
 
       const validPortoList = (talent.portfolioItems || []).filter(p => isValidDisplayUrl(p.url));
       if (validPortoList.length === 0 && isValidDisplayUrl(talent.portfolioUrl)) {
-        validPortoList.push({ name: 'Primary Portfolio Link', url: normalizeUrl(talent.portfolioUrl), type: 'document' });
+        validPortoList.push({ name: 'Primary Portfolio Link', url: talent.portfolioUrl, type: 'document' });
       }
 
       let portoBlockHtml = '';
       if (validPortoList.length > 0) {
         portoBlockHtml = validPortoList.map((item, idx) => {
-          const itemUrl = normalizeUrl(item.url || '');
+          const itemUrl = normalizeExternalUrl(item.url || '');
           const isVideo = itemUrl.includes('.mp4') || (item.type === 'video');
           const isCanva = itemUrl.includes('canva.site') || itemUrl.includes('canva.com');
           const isDrive = itemUrl.includes('drive.google.com');
@@ -3712,28 +3521,9 @@ const publicHtml = `<!DOCTYPE html>
             \${portoBlockHtml}
           </div>
         </div>
-
-        <div style="margin-top: 6px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #2563EB; font-weight: 600;">
-              3. Catatan &amp; Evaluasi Tim HR (<span id="profModalCommentsCount">\${(state.candidateComments[talent.id] || []).length}</span>)
-            </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openCandidateCommentsModal('\${talent.id}')" style="font-size: 10px; padding: 2px 8px;">
-              💬 Buka Diskusi Lengkap ↗
-            </button>
-          </div>
-          <div id="profModalCommentsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 10px; margin-bottom: 8px;"></div>
-          <div style="display: flex; gap: 6px;">
-            <input type="text" id="profModalCommentInput" class="form-input" placeholder="Tulis catatan evaluasi tim untuk \${escapeHtml(talent.name)}... (Tekan Enter)" style="font-size: 11px; padding: 6px 10px;" onkeydown="if(event.key==='Enter') handleAddCommentFromProfileModal('\${talent.id}')">
-            <button type="button" class="btn btn-primary btn-sm" onclick="handleAddCommentFromProfileModal('\${talent.id}')" style="font-size: 11px; padding: 4px 12px;">
-              Kirim
-            </button>
-          </div>
-        </div>
       \`;
 
       modal.classList.add('open');
-      renderProfileCommentsSection(talent.id);
     }
 
     function closeCandidateProfileModal() {
@@ -4219,8 +4009,8 @@ const publicHtml = `<!DOCTYPE html>
                 \${talents.map(t => \`
                   <td style="text-align: center; border-left: 1px solid var(--border-light); padding: 12px;">
                     <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
-                      \${isValidDisplayUrl(t.cvUrl) ? \`<a href="\${t.cvUrl}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11px;">CV ↗</a>\` : ''}
-                      \${t.phone ? \`<a href="https://wa.me/\${formatToInternationalPhone(t.phone).replace(/\\+/g, '')}" target="_blank" class="btn btn-wa btn-sm" style="font-size: 11px;">💬 WA</a>\` : ''}
+                      \${isValidDisplayUrl(t.cvUrl) ? \`<a href="\${normalizeExternalUrl(t.cvUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 11px;">CV ↗</a>\` : ''}
+                      \${t.phone ? \`<a href="https://wa.me/\${formatToInternationalPhone(t.phone).replace(/\\+/g, '')}" target="_blank" rel="noopener noreferrer" class="btn btn-wa btn-sm" style="font-size: 11px;">💬 WA</a>\` : ''}
                     </div>
                   </td>\`).join('')}
               </tr>
@@ -4248,7 +4038,7 @@ const publicHtml = `<!DOCTYPE html>
       const bodyEl = document.getElementById('portoGalleryModalBody');
       if (!bodyEl) return;
 
-      const items = talent.portfolioItems && talent.portfolioItems.length ? talent.portfolioItems : (isValidDisplayUrl(talent.portfolioUrl) ? [{ name: 'Portfolio Link', url: normalizeUrl(talent.portfolioUrl), type: 'document' }] : []);
+      const items = talent.portfolioItems && talent.portfolioItems.length ? talent.portfolioItems : (isValidDisplayUrl(talent.portfolioUrl) ? [{ name: 'Portfolio Link', url: talent.portfolioUrl, type: 'document' }] : []);
 
       if (!items.length) {
         bodyEl.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No portfolio attachments found.</div>';
@@ -4256,8 +4046,8 @@ const publicHtml = `<!DOCTYPE html>
         bodyEl.innerHTML = \`
           <div style="display: flex; flex-direction: column; gap: 12px;">
             \${items.map((item, idx) => {
-              const safeUrl = normalizeUrl(item.url);
-              const isVid = item.type === 'video' || (safeUrl && safeUrl.toLowerCase().includes('.mp4'));
+              const targetHref = normalizeExternalUrl(item.url || '');
+              const isVid = item.type === 'video' || (targetHref && targetHref.toLowerCase().includes('.mp4'));
               const isImg = item.type === 'image';
               const icon = isVid ? '🎬' : (isImg ? '🖼️' : '📄');
 
@@ -4268,13 +4058,13 @@ const publicHtml = `<!DOCTYPE html>
                       <span>\${icon}</span>
                       <span>\${escapeHtml(item.name || \`Portfolio Item #\${idx + 1}\`)}</span>
                     </div>
-                    <a href="\${safeUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 11px;">
+                    <a href="\${targetHref}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 11px;">
                       Open / Download ↗
                     </a>
                   </div>
-                  \${isVid && !safeUrl.includes('drive.google') && !safeUrl.includes('canva') && !safeUrl.includes('tiktok') ? \`
+                  \${isVid && !targetHref.includes('drive.google') && !targetHref.includes('canva') && !targetHref.includes('tiktok') ? \`
                     <div style="margin-top: 6px; border-radius: 6px; overflow: hidden; background: #000;">
-                      <video src="\${safeUrl}" controls style="width: 100%; max-height: 280px; display: block;"></video>
+                      <video src="\${targetHref}" controls style="width: 100%; max-height: 280px; display: block;"></video>
                     </div>
                   \` : ''}
                 </div>\`;
@@ -4864,247 +4654,6 @@ const publicHtml = `<!DOCTYPE html>
       }
     }
 
-    /* ---------------------------------------------------- */
-    /* REALTIME CANDIDATE COMMENTS & TEAM EVALUATION THREAD */
-    /* ---------------------------------------------------- */
-    function listenCandidateComments() {
-      try {
-        rtdb.ref('/candidate_comments').on('value', (snapshot) => {
-          const val = snapshot.val() || {};
-          state.candidateComments = {};
-          Object.keys(val).forEach(tId => {
-            const commMap = val[tId] || {};
-            const list = Object.values(commMap).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-            state.candidateComments[tId] = list;
-          });
-
-          // Live update active UI components
-          if (state.currentView === 'bento') {
-            updateCardCommentBadges();
-          }
-          if (state.activeCommentsTalentId) {
-            renderCandidateCommentsModal(state.activeCommentsTalentId);
-          }
-          if (currentProfileTalentId) {
-            renderProfileCommentsSection(currentProfileTalentId);
-          }
-        });
-      } catch (e) {
-        console.warn('Candidate comments listener error:', e);
-      }
-    }
-
-    function openCandidateCommentsModal(talentId) {
-      const talent = state.talents.find(t => t.id === talentId || t.$id === talentId);
-      if (!talent) return;
-      state.activeCommentsTalentId = talent.id;
-
-      const sub = document.getElementById('candidateCommentsSubtitle');
-      if (sub) {
-        sub.textContent = \`[\${talent.id}] \${talent.name} — \${talent.role || 'Freelance Content Creator'}\`;
-      }
-
-      renderCandidateCommentsModal(talent.id);
-
-      const modal = document.getElementById('candidateCommentsModalBackdrop');
-      if (modal) modal.classList.add('open');
-
-      const input = document.getElementById('inputCandidateCommentText');
-      if (input) {
-        input.value = '';
-        setTimeout(() => input.focus(), 150);
-      }
-    }
-
-    function closeCandidateCommentsModal() {
-      const modal = document.getElementById('candidateCommentsModalBackdrop');
-      if (modal) modal.classList.remove('open');
-      state.activeCommentsTalentId = null;
-    }
-
-    function renderCandidateCommentsModal(talentId) {
-      const container = document.getElementById('candidateCommentsList');
-      if (!container) return;
-
-      const comments = state.candidateComments[talentId] || [];
-      const curEmail = state.currentUser ? (state.currentUser.email || '').toLowerCase() : '';
-
-      if (comments.length === 0) {
-        container.innerHTML = \`
-          <div style="text-align: center; color: var(--text-muted); padding: 36px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-            <span style="font-size: 32px;">📝</span>
-            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Belum Ada Catatan Evaluasi Tim</div>
-            <div style="font-size: 11px; max-width: 340px; line-height: 1.45;">
-              Tulis catatan pertama untuk mengevaluasi skill, portofolio, kecocokan tim, atau kesepakatan interview kandidat ini.
-            </div>
-          </div>\`;
-        return;
-      }
-
-      container.innerHTML = comments.map(c => {
-        const isAuthor = (c.authorEmail || '').toLowerCase() === curEmail;
-        const canDelete = isAuthor || isSuperAdmin();
-        const initial = (c.authorName || 'HR').charAt(0).toUpperCase();
-
-        return \`
-          <div class="comment-thread-item" id="comment_\${c.id}">
-            <div class="comment-thread-header">
-              <div class="comment-thread-author">
-                <div class="comment-author-avatar-sm">\${initial}</div>
-                <div>
-                  <span style="font-weight: 600;">\${escapeHtml(c.authorName || 'HR Team')}</span>
-                  <span style="color: var(--text-muted); font-size: 10px; font-weight: normal; margin-left: 4px;">(\${escapeHtml(c.authorEmail || '')})</span>
-                </div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="comment-thread-time">\${formatTimeAgo(c.createdAt)}</span>
-                \${canDelete ? \`
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="handleDeleteCandidateComment('\${talentId}', '\${c.id}')" title="Hapus Catatan" style="color: var(--pastel-red-text); padding: 1px 6px; font-size: 10px;">
-                    ✕ Hapus
-                  </button>
-                \` : ''}
-              </div>
-            </div>
-            <div class="comment-thread-body">\${escapeHtml(c.text)}</div>
-          </div>\`;
-      }).join('');
-
-      // Auto scroll to bottom
-      const modalBody = container.parentElement;
-      if (modalBody) {
-        modalBody.scrollTop = modalBody.scrollHeight;
-      }
-    }
-
-    async function handleAddCandidateCommentFromModal() {
-      const input = document.getElementById('inputCandidateCommentText');
-      if (!input || !state.activeCommentsTalentId) return;
-      const text = input.value.trim();
-      if (!text) return;
-
-      input.value = '';
-      await addCandidateComment(state.activeCommentsTalentId, text);
-    }
-
-    async function addCandidateComment(talentId, text) {
-      if (!talentId || !text || !text.trim()) return;
-
-      const user = auth.currentUser || state.currentUser;
-      const authorName = user ? (user.displayName || user.email.split('@')[0]) : 'HR Team';
-      const authorEmail = user ? user.email : 'hr@pge.co.id';
-      const authorPhoto = user ? (user.photoURL || '') : '';
-
-      const commentId = 'cm_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-      const commentObj = {
-        id: commentId,
-        talentId: talentId,
-        text: text.trim(),
-        authorName: authorName,
-        authorEmail: authorEmail,
-        authorPhoto: authorPhoto,
-        createdAt: Date.now()
-      };
-
-      try {
-        await rtdb.ref(\`/candidate_comments/\${talentId}/\${commentId}\`).set(commentObj);
-        showToast('✓ Catatan tim berhasil disimpan!');
-      } catch (err) {
-        console.error('Error saving candidate comment:', err);
-        showToast('⚠️ Gagal menyimpan catatan: ' + err.message);
-      }
-    }
-
-    async function handleDeleteCandidateComment(talentId, commentId) {
-      if (!confirm('Hapus catatan evaluasi ini?')) return;
-      try {
-        await rtdb.ref(\`/candidate_comments/\${talentId}/\${commentId}\`).remove();
-        showToast('Catatan dihapus.');
-      } catch (err) {
-        console.error('Error deleting comment:', err);
-        showToast('⚠️ Gagal menghapus: ' + err.message);
-      }
-    }
-
-    function updateCardCommentBadges() {
-      document.querySelectorAll('.card-comments-preview').forEach(el => {
-        const talentId = el.getAttribute('data-talent-id');
-        if (!talentId) return;
-        const comments = state.candidateComments[talentId] || [];
-        const countPill = el.querySelector('.card-comments-count-pill');
-        const snippetEl = el.querySelector('.card-comments-snippet');
-
-        if (countPill) {
-          countPill.textContent = comments.length > 0 ? comments.length : '+ Catatan';
-        }
-        if (snippetEl) {
-          if (comments.length > 0) {
-            const last = comments[comments.length - 1];
-            const authorShort = (last.authorName || 'HR').split(' ')[0];
-            snippetEl.innerHTML = \`
-              <span class="comment-author-avatar-sm">\${authorShort.charAt(0).toUpperCase()}</span>
-              <span style="font-weight: 600; color: #1E293B;">\${escapeHtml(authorShort)}:</span>
-              <span style="color: #64748B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">"\${escapeHtml(last.text)}"</span>
-            \`;
-          } else {
-            snippetEl.innerHTML = \`
-              <span style="font-size: 13px;">💬</span>
-              <span style="color: #94A3B8; font-style: italic; font-size: 10.5px;">+ Tulis catatan evaluasi tim...</span>
-            \`;
-          }
-        }
-      });
-    }
-
-    function renderProfileCommentsSection(talentId) {
-      const container = document.getElementById('profModalCommentsContainer');
-      const countEl = document.getElementById('profModalCommentsCount');
-      if (!container) return;
-
-      const comments = state.candidateComments[talentId] || [];
-      if (countEl) countEl.textContent = comments.length;
-
-      if (comments.length === 0) {
-        container.innerHTML = '<span style="font-size: 11px; color: var(--text-muted); font-style: italic; text-align: center; padding: 10px 0;">Belum ada catatan evaluasi tim. Tulis catatan pertama di bawah.</span>';
-        return;
-      }
-
-      const curEmail = state.currentUser ? (state.currentUser.email || '').toLowerCase() : '';
-      container.innerHTML = comments.map(c => {
-        const isAuthor = (c.authorEmail || '').toLowerCase() === curEmail;
-        const canDelete = isAuthor || isSuperAdmin();
-        const initial = (c.authorName || 'HR').charAt(0).toUpperCase();
-
-        return \`
-          <div class="comment-thread-item" style="padding: 8px 10px;">
-            <div class="comment-thread-header">
-              <div class="comment-thread-author" style="font-size: 11px;">
-                <div class="comment-author-avatar-sm" style="width: 16px; height: 16px; font-size: 8px;">\${initial}</div>
-                <span>\${escapeHtml(c.authorName || 'HR Team')}</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span class="comment-thread-time">\${formatTimeAgo(c.createdAt)}</span>
-                \${canDelete ? \`
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="handleDeleteCandidateComment('\${talentId}', '\${c.id}')" title="Hapus Catatan" style="color: var(--pastel-red-text); padding: 0 4px; font-size: 10px;">
-                    ✕
-                  </button>
-                \` : ''}
-              </div>
-            </div>
-            <div class="comment-thread-body" style="font-size: 11.5px; margin-top: 2px;">\${escapeHtml(c.text)}</div>
-          </div>\`;
-      }).join('');
-      container.scrollTop = container.scrollHeight;
-    }
-
-    async function handleAddCommentFromProfileModal(talentId) {
-      const input = document.getElementById('profModalCommentInput');
-      if (!input || !talentId) return;
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = '';
-      await addCandidateComment(talentId, text);
-    }
-
     /* Renders permanent attached CV Card in Drawer */
     function renderAttachedCvCard(url, customName) {
       const container = document.getElementById('cvAttachedContainer');
@@ -5114,11 +4663,12 @@ const publicHtml = `<!DOCTYPE html>
         return;
       }
       const displayName = customName || (url.startsWith('data:') ? 'Local CV Document' : 'Attached CV Document (Click to Preview ↗)');
+      const targetHref = normalizeExternalUrl(url);
       container.innerHTML = \`
         <div class="attached-cv-box" id="attachedCvCard">
           <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; max-width: 380px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
             <span>📄</span>
-            <a href="\${url}" target="_blank" style="color: #1E40AF; font-weight: 500; text-decoration: underline;">\${escapeHtml(displayName)}</a>
+            <a href="\${targetHref}" target="_blank" rel="noopener noreferrer" style="color: #1E40AF; font-weight: 500; text-decoration: underline;">\${escapeHtml(displayName)}</a>
           </div>
           <button type="button" class="btn btn-secondary btn-sm" onclick="clearCvUrl()" style="padding: 2px 8px; font-size: 10px; color: var(--pastel-red-text);">Remove</button>
         </div>\`;
@@ -5168,11 +4718,11 @@ const publicHtml = `<!DOCTYPE html>
         return;
       }
       container.innerHTML = state.stagedPortfolioItems.map((item, idx) => {
-        const safeUrl = normalizeUrl(item.url);
+        const directHref = normalizeExternalUrl(item.url);
         return \`
           <div class="chip">
             <span>\${item.type === 'video' ? '🎬' : (item.type === 'image' ? '🖼️' : '📄')}</span>
-            <a href="\${safeUrl}" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); text-decoration: none; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\${escapeHtml(item.name || 'Portfolio Item')}</a>
+            <a href="\${directHref}" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); text-decoration: none; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\${escapeHtml(item.name || 'Portfolio Item')} ↗</a>
             <span class="chip-remove" onclick="removePortoItem(\${idx})">✕</span>
           </div>\`;
       }).join('');
@@ -5182,15 +4732,20 @@ const publicHtml = `<!DOCTYPE html>
       const input = document.getElementById('inputManualPortoUrl');
       if (!input || !input.value.trim()) return;
       const rawUrl = input.value.trim();
-      const safeUrl = normalizeUrl(rawUrl);
-      if (!safeUrl) {
-        showToast('⚠️ Please enter a valid URL');
-        return;
-      }
-      const isVid = safeUrl.toLowerCase().includes('.mp4') || safeUrl.toLowerCase().includes('youtube') || safeUrl.toLowerCase().includes('tiktok') || safeUrl.toLowerCase().includes('youtu.be');
+      const url = normalizeExternalUrl(rawUrl);
+      const lower = url.toLowerCase();
+      const isVid = lower.includes('.mp4') || lower.includes('youtube') || lower.includes('tiktok') || lower.includes('youtu.be');
+      const isCanva = lower.includes('canva.site') || lower.includes('canva.com');
+      const isDrive = lower.includes('drive.google.com');
+
+      let defaultName = 'Portfolio Link';
+      if (isVid) defaultName = 'Video Portfolio';
+      else if (isCanva) defaultName = 'Canva Deck';
+      else if (isDrive) defaultName = 'Google Drive';
+
       state.stagedPortfolioItems.push({
-        name: isVid ? 'Video Link' : 'Portfolio Link',
-        url: safeUrl,
+        name: defaultName,
+        url: url,
         type: isVid ? 'video' : 'document'
       });
       input.value = '';
@@ -5894,11 +5449,7 @@ const publicHtml = `<!DOCTYPE html>
     window.selectVacancy = selectVacancy;
     window.renderVacancyHub = renderVacancyHub;
     window.getUniqueVacancies = getUniqueVacancies;
-    window.openCandidateCommentsModal = openCandidateCommentsModal;
-    window.closeCandidateCommentsModal = closeCandidateCommentsModal;
-    window.handleAddCandidateCommentFromModal = handleAddCandidateCommentFromModal;
-    window.handleDeleteCandidateComment = handleDeleteCandidateComment;
-    window.handleAddCommentFromProfileModal = handleAddCommentFromProfileModal;
+    window.normalizeExternalUrl = normalizeExternalUrl;
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', bootApp);
