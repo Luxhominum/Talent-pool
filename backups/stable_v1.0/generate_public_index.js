@@ -1096,14 +1096,14 @@ const publicHtml = `<!DOCTYPE html>
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 14px 0 6px;
-      position: sticky;
-      top: -6px;
-      z-index: 5;
+      width: 100%;
+      margin: 16px 0 8px;
+      clear: both;
+      pointer-events: none;
     }
     .chat-date-separator span {
       background: #E5E7EB;
-      color: #4B5563;
+      color: #374151;
       font-size: 10px;
       font-weight: 600;
       font-family: var(--font-sans);
@@ -1111,7 +1111,7 @@ const publicHtml = `<!DOCTYPE html>
       border-radius: 9999px;
       letter-spacing: 0.02em;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.06);
     }
 
     .bg-particle-canvas {
