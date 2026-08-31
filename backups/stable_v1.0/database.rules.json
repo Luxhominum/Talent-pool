@@ -8,6 +8,10 @@
       ".read": "auth != null",
       ".write": "auth != null"
     },
+    "candidate_comments": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
     "talents": {
       ".read": "auth != null",
       ".write": "auth != null"
