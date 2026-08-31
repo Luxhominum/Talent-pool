@@ -1618,9 +1618,14 @@ const publicHtml = `<!DOCTYPE html>
           <div style="font-size: 10px; color: #9CA3AF; font-family: var(--font-mono);">Live Realtime Discussion</div>
         </div>
       </div>
-      <button type="button" class="btn btn-secondary btn-icon" onclick="toggleTeamMessenger()" style="color: #9CA3AF; border: none; background: transparent; padding: 4px;" title="Close">
-        ✕
-      </button>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button type="button" class="btn btn-secondary btn-icon" onclick="requestWindowsDesktopNotification()" style="color: #9CA3AF; border: none; background: transparent; padding: 4px; font-size: 13px;" title="Aktifkan Notifikasi Desktop Windows">
+          🔔
+        </button>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="toggleTeamMessenger()" style="color: #9CA3AF; border: none; background: transparent; padding: 4px;" title="Close">
+          ✕
+        </button>
+      </div>
     </div>
 
     <!-- Messenger View Tabs -->
@@ -3959,6 +3964,75 @@ const publicHtml = `<!DOCTYPE html>
     window.addEventListener('keydown', unlockAudio, { passive: true });
     window.addEventListener('touchstart', unlockAudio, { passive: true });
 
+    window.addEventListener('touchstart', unlockAudio, { passive: true });
+
+    /* ---------------------------------------------------- */
+    /* MULTI-LAYER NOTIFICATIONS: WINDOWS DESKTOP & CHIME   */
+    /* ---------------------------------------------------- */
+    function requestWindowsDesktopNotification() {
+      if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+              showToast('🔔 Notifikasi Desktop Windows Aktif!');
+              try {
+                new Notification('PGE Talent Pool', {
+                  body: 'Notifikasi Desktop Windows aktif. Anda tidak akan melewatkan pesan chat dari tim HR!',
+                  icon: '/favicon.svg'
+                });
+              } catch (e) {}
+            }
+          });
+        } else if (Notification.permission === 'granted') {
+          showToast('🔔 Notifikasi Desktop Windows sudah aktif.');
+        } else if (Notification.permission === 'denied') {
+          showToast('⚠️ Izin notifikasi diblokir di browser. Mohon izinkan via ikon gembok di address bar.');
+        }
+      }
+    }
+
+    function triggerWindowsDesktopNotification(senderName, messageText) {
+      try {
+        if ('Notification' in window && Notification.permission === 'granted') {
+          const notif = new Notification(\`💬 \${senderName || 'Tim HR PGE'}\`, {
+            body: messageText || 'Ada pesan baru di HR Team Lounge.',
+            icon: '/favicon.svg',
+            tag: 'pge-team-chat',
+            renotify: true
+          });
+          notif.onclick = () => {
+            window.focus();
+            if (!messengerOpen) toggleTeamMessenger();
+          };
+        }
+      } catch (e) {
+        console.warn('Desktop notification trigger error:', e);
+      }
+    }
+
+    let titleFlashInterval = null;
+    function startTitleFlash(unread) {
+      if (titleFlashInterval) clearInterval(titleFlashInterval);
+      let flag = false;
+      titleFlashInterval = setInterval(() => {
+        if (messengerOpen && messengerCurrentTab === 'chat') {
+          stopTitleFlash();
+          return;
+        }
+        document.title = flag ? \`🔴 (\${unread}) PESAN BARU! | PGE Talent Pool\` : \`💬 (\${unread}) Chat Masuk | PGE Talent Pool\`;
+        flag = !flag;
+      }, 900);
+    }
+
+    function stopTitleFlash() {
+      if (titleFlashInterval) {
+        clearInterval(titleFlashInterval);
+        titleFlashInterval = null;
+      }
+      document.title = 'PGE Talent Pool | Candidate Repository';
+    }
+
+    /* Crisp Slack / Apple Modern Two-Tone Chime Synth (880Hz -> 1320Hz + Harmonic Shimmer) */
     function playChimeSound() {
       try {
         unlockAudio();
@@ -3967,21 +4041,45 @@ const publicHtml = `<!DOCTYPE html>
         if (!ctx) return;
         if (ctx.state === 'suspended') ctx.resume();
 
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+        const t = ctx.currentTime;
 
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1); // A5
+        // Tone 1: 880 Hz (Crisp "Ding")
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, t);
+        gain1.gain.setValueAtTime(0.38, t);
+        gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(t);
+        osc1.stop(t + 0.32);
 
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+        // Tone 2: 1320 Hz (Harmonic "Dong")
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1320, t + 0.11);
+        gain2.gain.setValueAtTime(0.0, t);
+        gain2.gain.setValueAtTime(0.42, t + 0.11);
+        gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.58);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(t + 0.11);
+        osc2.stop(t + 0.58);
 
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start();
-        osc.stop(ctx.currentTime + 0.35);
+        // Tone 3: 2640 Hz (Resonant Metallic Bell Shimmer)
+        const osc3 = ctx.createOscillator();
+        const gain3 = ctx.createGain();
+        osc3.type = 'sine';
+        osc3.frequency.setValueAtTime(2640, t + 0.11);
+        gain3.gain.setValueAtTime(0.0, t);
+        gain3.gain.setValueAtTime(0.12, t + 0.11);
+        gain3.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+        osc3.connect(gain3);
+        gain3.connect(ctx.destination);
+        osc3.start(t + 0.11);
+        osc3.stop(t + 0.45);
       } catch (e) {
         console.warn('Audio chime error:', e);
       }
@@ -3999,7 +4097,7 @@ const publicHtml = `<!DOCTYPE html>
       unreadCount = 0;
       const badge = document.getElementById('messengerUnreadBadge');
       if (badge) badge.style.display = 'none';
-      document.title = 'PGE Talent Pool | Candidate Repository';
+      stopTitleFlash();
     }
 
     function scrollChatToBottom() {
@@ -4035,6 +4133,8 @@ const publicHtml = `<!DOCTYPE html>
 
             if (isFromOther) {
               playChimeSound();
+              triggerWindowsDesktopNotification(latestMsg.senderName, latestMsg.text);
+
               if (!messengerOpen || messengerCurrentTab !== 'chat') {
                 unreadCount++;
                 const badge = document.getElementById('messengerUnreadBadge');
@@ -4043,7 +4143,7 @@ const publicHtml = `<!DOCTYPE html>
                   badge.style.display = 'inline-block';
                 }
                 showToast(\`💬 \${latestMsg.senderName || 'Team Member'}: "\${latestMsg.text}"\`);
-                document.title = \`(\${unreadCount}) Pesan Baru | PGE Talent Pool\`;
+                startTitleFlash(unreadCount);
               }
             }
           } else if (!initialChatLoaded) {
@@ -4056,7 +4156,7 @@ const publicHtml = `<!DOCTYPE html>
                 badge.textContent = unreadCount;
                 badge.style.display = 'inline-block';
               }
-              document.title = \`(\${unreadCount}) Pesan Baru | PGE Talent Pool\`;
+              startTitleFlash(unreadCount);
             }
           }
 
@@ -4945,6 +5045,7 @@ const publicHtml = `<!DOCTYPE html>
     window.openCandidateProfileModal = openCandidateProfileModal;
     window.closeCandidateProfileModal = closeCandidateProfileModal;
     window.switchToEditDrawer = switchToEditDrawer;
+    window.requestWindowsDesktopNotification = requestWindowsDesktopNotification;
     window.sendBroadcastSingle = sendBroadcastSingle;
     window.renderBroadcastTable = renderBroadcastTable;
 
