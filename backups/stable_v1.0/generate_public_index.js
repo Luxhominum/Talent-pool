@@ -2306,7 +2306,7 @@ const publicHtml = `<!DOCTYPE html>
       }
     }
 
-    async function evaluateUserAccess(user) {
+    function evaluateUserAccess(user) {
       if (!user) {
         state.currentUser = null;
         if (el.authGate) el.authGate.style.display = 'flex';
@@ -2316,16 +2316,6 @@ const publicHtml = `<!DOCTYPE html>
       }
 
       const userEmail = (user.email || '').toLowerCase().trim();
-
-      // Ensure cloud whitelist is fetched
-      if (!cloudWhitelist || cloudWhitelist.length === 0) {
-        try {
-          const snap = await rtdb.ref('/metadata/authorizedEmails').once('value');
-          const val = snap.val();
-          if (Array.isArray(val)) cloudWhitelist = val;
-          else if (val && typeof val === 'object') cloudWhitelist = Object.values(val);
-        } catch (e) {}
-      }
 
       if (isEmailAuthorized(userEmail)) {
         state.currentUser = user;
@@ -2349,6 +2339,8 @@ const publicHtml = `<!DOCTYPE html>
         if (state.talents.length === 0) {
           loadAppwriteTalents();
           subscribeAppwriteRealtime();
+        } else {
+          selectVacancy(state.activeVacancy);
         }
       } else {
         state.currentUser = null;
@@ -2366,20 +2358,22 @@ const publicHtml = `<!DOCTYPE html>
     }
 
     async function handleGoogleSignIn() {
-      const btn = document.querySelector('#authGate button');
+      const btn = document.getElementById('btnGoogleSignIn') || document.querySelector('#authGate button');
       const originalHtml = btn ? btn.innerHTML : '';
       if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<span class="spin-icon" style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Menghubungkan ke Google...</span>';
       }
       try {
-        await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
-        await auth.signInWithPopup(provider);
+        const result = await auth.signInWithPopup(provider);
+        if (result && result.user) {
+          evaluateUserAccess(result.user);
+        }
       } catch (err) {
         console.error('Google Sign-In Error:', err);
-        showToast('Login: ' + (err.message || 'Please try again'));
+        showToast('Login: ' + (err.message || 'Silakan coba lagi'));
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = originalHtml;
@@ -2539,6 +2533,9 @@ const publicHtml = `<!DOCTYPE html>
       initEventListeners();
       initDefaultBroadcastTemplate();
       initAuthListener();
+      if (auth.currentUser) {
+        evaluateUserAccess(auth.currentUser);
+      }
     }
 
     /* ---------------------------------------------------- */
