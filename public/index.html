@@ -1452,6 +1452,249 @@
       opacity: 0.65;
     }
     .empty-state { text-align: center; padding: 48px 24px; color: var(--text-secondary); }
+
+    /* ==================================================== */
+    /* 3D PSYDUCK ANIMATED ASSISTANT WIDGET                 */
+    /* ==================================================== */
+    .psyduck-widget-container {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 1040;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      perspective: 1200px;
+      pointer-events: none;
+      user-select: none;
+    }
+    
+    .psyduck-speech-bubble {
+      pointer-events: auto;
+      width: 310px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      border-radius: 18px;
+      box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      transform-origin: bottom left;
+      transform-style: preserve-3d;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: bubbleSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .psyduck-speech-bubble.open {
+      display: flex;
+    }
+    @keyframes bubbleSlideIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.92) rotate(-2deg); }
+      to { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+    }
+
+    .psyduck-bubble-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .psyduck-mood-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+    }
+    .psyduck-bubble-close {
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      color: #9CA3AF;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.15s ease;
+    }
+    .psyduck-bubble-close:hover {
+      color: #111827;
+      background: #F3F4F6;
+    }
+    .psyduck-bubble-text {
+      font-size: 12px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+    .psyduck-bubble-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+    .psyduck-action-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: #F3F4F6;
+      color: #374151;
+      border: 1px solid #E5E7EB;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .psyduck-action-pill:hover {
+      background: #111827;
+      color: #FFFFFF;
+      border-color: #111827;
+      transform: translateY(-1px);
+    }
+
+    /* 3D Mascot Stage */
+    .psyduck-3d-stage {
+      pointer-events: auto;
+      position: relative;
+      width: 74px;
+      height: 74px;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      transition: transform 0.15s ease-out;
+    }
+    .psyduck-3d-stage:hover {
+      transform: scale(1.08);
+    }
+    .psyduck-3d-stage:active {
+      transform: scale(0.95);
+    }
+
+    /* 3D Floor Shadow & Hologram Rings */
+    .psyduck-hologram-ring {
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      width: 64px;
+      height: 22px;
+      transform: translateX(-50%) rotateX(75deg);
+      border-radius: 50%;
+      border: 2px solid rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4), inset 0 0 8px rgba(245, 158, 11, 0.3);
+      animation: holoPulse 3s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes holoPulse {
+      0% { transform: translateX(-50%) rotateX(75deg) scale(0.9); opacity: 0.5; }
+      100% { transform: translateX(-50%) rotateX(75deg) scale(1.15); opacity: 0.9; }
+    }
+
+    /* 3D Spherical Bezel Frame */
+    .psyduck-3d-sphere {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #FFFBEB 0%, #FEF3C7 50%, #F59E0B 100%);
+      padding: 3px;
+      box-shadow: 0 12px 24px -4px rgba(217, 119, 6, 0.38), 0 6px 12px rgba(0, 0, 0, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -4px 6px rgba(180, 83, 9, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+      animation: psyduckHover 4s ease-in-out infinite;
+    }
+    @keyframes psyduckHover {
+      0%, 100% { transform: translateY(0px) rotateZ(0deg); }
+      50% { transform: translateY(-7px) rotateZ(1.5deg); }
+    }
+
+    /* 3D Glass Lens Glare */
+    .psyduck-3d-glare {
+      position: absolute;
+      top: 3px;
+      left: 10px;
+      width: 26px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 100%);
+      transform: rotate(-25deg);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Inner 3D Image Container */
+    .psyduck-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.18);
+    }
+    .psyduck-avatar-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1.18) translateY(2px);
+      transition: transform 0.2s ease;
+    }
+
+    /* 3D Orbiting Math Particles */
+    .psyduck-orbit-item {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: #B45309;
+      text-shadow: 0 0 6px rgba(253, 230, 138, 0.9);
+      pointer-events: none;
+      z-index: 15;
+      animation: orbitFloat 5s ease-in-out infinite;
+    }
+    .orbit-1 { top: -4px; right: 2px; animation-delay: 0s; }
+    .orbit-2 { bottom: 6px; left: -8px; animation-delay: -1.7s; color: #7C3AED; }
+    .orbit-3 { top: 22px; right: -10px; animation-delay: -3.2s; color: #2563EB; }
+    @keyframes orbitFloat {
+      0%, 100% { transform: translateY(0px) scale(0.9); opacity: 0.6; }
+      50% { transform: translateY(-6px) scale(1.15); opacity: 1; }
+    }
+
+    /* 3D Head-Shake & Click Explosion Physics */
+    .psyduck-shake {
+      animation: psyduckShakePhysics 0.65s cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
+    }
+    @keyframes psyduckShakePhysics {
+      10%, 90% { transform: translate3d(-3px, 0, 0) rotateY(-18deg); }
+      20%, 80% { transform: translate3d(5px, 0, 0) rotateY(18deg) rotateZ(3deg); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0) rotateY(-25deg) rotateZ(-3deg); }
+      40%, 60% { transform: translate3d(6px, 0, 0) rotateY(25deg); }
+    }
+
+    /* Exploding math floating symbol elements */
+    .psyduck-math-burst {
+      position: fixed;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      pointer-events: none;
+      z-index: 2000;
+      animation: burstFly 1s ease-out forwards;
+    }
+    @keyframes burstFly {
+      0% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.6); }
+      100% { opacity: 0; transform: translate3d(var(--tx), var(--ty), 0) scale(1.4) rotate(var(--rot)); }
+    }
   </style>
 </head>
 <body>
@@ -2037,6 +2280,47 @@
     </form>
   </div>
 
+  <!-- 3D Psyduck Animated Assistant Widget -->
+  <div class="psyduck-widget-container" id="psyduckWidgetContainer">
+    <!-- Speech Bubble -->
+    <div class="psyduck-speech-bubble" id="psyduckSpeechBubble">
+      <div class="psyduck-bubble-header">
+        <div class="psyduck-mood-badge" id="psyduckMoodBadge">
+          <span>🧠</span> <span id="psyduckMoodText">Psyduck Assistant</span>
+        </div>
+        <button type="button" class="psyduck-bubble-close" onclick="closePsyduckBubble()" title="Tutup">✕</button>
+      </div>
+      <div class="psyduck-bubble-text" id="psyduckBubbleText">
+        Halo Kak! Aku Psyduck, asisten screening rekrutmen PGE. Klik aku kapan saja kalau butuh tips atau analisis cepat pelamar! 💡
+      </div>
+      <div class="psyduck-bubble-actions" id="psyduckBubbleActions">
+        <button type="button" class="psyduck-action-pill" onclick="executePsyduckAction('unscreened')">
+          🔍 Belum Screening
+        </button>
+        <button type="button" class="psyduck-action-pill" onclick="executePsyduckAction('top-rated')">
+          ⭐ Kandidat 5★
+        </button>
+        <button type="button" class="psyduck-action-pill" onclick="executePsyduckAction('random-tip')">
+          🎲 Tips HR
+        </button>
+      </div>
+    </div>
+
+    <!-- 3D Interactive Mascot Stage -->
+    <div class="psyduck-3d-stage" id="psyduckStage" onclick="handlePsyduckClick(event)">
+      <div class="psyduck-hologram-ring"></div>
+      <div class="psyduck-3d-sphere" id="psyduckSphere">
+        <div class="psyduck-3d-glare"></div>
+        <div class="psyduck-orbit-item orbit-1">∑</div>
+        <div class="psyduck-orbit-item orbit-2">∫dx</div>
+        <div class="psyduck-orbit-item orbit-3">√x</div>
+        <div class="psyduck-avatar-inner">
+          <img src="/assets/psyduck.png" alt="Psyduck Assistant" id="psyduckImg">
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Notification Toasts -->
   <div class="toast-container" id="toastContainer"></div>
 
@@ -2577,6 +2861,7 @@
       initEventListeners();
       initDefaultBroadcastTemplate();
       initAuthListener();
+      initPsyduckAssistant();
     }
 
     /* ---------------------------------------------------- */
@@ -5131,6 +5416,200 @@
       }
     }
 
+    /* ==================================================== */
+    /* 3D PSYDUCK ANIMATED ASSISTANT LOGIC                  */
+    /* ==================================================== */
+    const PSYDUCK_QUIPS = [
+      "Tips HR: Periksa konsistensi video editing dan color grading kandidat sebelum memindahkan ke Shortlist! 🎨",
+      "Kandidat yang mencantumkan link Canva presentation biasanya punya visual taste yang rapi loh Kak! ✨",
+      "Pusing mikirin kuota rekrutmen? Tenang, kamu bisa pakai fitur WhatsApp Broadcast untuk kontak banyak kandidat sekaligus! 📱",
+      "Jangan lupa gunakan Quick Decision Tag di ruang diskusi untuk evaluasi kilat bersama tim! ⚡",
+      "Kandidat rating 5.0 dengan domisili terdekat sangat direkomendasikan untuk panggilan interview batch pertama! ⭐"
+    ];
+
+    let psyduckQuipIndex = 0;
+
+    function initPsyduckAssistant() {
+      const stage = document.getElementById('psyduckStage');
+      const sphere = document.getElementById('psyduckSphere');
+      if (!stage || !sphere) return;
+
+      // 3D Parallax Mouse Tracking with Gyroscopic Physics
+      window.addEventListener('mousemove', (e) => {
+        if (!stage) return;
+        const rect = stage.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const deltaX = (e.clientX - centerX) / (window.innerWidth / 2);
+        const deltaY = (e.clientY - centerY) / (window.innerHeight / 2);
+
+        // Clamp rotation angles for smooth, realistic 3D depth
+        const rotY = Math.max(-25, Math.min(25, deltaX * 25));
+        const rotX = Math.max(-25, Math.min(25, -deltaY * 25));
+
+        sphere.style.transform = `perspective(600px) rotateX(${rotX.toFixed(1)}deg) rotateY(${rotY.toFixed(1)}deg) translateZ(12px)`;
+      });
+
+      renderPsyduckBubbleContent();
+    }
+
+    function playPsyduckQuackSound() {
+      try {
+        unlockAudio();
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtxClass) return;
+        const ctx = sharedAudioCtx || new AudioCtxClass();
+        const t = ctx.currentTime;
+
+        // Cute playful synthesized quack chirp
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+
+        // Frequency sweep for comic quack
+        osc.frequency.setValueAtTime(440, t);
+        osc.frequency.exponentialRampToValueAtTime(780, t + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(320, t + 0.22);
+
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.25);
+      } catch (e) {
+        console.warn('Psyduck audio error:', e);
+      }
+    }
+
+    function spawn3DMathParticles(originX, originY) {
+      const symbols = ['∫dx', '∑', '√x', 'π', '∞', 'e^(iπ)+1=0', 'f(x)', '?', '±', '∆'];
+      const colors = ['#B45309', '#7C3AED', '#2563EB', '#059669', '#DC2626'];
+
+      for (let i = 0; i < 9; i++) {
+        const span = document.createElement('span');
+        span.className = 'psyduck-math-burst';
+        span.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        span.style.left = (originX + (Math.random() * 20 - 10)) + 'px';
+        span.style.top = (originY + (Math.random() * 20 - 10)) + 'px';
+        span.style.color = colors[Math.floor(Math.random() * colors.length)];
+        span.style.fontSize = (11 + Math.floor(Math.random() * 8)) + 'px';
+
+        const tx = (Math.random() * 140 - 70) + 'px';
+        const ty = (-(40 + Math.random() * 110)) + 'px';
+        const rot = (Math.random() * 90 - 45) + 'deg';
+
+        span.style.setProperty('--tx', tx);
+        span.style.setProperty('--ty', ty);
+        span.style.setProperty('--rot', rot);
+
+        document.body.appendChild(span);
+        setTimeout(() => span.remove(), 1050);
+      }
+    }
+
+    function handlePsyduckClick(event) {
+      if (event) event.stopPropagation();
+      const stage = document.getElementById('psyduckStage');
+      const sphere = document.getElementById('psyduckSphere');
+
+      // 1. Play Sound
+      playPsyduckQuackSound();
+
+      // 2. Physics Head-Shake
+      if (sphere) {
+        sphere.classList.remove('psyduck-shake');
+        void sphere.offsetWidth; // trigger reflow
+        sphere.classList.add('psyduck-shake');
+      }
+
+      // 3. 3D Math Particle Explosion
+      const rect = stage ? stage.getBoundingClientRect() : { left: 40, top: window.innerHeight - 80 };
+      spawn3DMathParticles(rect.left + 35, rect.top + 20);
+
+      // 4. Toggle or Refresh Bubble Content
+      togglePsyduckBubble();
+    }
+
+    function togglePsyduckBubble() {
+      const bubble = document.getElementById('psyduckSpeechBubble');
+      if (!bubble) return;
+      if (bubble.classList.contains('open')) {
+        renderPsyduckBubbleContent();
+      } else {
+        renderPsyduckBubbleContent();
+        bubble.classList.add('open');
+      }
+    }
+
+    function closePsyduckBubble() {
+      const bubble = document.getElementById('psyduckSpeechBubble');
+      if (bubble) bubble.classList.remove('open');
+    }
+
+    function renderPsyduckBubbleContent(customMood, customMsg) {
+      const bubbleText = document.getElementById('psyduckBubbleText');
+      const moodBadge = document.getElementById('psyduckMoodBadge');
+      const moodText = document.getElementById('psyduckMoodText');
+      if (!bubbleText || !moodBadge || !moodText) return;
+
+      if (customMsg) {
+        bubbleText.textContent = customMsg;
+        if (customMood) moodText.textContent = customMood;
+        return;
+      }
+
+      // Compute Live Pipeline Intelligence
+      const total = state.talents.length;
+      const unscreened = state.talents.filter(t => (t.stage || 'prospect').toLowerCase() === 'prospect').length;
+      const topRated = state.talents.filter(t => (t.overallRating || 0) >= 4.8).length;
+
+      if (unscreened >= 10) {
+        moodBadge.innerHTML = '<span>😵‍💫</span> <span>Overthinking!</span>';
+        moodBadge.style.background = '#FEE2E2';
+        moodBadge.style.color = '#991B1B';
+        moodBadge.style.borderColor = '#FECACA';
+        bubbleText.innerHTML = `Aduh pusing Kak! Masih ada <strong>${unscreened} kandidat</strong> di tahap <em>Prospect</em> yang belum discreening. Yuk review atau short-list sekarang! 🤯`;
+      } else if (topRated > 0 && Math.random() > 0.4) {
+        moodBadge.innerHTML = '<span>⭐</span> <span>Top Talent Radar</span>';
+        moodBadge.style.background = '#FEF3C7';
+        moodBadge.style.color = '#92400E';
+        moodBadge.style.borderColor = '#FDE68A';
+        bubbleText.innerHTML = `Wah, ada <strong>${topRated} kandidat bintang lima (★ 5.0)</strong> di pipeline! Cek portofolio karya mereka sebelum disalip kompetitor ya Kak! ✨`;
+      } else {
+        moodBadge.innerHTML = '<span>💡</span> <span>Psyduck HR Tips</span>';
+        moodBadge.style.background = '#EFF6FF';
+        moodBadge.style.color = '#1E40AF';
+        moodBadge.style.borderColor = '#DBEAFE';
+        const quip = PSYDUCK_QUIPS[psyduckQuipIndex % PSYDUCK_QUIPS.length];
+        psyduckQuipIndex++;
+        bubbleText.innerHTML = quip;
+      }
+    }
+
+    function executePsyduckAction(actionType) {
+      if (actionType === 'unscreened') {
+        if (el.filterStage) {
+          el.filterStage.value = 'Prospect';
+          state.filters.stage = 'Prospect';
+          applyFilters();
+          showToast('🔍 Menampilkan kandidat yang belum discreening (Prospect).');
+        }
+      } else if (actionType === 'top-rated') {
+        if (el.filterRating) {
+          el.filterRating.value = '5';
+          state.filters.rating = '5';
+          applyFilters();
+          showToast('⭐ Menampilkan kandidat unggulan 5-Star.');
+        }
+      } else if (actionType === 'random-tip') {
+        psyduckQuipIndex++;
+        renderPsyduckBubbleContent();
+        playPsyduckQuackSound();
+      }
+    }
+
     /* Renders permanent attached CV Card in Drawer */
     function renderAttachedCvCard(url, customName) {
       const container = document.getElementById('cvAttachedContainer');
@@ -5932,6 +6411,10 @@
     window.renderVacancyHub = renderVacancyHub;
     window.getUniqueVacancies = getUniqueVacancies;
     window.normalizeExternalUrl = normalizeExternalUrl;
+    window.handlePsyduckClick = handlePsyduckClick;
+    window.closePsyduckBubble = closePsyduckBubble;
+    window.executePsyduckAction = executePsyduckAction;
+    window.renderPsyduckBubbleContent = renderPsyduckBubbleContent;
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', bootApp);
