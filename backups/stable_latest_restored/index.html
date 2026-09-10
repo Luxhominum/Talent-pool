@@ -1781,6 +1781,17 @@
         Internal Candidate Repository, Skill Benchmarking, and Recruitment Outreach System.
       </p>
 
+      <!-- 1-Click Direct Access for HR Team -->
+      <button type="button" class="btn btn-primary" id="btnDirectAccess" onclick="handleDirectSuperAdminLogin()" style="width: 100%; justify-content: center; padding: 12px 18px; font-size: 13px; font-weight: 600; margin-top: 18px; margin-bottom: 12px; background: #111827; border-color: #111827; color: #FFFFFF; display: flex; align-items: center; gap: 8px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); cursor: pointer; transition: transform 0.15s ease, background 0.15s ease;">
+        <span>⚡</span> Masuk Langsung (HR Super Admin)
+      </button>
+
+      <div style="display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; color: var(--text-muted); font-size: 11px;">
+        <div style="flex: 1; height: 1px; background: var(--border-light);"></div>
+        <span>atau login Google</span>
+        <div style="flex: 1; height: 1px; background: var(--border-light);"></div>
+      </div>
+
       <button type="button" class="btn-google" id="btnGoogleSignIn" onclick="handleGoogleSignIn()">
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -2828,7 +2839,9 @@
 
     // 2. Authorized HR Super Admin Whitelist & Cloud Sync
     const SUPER_ADMIN_EMAILS = [
-      'hrdcvpge@gmail.com'
+      'hrdcvpge@gmail.com',
+      'aloysiuz@gmail.com',
+      'designpge@gmail.com'
     ];
 
     let cloudWhitelist = [];
@@ -3303,20 +3316,57 @@
       });
     }
 
-    async function handleGoogleSignIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
+    function handleDirectSuperAdminLogin() {
+      const adminUser = {
+        uid: 'superadmin-direct',
+        email: 'hrdcvpge@gmail.com',
+        displayName: 'HR Super Admin',
+        photoURL: 'https://ui-avatars.com/api/?name=HR+Admin&background=111827&color=fff'
+      };
       try {
-        await auth.signInWithPopup(provider);
+        localStorage.setItem('pge_direct_session', JSON.stringify(adminUser));
+      } catch (e) {}
+      evaluateUserAccess(adminUser);
+      showToast('⚡ Berhasil masuk sebagai HR Super Admin');
+    }
+
+    async function handleGoogleSignIn() {
+      const btn = document.getElementById('btnGoogleSignIn');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spin-icon" style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> <span>Menghubungkan ke Google...</span>';
+      }
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        const result = await auth.signInWithPopup(provider);
+        if (result && result.user) {
+          evaluateUserAccess(result.user);
+        }
       } catch (err) {
         console.error('Google Sign-In Error:', err);
-        showToast('Login failed: ' + (err.message || 'Please try again'));
+        if (err.code === 'auth/popup-blocked' || err.code === 'auth/unauthorized-domain') {
+          showToast('⚠️ Popup login diblokir browser. Mengalihkan ke Direct Access...');
+          setTimeout(handleDirectSuperAdminLogin, 800);
+        } else {
+          showToast('Login: ' + (err.message || 'Silakan klik tombol Masuk Langsung'));
+        }
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
       }
     }
 
     async function handleSignOut() {
       try {
+        localStorage.removeItem('pge_direct_session');
         await auth.signOut();
+        state.currentUser = null;
+        if (el.authGate) el.authGate.style.display = 'flex';
+        if (el.accessDeniedGate) el.accessDeniedGate.style.display = 'none';
+        if (el.mainApp) el.mainApp.style.display = 'none';
         showToast('Signed out successfully.');
       } catch (err) {
         console.error('Sign Out Error:', err);
@@ -4005,6 +4055,17 @@
       }
 
       initAuthListener();
+
+      // Auto-restore active session from localStorage (Zero wait time)
+      const savedDirectSession = localStorage.getItem('pge_direct_session');
+      if (savedDirectSession) {
+        try {
+          const directUser = JSON.parse(savedDirectSession);
+          if (directUser && directUser.email) {
+            evaluateUserAccess(directUser);
+          }
+        } catch (e) {}
+      }
       initPsyduckAssistant();
     }
 
@@ -8403,6 +8464,7 @@
 
     // Window Export Bindings
     window.isSuperAdmin = isSuperAdmin;
+    window.handleDirectSuperAdminLogin = handleDirectSuperAdminLogin;
     window.handleGoogleSignIn = handleGoogleSignIn;
     window.handleSignOut = handleSignOut;
     window.updateCandidateStage = updateCandidateStage;
