@@ -4095,6 +4095,8 @@
           try { if (doc.skillsJson) skills = JSON.parse(doc.skillsJson); } catch (e) {}
           try { if (doc.portfolioItemsJson) portfolioItems = JSON.parse(doc.portfolioItemsJson); } catch (e) {}
 
+          const parsedNotes = typeof extractOutreachStatus === 'function' ? extractOutreachStatus(doc.notes || '') : { text: doc.notes || '', status: 'Pending' };
+
           return {
             $id: doc.$id,
             id: doc.talentId || doc.$id,
@@ -4112,8 +4114,8 @@
             portfolioUrl: doc.portfolioUrl || '',
             portfolioItems: portfolioItems,
             skills: skills,
-            notes: doc.notes || '',
-            outreachStatus: doc.outreachStatus || 'Pending'
+            notes: parsedNotes.text || doc.notes || '',
+            outreachStatus: doc.outreachStatus || parsedNotes.status || 'Pending'
           };
         });
 
@@ -5054,7 +5056,6 @@
     }
 
     
-    async 
     let currentRescheduleId = null;
     function openRescheduleModal(id) {
       currentRescheduleId = id;
