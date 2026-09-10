@@ -1,16 +1,16 @@
 {
   "rules": {
     "presence": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": true,
+      ".write": true
     },
     "team_chat": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": true,
+      ".write": true
     },
     "candidate_discussions": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": true,
+      ".write": true
     },
     "talents": {
       ".read": true,
@@ -22,11 +22,11 @@
     },
     "metadata": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": true
     },
     "authorizedUsers": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": true
     }
   }
 }

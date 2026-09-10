@@ -187,7 +187,39 @@
       padding: 3px 8px; border-radius: var(--radius-pill); font-weight: 500;
     }
 
-    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+    .nav-cluster { display: flex; align-items: center; gap: 6px; }
+    .nav-btn-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+      gap: 2px;
+    }
+    .nav-btn-group .btn-secondary {
+      background: transparent;
+      border: 1px solid transparent;
+      box-shadow: none;
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+    .nav-btn-group .btn-secondary:hover {
+      background: var(--bg-surface);
+      border-color: var(--border-light);
+      color: var(--text-primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .nav-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-light);
+      margin: 0 4px;
+      flex-shrink: 0;
+    }
 
     .user-profile-pill {
       display: flex;
@@ -1836,47 +1868,55 @@
       <div class="brand-group">
         <div class="brand-logo">P</div>
         <span class="brand-title">PGE Talent Pool</span>
-        <span class="brand-badge" id="syncStatus">● Appwrite Cloud</span>
+        <span class="brand-badge" id="syncStatus">● Appwrite Live</span>
       </div>
 
       <div class="nav-actions">
-        <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAnalytics" onclick="toggleAnalyticsDashboard()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
-          Visual Analytics
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV" onclick="handleExportCSV()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Export CSV
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenScheduleModal" onclick="openFinalScheduleModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Interview Schedule
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenScheduleModal" onclick="openFinalScheduleModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Interview Schedule
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnAssessmentPortal" onclick="openAssessmentLauncherModal()" style="border-color: #111827; color: #111827; font-weight: 600; background: #FFFFFF; display: inline-flex; align-items: center; gap: 6px;">
-          <span>🧠</span> Portal Asesmen On-Site
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnNavToggleChicken" onclick="toggleChickenRunning(event)" title="Nyalakan / Matikan kejar kursor maskot ayam" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 500;">
-          🐥 <span id="btnNavToggleChickenText">Pause Ayam</span>
-        </button>
-        <button type="button" class="btn btn-secondary btn-sm" id="btnManageWhitelist" onclick="openWhitelistModal()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          Team Whitelist
-        </button>
-        <span class="brand-badge" id="onlineTeamBadge" style="display: none; background: #F0FDF4; color: #166534; border-color: #DCFCE7; font-size: 11px;">🟢 1 Online</span>
-        <button type="button" class="btn btn-primary btn-sm" id="btnAddTalent" onclick="openAddCandidateDrawer()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          + New Candidate
-        </button>
+        <!-- Primary Operational Tools -->
+        <div class="nav-cluster">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnOpenScheduleModal" onclick="openFinalScheduleModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Jadwal Interview
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnAssessmentPortal" onclick="openAssessmentLauncherModal()" style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+            <span style="font-size: 13px;">🧠</span> Asesmen On-Site
+          </button>
+        </div>
+
+        <div class="nav-divider"></div>
+
+        <!-- Management & Data Utilities (Segmented Group) -->
+        <div class="nav-btn-group">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAnalytics" onclick="toggleAnalyticsDashboard()" title="Visual Analytics">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+            Analytics
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV" onclick="handleExportCSV()" title="Export CSV">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnManageWhitelist" onclick="openWhitelistModal()" title="Team Whitelist">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Whitelist
+          </button>
+        </div>
+
+        <div class="nav-divider"></div>
+
+        <!-- Presence & Primary Action -->
+        <div class="nav-cluster">
+          <span class="brand-badge" id="onlineTeamBadge" style="display: none; background: #F0FDF4; color: #166534; border-color: #DCFCE7; font-size: 11px;">🟢 1 Online</span>
+          <button type="button" class="btn btn-primary btn-sm" id="btnAddTalent" onclick="openAddCandidateDrawer()" style="font-weight: 600;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            + New Candidate
+          </button>
+        </div>
 
         <!-- User Profile Pill & Sign Out -->
         <div class="user-profile-pill" id="userProfileBadge">
           <img src="" id="navUserAvatar" class="user-avatar" alt="Avatar">
-          <span id="navUserName" style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">HR Admin</span>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="handleSignOut()" style="padding: 2px 8px; font-size: 11px; border: none; background: transparent; color: var(--pastel-red-text);" title="Sign Out">
+          <span id="navUserName" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">HR Admin</span>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="handleSignOut()" style="padding: 2px 6px; font-size: 11px; border: none; background: transparent; color: var(--pastel-red-text);" title="Sign Out">
             Logout ↗
           </button>
         </div>
