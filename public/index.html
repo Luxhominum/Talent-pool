@@ -1551,6 +1551,282 @@
     }
     .status-reschedule { background-color: #FEF3C7; color: #D97706; border-color: #FDE68A; }
 
+  
+    /* ========================================================= */
+    /* APP SHELL & PERSISTENT LEFT SIDEBAR (LINEAR / STITCH STYLE) */
+    /* ========================================================= */
+    .app-shell-root {
+      width: 100%;
+      min-height: 100vh;
+      background: var(--bg-canvas);
+    }
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      background: var(--bg-canvas);
+      position: relative;
+    }
+    .app-sidebar {
+      width: 256px;
+      min-width: 256px;
+      background: #FFFFFF;
+      border-right: 1px solid var(--border-light);
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 990;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sidebar-header {
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sidebar-brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .sidebar-brand-logo {
+      width: 30px;
+      height: 30px;
+      background: #0F172A;
+      color: #FFFFFF;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .sidebar-brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .sidebar-brand-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .sidebar-primary-cta {
+      padding: 12px 14px 6px;
+    }
+    .sidebar-primary-cta .btn-primary {
+      width: 100%;
+      justify-content: center;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      gap: 6px;
+    }
+    .sidebar-nav-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar-section-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 4px 8px;
+      margin-bottom: 2px;
+    }
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .sidebar-nav-item:hover {
+      background: var(--bg-surface-secondary);
+      color: var(--text-primary);
+    }
+    .sidebar-nav-item.active {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      font-weight: 600;
+      border-color: #DBEAFE;
+    }
+    .sidebar-nav-item svg {
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+    .sidebar-nav-item:hover svg,
+    .sidebar-nav-item.active svg {
+      opacity: 1;
+    }
+    .sidebar-footer {
+      padding: 12px 14px;
+      border-top: 1px solid var(--border-light);
+      background: #FAFAFA;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sidebar-user-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .sidebar-user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .app-main-viewport {
+      flex: 1;
+      min-width: 0;
+      padding: 24px 32px 80px;
+      overflow-y: auto;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .mobile-topbar {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 950;
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 16px;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 980;
+    }
+
+    @media (max-width: 960px) {
+      .mobile-topbar { display: flex; }
+      .app-shell { flex-direction: column; }
+      .app-sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        transform: translateX(-100%);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+      .app-sidebar.sidebar-mobile-open {
+        transform: translateX(0);
+      }
+      .sidebar-backdrop.active {
+        display: block;
+      }
+      .app-main-viewport {
+        padding: 16px 16px 80px;
+      }
+    }
+
+    /* ========================================================= */
+    /* ADMIN CANDIDATE PREVIEW SLIDE-OVER SHEET                  */
+    /* ========================================================= */
+    #candidateProfileModalBackdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.5) !important;
+      backdrop-filter: blur(4px);
+      z-index: 2100;
+      display: flex !important;
+      justify-content: flex-end !important;
+      align-items: stretch !important;
+      padding: 0 !important;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #candidateProfileModalBackdrop.open {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    #candidateProfileModalBackdrop .modal-card-xl {
+      width: min(920px, 95vw) !important;
+      max-width: 920px !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      border-left: 1px solid var(--border-light) !important;
+      border-top: none !important;
+      border-bottom: none !important;
+      border-right: none !important;
+      box-shadow: -12px 0 40px rgba(0, 0, 0, 0.18) !important;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      background: #FFFFFF !important;
+    }
+    #candidateProfileModalBackdrop.open .modal-card-xl {
+      transform: translateX(0);
+    }
+    #candidateProfileModalBackdrop .modal-header {
+      padding: 16px 24px !important;
+      border-bottom: 1px solid var(--border-light) !important;
+      background: #F8FAFC !important;
+      flex-shrink: 0;
+    }
+    #candidateProfileModalBackdrop .modal-body {
+      flex: 1 !important;
+      overflow-y: auto !important;
+      padding: 24px !important;
+      background: #FFFFFF !important;
+    }
+
   </style>
 </head>
 <body>
@@ -1619,66 +1895,111 @@
   <!-- ============================================== -->
   <!-- 3. MAIN APPLICATION CONTAINER (AUTHENTICATED)  -->
   <!-- ============================================== -->
-  <div id="mainApp" class="app-container" style="display: none;">
-    <!-- Navbar -->
-    <header class="navbar">
-      <div class="brand-group">
-        <div class="brand-logo">P</div>
-        <span class="brand-title">PGE Talent Pool</span>
-        <span class="brand-badge" id="syncStatus">● Appwrite Live</span>
-      </div>
+  <div id="mainApp" class="app-shell-root" style="display: none;">
+    <div class="app-shell">
+      <!-- Mobile Topbar for Small Screens -->
+      <header class="mobile-topbar" id="mobileTopbar">
+        <button type="button" class="btn btn-secondary btn-icon" onclick="toggleAppSidebar(true)" aria-label="Toggle navigation">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="brand-group" style="display: flex; align-items: center; gap: 8px;">
+          <div class="sidebar-brand-logo" style="width: 26px; height: 26px; font-size: 12px;">P</div>
+          <span style="font-size: 14px; font-weight: 700; color: var(--text-primary);">PGE Talent Pool</span>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="openAddCandidateDrawer()" style="padding: 4px 10px; font-size: 11px;">+ New</button>
+      </header>
 
-      <div class="nav-actions">
-        <!-- Primary Operational Tools -->
-        <div class="nav-cluster">
-          <button type="button" class="btn btn-secondary btn-sm" id="btnOpenScheduleModal" onclick="openFinalScheduleModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Jadwal Interview
-          </button>
-          <button type="button" class="btn btn-secondary btn-sm" id="btnAssessmentPortal" onclick="openAssessmentLauncherModal()" style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
-            <span style="font-size: 13px;">🧠</span> Asesmen On-Site
-          </button>
+      <!-- Persistent Left Navigation Sidebar -->
+      <aside class="app-sidebar" id="appSidebar">
+        <!-- Sidebar Brand Header -->
+        <div class="sidebar-header">
+          <div class="sidebar-brand-row">
+            <a href="javascript:void(0)" onclick="selectVacancy('HUB')" class="sidebar-brand">
+              <div class="sidebar-brand-logo">P</div>
+              <div>
+                <div class="sidebar-brand-title">PGE Talent Pool</div>
+                <div class="sidebar-brand-sub">Recruitment OS</div>
+              </div>
+            </a>
+            <span class="brand-badge" id="syncStatus" title="Appwrite Real-time Status" style="font-size: 10px; padding: 2px 7px;">● Live</span>
+          </div>
         </div>
 
-        <div class="nav-divider"></div>
-
-        <!-- Management & Data Utilities (Segmented Group) -->
-        <div class="nav-btn-group">
-          <button type="button" class="btn btn-secondary btn-sm" id="btnToggleAnalytics" onclick="toggleAnalyticsDashboard()" title="Visual Analytics">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
-            Analytics
-          </button>
-          <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV" onclick="handleExportCSV()" title="Export CSV">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Export
-          </button>
-          <button type="button" class="btn btn-secondary btn-sm" id="btnManageWhitelist" onclick="openWhitelistModal()" title="Team Whitelist">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            Whitelist
-          </button>
-        </div>
-
-        <div class="nav-divider"></div>
-
-        <!-- Presence & Primary Action -->
-        <div class="nav-cluster">
-          <span class="brand-badge" id="onlineTeamBadge" style="display: none; background: #F0FDF4; color: #166534; border-color: #DCFCE7; font-size: 11px;">🟢 1 Online</span>
-          <button type="button" class="btn btn-primary btn-sm" id="btnAddTalent" onclick="openAddCandidateDrawer()" style="font-weight: 600;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <!-- Primary Action -->
+        <div class="sidebar-primary-cta">
+          <button type="button" class="btn btn-primary" id="btnAddTalent" onclick="openAddCandidateDrawer()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             + New Candidate
           </button>
         </div>
 
-        <!-- User Profile Pill & Sign Out -->
-        <div class="user-profile-pill" id="userProfileBadge">
-          <img src="" id="navUserAvatar" class="user-avatar" alt="Avatar">
-          <span id="navUserName" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">HR Admin</span>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="handleSignOut()" style="padding: 2px 6px; font-size: 11px; border: none; background: transparent; color: var(--pastel-red-text);" title="Sign Out">
-            Logout ↗
-          </button>
+        <!-- Navigation Clusters -->
+        <div class="sidebar-nav-body">
+          <!-- Workspaces -->
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">Workspaces</div>
+            <button type="button" class="sidebar-nav-item active" id="navBtnHub" onclick="selectVacancy('HUB'); toggleAppSidebar(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Job Vacancy Hub</span>
+            </button>
+            <button type="button" class="sidebar-nav-item" id="navBtnScreening" onclick="selectVacancy('ALL'); toggleAppSidebar(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <span>Screening Room</span>
+            </button>
+          </div>
+
+          <!-- Operations -->
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">Operations</div>
+            <button type="button" class="sidebar-nav-item" id="btnOpenScheduleModal" onclick="openFinalScheduleModal(); toggleAppSidebar(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <span>Jadwal Interview</span>
+            </button>
+            <button type="button" class="sidebar-nav-item" id="btnAssessmentPortal" onclick="openAssessmentLauncherModal(); toggleAppSidebar(false);" style="background: #F5F3FF; color: #4F46E5; border-color: #E0E7FF;">
+              <span style="font-size: 14px; line-height: 1;">🧠</span>
+              <span style="font-weight: 600;">Asesmen On-Site</span>
+            </button>
+          </div>
+
+          <!-- Admin & Data -->
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">Admin &amp; Data</div>
+            <button type="button" class="sidebar-nav-item" id="btnToggleAnalytics" onclick="toggleAnalyticsDashboard(); toggleAppSidebar(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+              <span>Visual Analytics</span>
+            </button>
+            <button type="button" class="sidebar-nav-item" id="btnExportCSV" onclick="handleExportCSV()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Export CSV</span>
+            </button>
+            <button type="button" class="sidebar-nav-item" id="btnManageWhitelist" onclick="openWhitelistModal(); toggleAppSidebar(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Team Whitelist</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </header>
+
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+          <span class="brand-badge" id="onlineTeamBadge" style="display: none; background: #F0FDF4; color: #166534; border-color: #DCFCE7; font-size: 11px; text-align: center; width: 100%; justify-content: center;">🟢 1 Online</span>
+          
+          <div class="sidebar-user-card" id="userProfileBadge">
+            <div class="sidebar-user-info">
+              <img src="" id="navUserAvatar" class="user-avatar" alt="Avatar">
+              <span id="navUserName" style="max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 500;">HR Admin</span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="handleSignOut()" style="padding: 2px 6px; font-size: 11px; border: none; background: transparent; color: var(--pastel-red-text);" title="Sign Out">
+              Logout ↗
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Sidebar Backdrop for Mobile -->
+      <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleAppSidebar(false)"></div>
+
+      <!-- Main Viewport for Workspace & Candidate Content -->
+      <main class="app-main-viewport" id="appMainViewport">
 
     <!-- ============================================== -->
     <!-- VIEW A: JOB VACANCY HUB & PORTAL (LANDING)     -->
@@ -2002,7 +2323,9 @@
       </div>
     </main>
     </div> <!-- /#screeningRoomView -->
-  </div> <!-- /.app-container -->
+      </main> <!-- /.app-main-viewport -->
+    </div> <!-- /.app-shell -->
+  </div> <!-- /#mainApp -->
 
   <!-- Slide-over Drawer -->
   <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
@@ -3821,7 +4144,6 @@
           }
         } catch (e) {}
       }
-      initPsyduckAssistant();
     }
 
     /* ---------------------------------------------------- */
@@ -4212,6 +4534,18 @@
         localStorage.setItem('pge_active_vacancy', vacancyName);
       } catch (e) {}
 
+      const navHub = document.getElementById('navBtnHub');
+      const navScreening = document.getElementById('navBtnScreening');
+      if (navHub && navScreening) {
+        if (vacancyName === 'HUB') {
+          navHub.classList.add('active');
+          navScreening.classList.remove('active');
+        } else {
+          navHub.classList.remove('active');
+          navScreening.classList.add('active');
+        }
+      }
+
       const hubView = document.getElementById('vacancyHubView');
       const roomView = document.getElementById('screeningRoomView');
       const heading = document.getElementById('selectedVacancyHeading');
@@ -4309,6 +4643,11 @@
       if (!section) return;
       state.analyticsOpen = !state.analyticsOpen;
       section.style.display = state.analyticsOpen ? 'block' : 'none';
+      const btn = document.getElementById('btnToggleAnalytics');
+      if (btn) {
+        if (state.analyticsOpen) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
       if (state.analyticsOpen) renderAnalyticsDashboard();
     }
 
@@ -8015,6 +8354,23 @@
     } else {
       bootApp();
     }
-  </script>
+  
+    /* Sidebar mobile navigation toggle */
+    function toggleAppSidebar(force) {
+      const sidebar = document.getElementById('appSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (!sidebar) return;
+      const willOpen = typeof force === 'boolean' ? force : !sidebar.classList.contains('sidebar-mobile-open');
+      if (willOpen) {
+        sidebar.classList.add('sidebar-mobile-open');
+        if (backdrop) backdrop.classList.add('active');
+      } else {
+        sidebar.classList.remove('sidebar-mobile-open');
+        if (backdrop) backdrop.classList.remove('active');
+      }
+    }
+    window.toggleAppSidebar = toggleAppSidebar;
+
+</script>
 </body>
 </html>
