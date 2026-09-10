@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PGE Talent Pool | Asesmen Kepribadian Kandidat</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111827'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-weight='bold' font-size='18' fill='%23FFFFFF' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-canvas: #F8F9FA;
+      --bg-surface: #FFFFFF;
+      --bg-surface-secondary: #F3F4F6;
+      --border-light: rgba(0, 0, 0, 0.08);
+      --border-focus: #111827;
+
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #6B7280;
+
+      --accent-primary: #111827;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #ECFDF5;
+
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Geist Mono', monospace;
+      --font-serif: 'Newsreader', Georgia, serif;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* Top Sticky Header */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-candidate-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .candidate-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #111827;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .candidate-info-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .candidate-info-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .candidate-tag {
+      background: var(--bg-surface-secondary);
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-light);
+      font-size: 11px;
+    }
+
+    .progress-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 240px;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 7px;
+      background: var(--bg-surface-secondary);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-emerald);
+      border-radius: 999px;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-counter {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .autosave-pill {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--accent-emerald);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Main Content Container */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 32px 20px 100px;
+    }
+
+    /* Instructions Banner */
+    .instruction-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .instruction-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instruction-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .scale-guide-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border-light);
+    }
+
+    .scale-guide-item {
+      text-align: center;
+      background: var(--bg-surface-secondary);
+      padding: 8px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+    }
+
+    .scale-guide-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .scale-guide-label {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      line-height: 1.2;
+    }
+
+    /* Questions List */
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .question-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .question-card:hover {
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+
+    .question-card.is-answered {
+      border-left: 4px solid var(--accent-emerald);
+    }
+
+    .question-card.is-active {
+      border-color: var(--text-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .question-card.pulse-highlight {
+      animation: pulseAttention 1.4s ease;
+      border-color: #EF4444 !important;
+    }
+
+    @keyframes pulseAttention {
+      0% { transform: scale(1); background-color: #FEF2F2; }
+      50% { transform: scale(1.02); background-color: #FEE2E2; }
+      100% { transform: scale(1); background-color: var(--bg-surface); }
+    }
+
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .question-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--border-light);
+      padding: 3px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .question-text {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.45;
+    }
+
+    /* Likert Options */
+    .likert-options {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .likert-btn {
+      appearance: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 10px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .likert-btn:hover {
+      background: var(--bg-surface-secondary);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .likert-btn.selected {
+      background: #111827;
+      border-color: #111827;
+      color: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .likert-val {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .likert-text {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    
+    /* DISC Most / Least Table Styles */
+    .disc-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .disc-card.is-answered {
+      border-left: 4px solid #7C3AED;
+    }
+
+    .disc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .disc-table th {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 8px 6px;
+      text-align: center;
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .disc-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      vertical-align: middle;
+    }
+
+    .disc-statement-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .disc-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border-light);
+      background: #FFFFFF;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: #64748B;
+    }
+
+    .disc-btn:hover {
+      background: #F1F5F9;
+      border-color: #94A3B8;
+    }
+
+    .disc-btn.selected-most {
+      background: #059669 !important;
+      border-color: #059669 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 1px 3px rgba(5, 150, 105, 0.4);
+    }
+
+    .disc-btn.selected-least {
+      background: #DC2626 !important;
+      border-color: #DC2626 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 1px 3px rgba(220, 38, 38, 0.4);
+    }
+
+    .likert-btn.selected .likert-text {
+      color: #D1D5DB;
+    }
+
+    /* Multiple Choice (Cognitive) Options */
+    .mc-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mc-btn {
+      appearance: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+      width: 100%;
+      color: var(--text-primary);
+    }
+
+    .mc-btn:hover {
+      background: var(--bg-surface-secondary);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .mc-btn.selected {
+      background: #111827;
+      border-color: #111827;
+      color: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mc-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .mc-btn.selected .mc-letter {
+      background: #FFFFFF;
+      color: #111827;
+      border-color: #FFFFFF;
+    }
+
+    .mc-text {
+      font-size: 13.5px;
+      font-weight: 500;
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .category-chip {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #EFF6FF;
+      color: #1E40AF;
+      border: 1px solid #DBEAFE;
+    }
+
+    .section-divider-card {
+      margin: 32px 0 20px;
+      padding: 16px 20px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #1E293B;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Multiple Choice (Cognitive) Options */
+    .mc-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mc-btn {
+      appearance: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+      width: 100%;
+      color: var(--text-primary);
+    }
+
+    .mc-btn:hover {
+      background: var(--bg-surface-secondary);
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .mc-btn.selected {
+      background: #111827;
+      border-color: #111827;
+      color: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mc-letter {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--bg-surface-secondary);
+      border: 1px solid var(--border-light);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .mc-btn.selected .mc-letter {
+      background: #FFFFFF;
+      color: #111827;
+      border-color: #FFFFFF;
+    }
+
+    .mc-text {
+      font-size: 13.5px;
+      font-weight: 500;
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .category-chip {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #EFF6FF;
+      color: #1E40AF;
+      border: 1px solid #DBEAFE;
+    }
+
+    .section-divider-card {
+      margin: 32px 0 20px;
+      padding: 16px 20px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #1E293B;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Submit Section */
+    .submit-section {
+      margin-top: 36px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .submit-status-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .btn-submit {
+      background: #111827;
+      color: #FFFFFF;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 14px 36px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      background: #9CA3AF;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* Unanswered Floating Warning Banner */
+    .unanswered-banner {
+      display: none;
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      width: 100%;
+    }
+
+    .unanswered-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #991B1B;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .unanswered-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .unanswered-chip {
+      background: #FFFFFF;
+      border: 1px solid #F87171;
+      color: #B91C1C;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .unanswered-chip:hover {
+      background: #FEE2E2;
+    }
+
+    /* Fullscreen Completion State */
+    .completion-container {
+      display: none;
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .completion-icon-wrapper {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--accent-emerald-light);
+      border: 2px solid #A7F3D0;
+      color: var(--accent-emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .completion-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .completion-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .completion-notice-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 18px 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Loading Overlay */
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(248, 249, 250, 0.96);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      gap: 12px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-top-color: #111827;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 640px) {
+      .top-header {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .progress-section {
+        min-width: 100%;
+      }
+      .scale-guide-grid {
+        grid-template-columns: repeat(5, 1fr);
+        font-size: 9px;
+      }
+      .scale-guide-label {
+        display: none;
+      }
+      .likert-text {
+        font-size: 9px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading State -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div id="loadingText">Memuat data asesmen...</div>
+  </div>
+
+  <!-- Top Sticky Header -->
+  <header class="top-header" id="topHeader" style="display: none;">
+    <div class="header-candidate-box">
+      <div class="candidate-avatar" id="candAvatar">--</div>
+      <div>
+        <div class="candidate-info-name" id="candName">Nama Kandidat</div>
+        <div class="candidate-info-sub">
+          <span class="candidate-tag" id="candId">ID</span>
+          <span id="candRole">Freelance Content Creator</span>
+          <span class="autosave-pill" id="autosaveIndicator">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            Tersimpan
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-counter" id="progressText">0 / 50 (0%)</div>
+    </div>
+  </header>
+
+  <!-- Main Test Form Container -->
+  <main class="container" id="mainContainer" style="display: none;">
+    
+    <!-- Instruction Card -->
+    <section class="instruction-card" id="instructionCard">
+      <h1 class="instruction-title" id="instructionTitle">
+        <span>📋</span> Petunjuk Asesmen On-Site
+      </h1>
+      <div class="instruction-desc" id="instructionDesc">
+        Silakan isi pertanyaan di bawah ini dengan seksama. Pastikan seluruh pertanyaan telah dijawab sebelum mengirimkan hasil tes.
+      </div>
+
+      <!-- Big Five Scale Guide -->
+      <div class="scale-guide-grid" id="likertScaleGuide" style="display: none;">
+        <div class="scale-guide-item">
+          <div class="scale-guide-number">1</div>
+          <div class="scale-guide-label">Sangat Tidak Sesuai</div>
+        </div>
+        <div class="scale-guide-item">
+          <div class="scale-guide-number">2</div>
+          <div class="scale-guide-label">Tidak Sesuai</div>
+        </div>
+        <div class="scale-guide-item">
+          <div class="scale-guide-number">3</div>
+          <div class="scale-guide-label">Netral / Ragu</div>
+        </div>
+        <div class="scale-guide-item">
+          <div class="scale-guide-number">4</div>
+          <div class="scale-guide-label">Sesuai</div>
+        </div>
+        <div class="scale-guide-item">
+          <div class="scale-guide-number">5</div>
+          <div class="scale-guide-label">Sangat Sesuai</div>
+        </div>
+      </div>
+
+      <!-- DISC Most/Least Guide -->
+      <div id="discGuide" style="display: none; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border-light);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 600; font-size: 13px; color: #4C1D95;">
+          <span>💡</span> Panduan Pengisian Tes Gaya Kerja (DISC):
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
+          <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #059669; color: #FFF; font-weight: 700; font-size: 13px; flex-shrink: 0;">M</span>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 600; color: #065F46;">[M] Most / Paling Sesuai (+)</div>
+              <div style="font-size: 11.5px; color: #047857; margin-top: 2px;">Pilih 1 karakteristik yang <strong>paling menggambarkan</strong> diri Anda saat bekerja.</div>
+            </div>
+          </div>
+          <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 6px; background: #DC2626; color: #FFF; font-weight: 700; font-size: 13px; flex-shrink: 0;">L</span>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 600; color: #991B1B;">[L] Least / Paling Tidak Sesuai (-)</div>
+              <div style="font-size: 11.5px; color: #B91C1C; margin-top: 2px;">Pilih 1 karakteristik yang <strong>paling tidak menggambarkan</strong> diri Anda.</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 8px; font-size: 11.5px; color: #6B7280; font-family: var(--font-mono);">
+          * Catatan: Pada tiap nomor soal (4 baris), wajib memilih tepat 1 tombol [M] dan 1 tombol [L] pada baris berbeda.
+        </div>
+      </div>
+
+      <!-- Cognitive Guide -->
+      <div id="cognitiveGuide" style="display: none; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border-light);">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: #065F46;">
+          <span>💡</span> Panduan Soal Logika, Kognitif &amp; Bisnis:
+        </div>
+        <div style="font-size: 12.5px; color: #374151; line-height: 1.5;">
+          Setiap nomor memiliki 5 opsi jawaban (A–E). Pilih satu jawaban yang paling tepat. Anda diperkenankan mencoret hitungan pada lembar buram jika diperlukan.
+        </div>
+      </div>
+    </section>
+
+    <!-- Questions Feed -->
+    <div class="questions-list" id="questionsList"></div>
+
+    <!-- Submit Section -->
+    <section class="submit-section">
+      <!-- Incomplete Warning -->
+      <div class="unanswered-banner" id="unansweredBanner">
+        <div class="unanswered-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="unansweredTitleText">Masih ada pertanyaan yang belum diisi</span>
+        </div>
+        <div style="font-size: 11.5px; color: #7F1D1D; margin-bottom: 8px;">
+          Klik nomor pertanyaan di bawah ini untuk langsung menuju soal:
+        </div>
+        <div class="unanswered-chips-container" id="unansweredChips"></div>
+      </div>
+
+      <div class="submit-status-text" id="submitStatusText">
+        Pastikan seluruh 50 pernyataan telah terisi sebelum mengirim jawaban.
+      </div>
+
+      <button type="button" class="btn-submit" id="submitBtn" onclick="handleVerifyAndSubmit()">
+        <span>Kirim Jawaban Asesmen</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Fullscreen Completion Lockdown Screen -->
+  <div class="completion-container" id="completionScreen" style="display: none;">
+    <div class="completion-icon-wrapper">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h1 class="completion-title">Asesmen Telah Selesai</h1>
+    <p class="completion-desc">
+      Terima kasih telah menyelesaikan asesmen kepribadian ini. Seluruh respon Anda telah berhasil tersimpan secara aman di sistem PGE Talent Pool.
+    </p>
+    <div class="completion-notice-card">
+      🔒 Silakan serahkan kembali laptop kepada tim interviewer.
+    </div>
+  </div>
+
+  <script>
+    // 1. Firebase Initialization (shared credentials)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8HZVXj6kzxVrdMrbmenfKRb5itrtvboA",
+      authDomain: "talentpool-34137.firebaseapp.com",
+      databaseURL: "https://talentpool-34137-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "talentpool-34137",
+      storageBucket: "talentpool-34137.firebasestorage.app",
+      messagingSenderId: "530363287467",
+      appId: "1:530363287467:web:6d58c64fb7dffd70b534ee"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const rtdb = firebase.database();
+
+    // 2. Standard 50-Item IPIP Big Five Questionnaire Data
+    const QUESTIONS = [
+      { "id": "E1", "dimension": "Extraversion", "text": "Menghidupkan suasana dalam suatu acara", "scoring_key": "positive" },
+      { "id": "A2", "dimension": "Agreeableness", "text": "Tidak terlalu memedulikan orang lain", "scoring_key": "negative" },
+      { "id": "C3", "dimension": "Conscientiousness", "text": "Selalu mempersiapkan segala hal", "scoring_key": "positive" },
+      { "id": "EM4", "dimension": "Emotional Stability", "text": "Mudah merasa tertekan", "scoring_key": "negative" },
+      { "id": "I5", "dimension": "Intellect", "text": "Menguasai banyak kosakata", "scoring_key": "positive" },
+      { "id": "E6", "dimension": "Extraversion", "text": "Tidak banyak berbicara", "scoring_key": "negative" },
+      { "id": "A7", "dimension": "Agreeableness", "text": "Peduli dengan orang lain", "scoring_key": "positive" },
+      { "id": "C8", "dimension": "Conscientiousness", "text": "Meninggalkan barang pribadi di sembarang tempat", "scoring_key": "negative" },
+      { "id": "EM9", "dimension": "Emotional Stability", "text": "Merasa tenang hampir setiap saat", "scoring_key": "positive" },
+      { "id": "I10", "dimension": "Intellect", "text": "Kesulitan memahami ide yang bersifat abstrak", "scoring_key": "negative" },
+      { "id": "E11", "dimension": "Extraversion", "text": "Merasa nyaman di sekitar orang lain", "scoring_key": "positive" },
+      { "id": "A12", "dimension": "Agreeableness", "text": "Bersikap kasar pada orang lain", "scoring_key": "negative" },
+      { "id": "C13", "dimension": "Conscientiousness", "text": "Memperhatikan hal-hal secara rinci", "scoring_key": "positive" },
+      { "id": "EM14", "dimension": "Emotional Stability", "text": "Mudah khawatir", "scoring_key": "negative" },
+      { "id": "I15", "dimension": "Intellect", "text": "Memiliki imajinasi yang sangat kuat", "scoring_key": "positive" },
+      { "id": "E16", "dimension": "Extraversion", "text": "Lebih suka bekerja di belakang layar", "scoring_key": "negative" },
+      { "id": "A17", "dimension": "Agreeableness", "text": "Bersimpati dengan perasaan orang lain", "scoring_key": "positive" },
+      { "id": "C18", "dimension": "Conscientiousness", "text": "Mengacaukan banyak hal", "scoring_key": "negative" },
+      { "id": "EM19", "dimension": "Emotional Stability", "text": "Jarang merasa sedih", "scoring_key": "positive" },
+      { "id": "I20", "dimension": "Intellect", "text": "Tidak tertarik dengan ide-ide abstrak", "scoring_key": "negative" },
+      { "id": "E21", "dimension": "Extraversion", "text": "Memulai suatu percakapan", "scoring_key": "positive" },
+      { "id": "A22", "dimension": "Agreeableness", "text": "Tidak tertarik dengan masalah orang lain", "scoring_key": "negative" },
+      { "id": "C23", "dimension": "Conscientiousness", "text": "Tidak menunda pekerjaan", "scoring_key": "positive" },
+      { "id": "EM24", "dimension": "Emotional Stability", "text": "Mudah merasa terganggu", "scoring_key": "negative" },
+      { "id": "I25", "dimension": "Intellect", "text": "Memiliki ide-ide yang cemerlang", "scoring_key": "positive" },
+      { "id": "E26", "dimension": "Extraversion", "text": "Sedikit berkata", "scoring_key": "negative" },
+      { "id": "A27", "dimension": "Agreeableness", "text": "Lemah lembut", "scoring_key": "positive" },
+      { "id": "C28", "dimension": "Conscientiousness", "text": "Sering lupa meletakkan barang kembali pada tempatnya", "scoring_key": "negative" },
+      { "id": "EM29", "dimension": "Emotional Stability", "text": "Mudah merasa kesal", "scoring_key": "negative" },
+      { "id": "I30", "dimension": "Intellect", "text": "Tidak memiliki imajinasi yang baik", "scoring_key": "negative" },
+      { "id": "E31", "dimension": "Extraversion", "text": "Berinteraksi dengan banyak orang dalam suatu acara", "scoring_key": "positive" },
+      { "id": "A32", "dimension": "Agreeableness", "text": "Tidak terlalu tertarik dengan orang lain", "scoring_key": "negative" },
+      { "id": "C33", "dimension": "Conscientiousness", "text": "Menyukai keteraturan", "scoring_key": "positive" },
+      { "id": "EM34", "dimension": "Emotional Stability", "text": "Memiliki perasaan yang berubah-ubah", "scoring_key": "negative" },
+      { "id": "I35", "dimension": "Intellect", "text": "Cepat dalam memahami sesuatu", "scoring_key": "positive" },
+      { "id": "E36", "dimension": "Extraversion", "text": "Tidak suka menjadi pusat perhatian", "scoring_key": "negative" },
+      { "id": "A37", "dimension": "Agreeableness", "text": "Meluangkan waktu untuk orang lain", "scoring_key": "positive" },
+      { "id": "C38", "dimension": "Conscientiousness", "text": "Mengabaikan tugas-tugas saya", "scoring_key": "negative" },
+      { "id": "EM39", "dimension": "Emotional Stability", "text": "Memiliki suasana hati yang sering berubah-ubah", "scoring_key": "negative" },
+      { "id": "I40", "dimension": "Intellect", "text": "Menggunakan istilah-istilah yang sulit", "scoring_key": "positive" },
+      { "id": "E41", "dimension": "Extraversion", "text": "Tidak keberatan menjadi pusat perhatian", "scoring_key": "positive" },
+      { "id": "A42", "dimension": "Agreeableness", "text": "Memahami perasaan orang lain", "scoring_key": "positive" },
+      { "id": "C43", "dimension": "Conscientiousness", "text": "Melakukan aktivitas sesuai jadwal atau agenda", "scoring_key": "positive" },
+      { "id": "EM44", "dimension": "Emotional Stability", "text": "Mudah merasa jengkel", "scoring_key": "negative" },
+      { "id": "I45", "dimension": "Intellect", "text": "Meluangkan waktu untuk merefleksikan berbagai hal", "scoring_key": "positive" },
+      { "id": "E46", "dimension": "Extraversion", "text": "Tidak banyak berbicara pada orang yang tidak dikenal", "scoring_key": "negative" },
+      { "id": "A47", "dimension": "Agreeableness", "text": "Membuat orang lain merasa nyaman", "scoring_key": "positive" },
+      { "id": "C48", "dimension": "Conscientiousness", "text": "Telaten dalam mengerjakan tugas", "scoring_key": "positive" },
+      { "id": "EM49", "dimension": "Emotional Stability", "text": "Sering merasa sedih", "scoring_key": "negative" },
+      { "id": "I50", "dimension": "Intellect", "text": "Memiliki banyak ide", "scoring_key": "positive" }
+    ];
+
+    
+    const COGNITIVE_QUESTIONS = [
+      {
+        "id": "COG_NUM_03",
+        "category": "Deret Angka",
+        "question": "Berapakah angka selanjutnya pada deret berikut: 100, 95, 85, 70, 50, ... ?",
+        "options": ["20", "25", "30", "35", "40"],
+        "correct_answer": "25",
+        "explanation": "Pola pengurangan bertingkat: -5, -10, -15, -20. Selanjutnya adalah -25 (50 - 25 = 25)."
+      },
+      {
+        "id": "COG_NUM_04",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret berikut: 4, 9, 16, 25, 36, ... Angka berikutnya adalah?",
+        "options": ["45", "47", "49", "52", "64"],
+        "correct_answer": "49",
+        "explanation": "Pola kuadrat bilangan bulat: 2², 3², 4², 5², 6². Selanjutnya adalah 7² = 49."
+      },
+      {
+        "id": "COG_NUM_05",
+        "category": "Deret Angka",
+        "question": "Berapakah angka selanjutnya: 1, 2, 6, 24, 120, ... ?",
+        "options": ["240", "360", "480", "600", "720"],
+        "correct_answer": "720",
+        "explanation": "Pola perkalian bertingkat: x2, x3, x4, x5. Selanjutnya adalah x6 (120 x 6 = 720)."
+      },
+      {
+        "id": "COG_ARI_01",
+        "category": "Aritmatika Dasar",
+        "question": "Sebuah produk memiliki harga awal Rp50.000. Produk tersebut didiskon 20%, kemudian pada saat flash sale didiskon lagi sebesar 10% dari harga setelah diskon pertama. Berapakah harga akhirnya?",
+        "options": ["Rp35.000", "Rp36.000", "Rp37.500", "Rp40.000", "Rp45.000"],
+        "correct_answer": "Rp36.000",
+        "explanation": "Diskon 20% dari 50.000 = 40.000. Diskon tambahan 10% dari 40.000 = 4.000. Harga akhir = 40.000 - 4.000 = 36.000."
+      },
+      {
+        "id": "COG_ARI_02",
+        "category": "Aritmatika Dasar",
+        "question": "Rasio penjualan produk A dan produk B adalah 3:2. Jika total penjualan kedua produk tersebut dalam sebulan adalah 150 unit, berapakah jumlah produk A yang terjual?",
+        "options": ["60", "75", "80", "90", "100"],
+        "correct_answer": "90",
+        "explanation": "Bagian produk A = 3 / (3+2) x 150 = (3/5) x 150 = 90 unit."
+      },
+      {
+        "id": "COG_ARI_03",
+        "category": "Aritmatika Dasar",
+        "question": "5 orang admin dapat memproses 100 pesanan dalam waktu 2 jam. Jika hanya ada 2 orang admin, berapa waktu yang dibutuhkan untuk memproses 40 pesanan dengan kecepatan yang sama?",
+        "options": ["1 jam", "1,5 jam", "2 jam", "2,5 jam", "3 jam"],
+        "correct_answer": "2 jam",
+        "explanation": "1 admin = 20 pesanan / 2 jam = 10 pesanan / jam. 2 admin = 20 pesanan / jam. Waktu untuk 40 pesanan = 40 / 20 = 2 jam."
+      },
+      {
+        "id": "COG_BIZ_03",
+        "category": "Logika Komersial",
+        "question": "Data bulan ini menunjukkan Gross Margin turun drastis dari 30% menjadi 24%, sementara Average Selling Price (harga jual) hampir tidak berubah. Manakah faktor yang paling mungkin menjadi penyebabnya?",
+        "options": ["Penurunan jumlah pengunjung (traffic)", "Kenaikan harga pokok barang atau biaya produksi", "Peningkatan anggaran iklan secara berlebihan", "Kenaikan conversion rate", "Banyak pelanggan menggunakan fitur gratis ongkir"],
+        "correct_answer": "Kenaikan harga pokok barang atau biaya produksi",
+        "explanation": "Menguji kemampuan menganalisis harga dan margin secara struktural. Jika Gross Margin turun sementara harga jual stabil, otomatis biaya pokok barang (COGS) yang meningkat."
+      },
+      {
+        "id": "COG_BIZ_04",
+        "category": "Logika Komersial",
+        "question": "Biaya operasional tetap toko adalah Rp5.000.000 per bulan. Rata-rata keuntungan bersih dari setiap produk yang terjual adalah Rp25.000. Berapa jumlah minimal produk yang harus terjual agar perusahaan mencapai Break Even Point (balik modal)?",
+        "options": ["100", "150", "200", "250", "300"],
+        "correct_answer": "200",
+        "explanation": "BEP Unit = Biaya Tetap / Margin Kontribusi per unit = 5.000.000 / 25.000 = 200 produk."
+      },
+      {
+        "id": "COG_BIZ_05",
+        "category": "Logika Komersial",
+        "question": "Sebuah dompet kulit dijual seharga Rp100.000. Biaya admin marketplace adalah 5% dan biaya layanan gratis ongkir adalah 3% yang dipotong langsung dari harga jual. Berapa nominal uang yang akan diterima masuk ke saldo perusahaan?",
+        "options": ["Rp100.000", "Rp95.000", "Rp92.000", "Rp85.000", "Rp82.000"],
+        "correct_answer": "Rp92.000",
+        "explanation": "Total potongan = 5% + 3% = 8%. Potongan uang = 8% x 100.000 = 8.000. Uang diterima = 100.000 - 8.000 = 92.000."
+      },
+      {
+        "id": "COG_BIZ_06",
+        "category": "Logika Komersial",
+        "question": "Perusahaan menghabiskan Rp500.000 untuk biaya iklan (Ads). Iklan tersebut menghasilkan 20 transaksi baru. Jika profit kotor dari setiap transaksi adalah Rp40.000, berapakah laba bersih yang didapat dari kampanye iklan ini?",
+        "options": ["Rp300.000", "Rp400.000", "Rp500.000", "Rp800.000", "-Rp100.000 (Rugi)"],
+        "correct_answer": "Rp300.000",
+        "explanation": "Total profit kotor = 20 x 40.000 = 800.000. Laba bersih = Profit kotor - Biaya iklan = 800.000 - 500.000 = Rp300.000."
+      },
+      {
+        "id": "COG_DAT_01",
+        "category": "Analisis Data",
+        "question": "Data penjualan menunjukkan bahwa ketika perusahaan melipatgandakan anggaran iklan, jumlah pengunjung toko (traffic) naik tajam, tetapi total transaksi harian tetap sama seperti sebelumnya. Apa simpulan metrik yang paling akurat?",
+        "options": ["Conversion rate menurun", "Average order value meningkat", "Margin keuntungan meningkat", "Pembeli menghabiskan lebih banyak uang", "Iklan mendatangkan target pasar yang tepat"],
+        "correct_answer": "Conversion rate menurun",
+        "explanation": "Conversion Rate = Transaksi / Traffic. Jika traffic naik namun pembagi (transaksi) tetap, persentasenya pasti mengecil."
+      },
+      {
+        "id": "COG_DAT_02",
+        "category": "Analisis Data",
+        "question": "Anda menyadari satu lini produk tiba-tiba melonjak penjualannya 300% dalam sehari tanpa ada promosi. Sistem pelaporan belum selesai memproses asal sumber pengunjung tersebut. Apa tindakan komersial terbaik yang harus segera dilakukan?",
+        "options": ["Menunggu hingga data pelaporan selesai 100% besok pagi", "Segera mengecek tren viral di sosial media dan mengamankan ketersediaan stok fisik", "Menghentikan penjualan produk agar stok tidak habis", "Menurunkan harga agar semakin banyak yang beli", "Melaporkan adanya kesalahan sistem kepada tim IT"],
+        "correct_answer": "Segera mengecek tren viral di sosial media dan mengamankan ketersediaan stok fisik",
+        "explanation": "Menguji toleransi terhadap ambiguitas saat mengambil keputusan dengan data yang belum lengkap atau sistem yang belum sempurna."
+      },
+      {
+        "id": "COG_DAT_03",
+        "category": "Analisis Data",
+        "question": "Tingkat pembatalan (Cancellation Rate) mendadak naik dari 2% menjadi 6%. Bersamaan dengan itu, traffic dan conversion rate pesanan di awal bulan sangat tinggi. Apa hipotesis yang paling masuk akal?",
+        "options": ["Sistem pembayaran pelanggan sedang error", "Stok fisik barang tidak cukup untuk memenuhi lonjakan pesanan sehingga sistem otomatis membatalkan", "Kurir pengiriman mogok kerja", "Kualitas produk memburuk", "Harga produk terlalu mahal"],
+        "correct_answer": "Stok fisik barang tidak cukup untuk memenuhi lonjakan pesanan sehingga sistem otomatis membatalkan",
+        "explanation": "Kenaikan pesanan yang sangat tinggi sering kali memicu kehabisan stok (overselling) jika sinkronisasi telat, menyebabkan pesanan terpaksa dibatalkan."
+      },
+      {
+        "id": "COG_LOG_03",
+        "category": "Silogisme",
+        "question": "Semua produk yang diskon diletakkan di etalase kategori 'Promo'. Beberapa gantungan kunci diletakkan di etalase kategori 'Promo'. Kesimpulan yang paling tepat adalah:",
+        "options": ["Semua gantungan kunci adalah produk diskon", "Gantungan kunci pasti produk paling murah", "Tidak ada gantungan kunci yang diskon", "Beberapa gantungan kunci mungkin adalah produk diskon", "Gantungan kunci bukan produk diskon"],
+        "correct_answer": "Beberapa gantungan kunci mungkin adalah produk diskon",
+        "explanation": "Premis tidak secara eksklusif menyatakan HANYA produk diskon yang ada di etalase Promo. Jadi 'beberapa' mengindikasikan kemungkinan."
+      },
+      {
+        "id": "COG_LOG_04",
+        "category": "Penalaran Kritis",
+        "question": "Anda menemukan kompetitor menjual produk identik dengan harga 10% lebih murah. Produk kompetitor memiliki rating 3.5 dari 5, sedangkan produk perusahaan Anda memiliki rating 4.9 dari 5. Apa rekomendasi harga (pricing) yang paling logis?",
+        "options": ["Ikut menurunkan harga 10% agar tidak kalah saing", "Menurunkan harga 15% untuk mematikan kompetitor", "Pertahankan harga saat ini dan jadikan ulasan/kualitas sebagai nilai jual utama", "Menaikkan harga 10% karena kualitas lebih bagus", "Berhenti menjual produk tersebut"],
+        "correct_answer": "Pertahankan harga saat ini dan jadikan ulasan/kualitas sebagai nilai jual utama",
+        "explanation": "Menguji kemampuan riset pasar dan analisis kompetitor untuk memberikan rekomendasi komersial. Penurunan harga tidak rasional jika produk memiliki keunggulan kompetitif pada trust (rating tinggi)."
+      }
+    ];
+
+    
+    
+    const DISC_QUESTIONS = [
+  {
+    "id": "DISC_01",
+    "options": [
+      {
+        "text": "Cepat mengambil keputusan, berani, tegas",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Ramah, lincah, memikat hati orang lain",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Tenang, sabar, pendengar yang baik",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Cermat, teliti, rapi dan sistematis",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_02",
+    "options": [
+      {
+        "text": "Berorientasi pada hasil akhir, pantang menyerah",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Ceria, persuasif, membangkitkan semangat",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Setia kawan, mudah bekerja sama, penurut",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Disiplin, mematuhi aturan, berpikir logis",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_03",
+    "options": [
+      {
+        "text": "Suka tantangan baru, kompetitif, mandiri",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Supel, pandai bergaul, banyak bicara",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Konsisten, menghindari konflik, cinta damai",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Akurat, berhati-hati, standar tinggi",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_04",
+    "options": [
+      {
+        "text": "Berani mengambil risiko, tidak suka basa-basi",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Ekspresif, optimis, memotivasi orang lain",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Dapat diandalkan, stabil, loyal",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Analitis, kritis, memperhatikan detail kecil",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_05",
+    "options": [
+      {
+        "text": "Memegang kendali, percaya diri tinggi",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Hangat, humoris, mudah berteman",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Rela berkorban, sabar menghadapi orang lain",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Teratur, metodis, taat pada prosedur",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_06",
+    "options": [
+      {
+        "text": "Menuntut pencapaian, bergerak cepat",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Populer, menyukai perhatian, kreatif",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Mudah puas, toleran, tidak banyak menuntut",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Kritis terhadap kesalahan, perfeksionis",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_07",
+    "options": [
+      {
+        "text": "Fokus pada tujuan, gigih menyelesaikan tugas",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Pandai meyakinkan orang, antusias",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Mendukung rekan kerja, pendamai saat ribut",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Mengecek fakta, mendasarkan keputusan pada data",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_08",
+    "options": [
+      {
+        "text": "Suka memimpin, langsung ke inti persoalan",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Spontan, lincah, menghibur suasana",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Pemberi rasa aman, tidak terburu-buru",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Terencana rapi, menjunjung tinggi kualitas kerja",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_09",
+    "options": [
+      {
+        "text": "Optimis terhadap hasil, tekad baja",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Suka berkolaborasi dalam tim besar",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Pemaaf, menolak perdebatan terbuka",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Mengikuti instruksi tertulis, teliti tanpa cela",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_10",
+    "options": [
+      {
+        "text": "Menyukai kekuasaan/tanggung jawab penuh",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Inspiratif, pandai menarik minat pendengar",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Pendiam, setia pada tugas rutin, tekun",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Tegas pada standar etika dan kepatuhan aturan",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_11",
+    "options": [
+      {
+        "text": "Ambisius, tanggap menghadapi krisis darurat",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Penuh energi, membawa atmosfer positif",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Rendah hati, bersahabat, menghindari pamer",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Berhati-hati dalam berbicara, objektif",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_12",
+    "options": [
+      {
+        "text": "Mendorong orang lain bergerak cepat",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Membangun hubungan sosial dengan cepat",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Ketenangan dalam menghadapi perubahan mendadak",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Skeptis sebelum melihat bukti konkret",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_13",
+    "options": [
+      {
+        "text": "Mampu bersikap tegas meski tidak disukai",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Menyukai pujian dan apresiasi sosial",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Menghindari pergantian rutinitas mendadak",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Menganalisis sebab-akibat secara mendalam",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_14",
+    "options": [
+      {
+        "text": "Fokus mengejar target tanpa terganggu emosi",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Pandai mencairkan suasana yang kaku",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Menjaga keharmonisan dan kebersamaan tim",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Rapi dalam dokumentasi dan tata kelola arsip",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_15",
+    "options": [
+      {
+        "text": "Berani melawan arus jika yakin benar",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Berbakat membujuk dan mempromosikan ide",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Pendengar yang tulus dan tidak menghakimi",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Menghitung segala kemungkinan risiko",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_16",
+    "options": [
+      {
+        "text": "Menyukai kecepatan dan efisiensi waktu",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Mudah bergaul dengan orang yang baru dikenal",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Penuh pengertian dan menjaga perasaan rekan",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Menyukai kejelasan pedoman dan batasan kerja",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_17",
+    "options": [
+      {
+        "text": "Percaya diri mengatasi masalah rumit",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Kreatif memunculkan ide-ide segar",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Setia pada komitmen jangka panjang",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Memastikan tidak ada kekeliruan sekecil apapun",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_18",
+    "options": [
+      {
+        "text": "Tegas menolak hal yang menghambat kemajuan",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Menghidupkan suasana kelompok",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Mampu bekerja dalam ketenangan dan kestabilan",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Berpikir berdasarkan logika fakta teruji",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_19",
+    "options": [
+      {
+        "text": "Berinisiatif tinggi tanpa menunggu arahan",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Pandai membawa diri di berbagai kalangan",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Rela mengalah demi kebaikan bersama",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Kritis terhadap ide yang tidak realistis",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_20",
+    "options": [
+      {
+        "text": "Berani bertindak saat orang lain ragu-ragu",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Mudah membangkitkan rasa percaya diri orang lain",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Sabar menemani proses kerja bertahap",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Mempersiapkan segala hal secara sistematis",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_21",
+    "options": [
+      {
+        "text": "Fokus pada kemenangan dan kepemimpinan",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Suka berdiskusi terbuka dan bertukar cerita",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Mudah berempati dan memahami perasaan orang lain",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Mengutamakan kualitas di atas kecepatan",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_22",
+    "options": [
+      {
+        "text": "Membuat keputusan sulit dengan kepala dingin",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Menyebarkan energi ceria dan kebersamaan",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Dapat dipercaya memegang rahasia tim",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Sangat terstruktur dalam menyusun rencana kerja",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_23",
+    "options": [
+      {
+        "text": "Siap bertanggung jawab atas risiko kegagalan",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Mengandalkan intuisi sosial dan hubungan baik",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Menyukai lingkungan kerja yang damai dan stabil",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Mengutamakan fakta objektif daripada opini pribadi",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  },
+  {
+    "id": "DISC_24",
+    "options": [
+      {
+        "text": "Pantang menyerah sebelum tujuan terwujud",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Penuh pesona dan daya pikat dalam berkomunikasi",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Pekerja tekun yang tidak mudah mengeluh",
+        "most": "S",
+        "least": "S"
+      },
+      {
+        "text": "Cermat memastikan kepatuhan standar mutu SOP",
+        "most": "C",
+        "least": "C"
+      }
+    ]
+  }
+];
+
+    const LIKERT_LABELS = {
+      1: "Sangat Tidak Sesuai",
+      2: "Tidak Sesuai",
+      3: "Netral / Ragu",
+      4: "Sesuai",
+      5: "Sangat Sesuai"
+    };
+
+    // 3. State Management
+    let candidateId = null;
+    let candidateData = null;
+    let enabledTests = ['bigfive', 'disc', 'cognitive']; // default all
+    let userAnswers = {}; // { [qid]: number | string }
+    let cognitiveAnswers = {}; // { [id]: string }
+
+    // Read URL Parameters
+    function getQueryParam(key) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(key);
+    }
+
+    // Initialize Page
+    async function init() {
+      candidateId = getQueryParam('id') || getQueryParam('candidateId');
+      
+      const testsParam = getQueryParam('tests');
+      if (testsParam) {
+        enabledTests = testsParam.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+      }
+      if (enabledTests.length === 0) enabledTests = ['bigfive', 'disc', 'cognitive'];
+      
+      if (!candidateId) {
+        document.getElementById('loadingText').innerHTML = `
+          <span style="color: #EF4444; font-weight: 600;">Error: Parameter ID Kandidat tidak ditemukan.</span><br>
+          <span style="font-size: 11px; color: var(--text-muted);">Buka halaman ini melalui menu kandidat di PGE Talent Pool.</span>
+        `;
+        return;
+      }
+
+      // Read fallback details from URL params if provided
+      const paramName = getQueryParam('name');
+      const paramRole = getQueryParam('role');
+      if (paramName) {
+        candidateData = {
+          id: candidateId,
+          name: decodeURIComponent(paramName),
+          role: paramRole ? decodeURIComponent(paramRole) : 'Freelance Content Creator'
+        };
+        setupHeader(candidateData);
+      }
+
+      // Restore answers from SessionStorage if available
+      try {
+        const cached = sessionStorage.getItem('ipip_answers_' + candidateId);
+        if (cached) {
+          userAnswers = JSON.parse(cached) || {};
+        }
+      } catch (e) {
+        console.warn('SessionStorage unavailable', e);
+      }
+
+      renderQuestions();
+      updateProgress();
+
+      // Show UI immediately if fallback data is ready
+      if (candidateData) {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        document.getElementById('topHeader').style.display = 'flex';
+        document.getElementById('mainContainer').style.display = 'block';
+      }
+
+      // Listen for Firebase Auth & RTDB synchronization
+      auth.onAuthStateChanged(async (user) => {
+        try {
+          // Check talents/{candidateId}
+          const snap = await rtdb.ref('talents/' + candidateId).once('value');
+          if (snap.exists()) {
+            const dbData = snap.val();
+            candidateData = { ...candidateData, ...dbData };
+            setupHeader(candidateData);
+
+            if (dbData.assessment && dbData.assessment.status === 'completed') {
+              showCompletionScreen(true);
+              return;
+            }
+          } else {
+            // Also check candidate_assessments/{candidateId}
+            const snapAss = await rtdb.ref('candidate_assessments/' + candidateId).once('value');
+            if (snapAss.exists() && snapAss.val().status === 'completed') {
+              showCompletionScreen(true);
+              return;
+            }
+          }
+
+          document.getElementById('loadingOverlay').style.display = 'none';
+          document.getElementById('topHeader').style.display = 'flex';
+          document.getElementById('mainContainer').style.display = 'block';
+
+        } catch (err) {
+          console.warn('RTDB candidate fetch error (using fallback):', err);
+          if (candidateData) {
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('topHeader').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'block';
+          } else {
+            // Setup generic candidate header
+            candidateData = { id: candidateId, name: 'Kandidat ' + candidateId, role: 'Freelance Talent' };
+            setupHeader(candidateData);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('topHeader').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'block';
+          }
+        }
+      });
+    }
+
+    function setupHeader(candidate) {
+      const initials = (candidate.name || 'KD').split(' ').map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
+      document.getElementById('candAvatar').textContent = initials;
+      document.getElementById('candName').textContent = candidate.name || 'Kandidat';
+      document.getElementById('candId').textContent = candidate.id || candidateId;
+      document.getElementById('candRole').textContent = candidate.role || 'Freelance Content Creator';
+    }
+
+    // Active Questions Registry (ordered: Big Five -> DISC -> Cognitive)
+    function getActiveQuestions() {
+      const list = [];
+      if (enabledTests.includes('bigfive')) {
+        QUESTIONS.forEach((q, idx) => {
+          list.push({ ...q, _type: 'bigfive', _num: idx + 1 });
+        });
+      }
+      if (enabledTests.includes('disc')) {
+        DISC_QUESTIONS.forEach((q, idx) => {
+          list.push({ ...q, _type: 'disc', _num: idx + 1 });
+        });
+      }
+      if (enabledTests.includes('cognitive')) {
+        COGNITIVE_QUESTIONS.forEach((q, idx) => {
+          list.push({ ...q, _type: 'cognitive', _num: idx + 1 });
+        });
+      }
+      return list;
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById('questionsList');
+      container.innerHTML = '';
+
+      const hasBigFive = enabledTests.includes('bigfive');
+      const hasDisc = enabledTests.includes('disc');
+      const hasCognitive = enabledTests.includes('cognitive');
+
+      // 1. Build list of active modules in consistent sequence: Big Five -> DISC -> Cognitive
+      const activeModules = [];
+      if (hasBigFive) {
+        activeModules.push({
+          key: 'bigfive',
+          title: 'Tes Kepribadian Kerja (IPIP Big Five)',
+          countText: '50 Pernyataan',
+          icon: '🧠',
+          accentColor: '#1E40AF',
+          tagBg: '#EFF6FF',
+          borderColor: '#3B82F6',
+          subtitle: '50 Pernyataan • Skala Likert 1 (Sangat Tidak Sesuai) s.d 5 (Sangat Sesuai)',
+          shortInstr: 'Tanggapi pernyataan perilaku & gaya kerja pada skala 1 s.d 5 secara spontan dan jujur.'
+        });
+      }
+      if (hasDisc) {
+        activeModules.push({
+          key: 'disc',
+          title: 'Tes Gaya Kerja & Komunikasi (DISC)',
+          countText: '24 Soal M/L',
+          icon: '🧩',
+          accentColor: '#7C3AED',
+          tagBg: '#F5F3FF',
+          borderColor: '#7C3AED',
+          subtitle: '24 Nomor • Pilih 1 sifat [M] Paling Sesuai (+) dan 1 sifat [L] Paling Tidak Sesuai (-)',
+          shortInstr: 'Pada setiap nomor, pilih 1 sifat yang [M] Paling Sesuai dan 1 sifat yang [L] Paling Tidak Sesuai.'
+        });
+      }
+      if (hasCognitive) {
+        activeModules.push({
+          key: 'cognitive',
+          title: 'Tes Logika, Kognitif & Bisnis Praktis',
+          countText: '15 Soal Pilihan Ganda',
+          icon: '📊',
+          accentColor: '#059669',
+          tagBg: '#ECFDF5',
+          borderColor: '#059669',
+          subtitle: '15 Soal Pilihan Ganda A–E • Deret Angka, Logika Aritmatika & Analisis Bisnis',
+          shortInstr: 'Pilih satu opsi jawaban (A–E) yang paling tepat untuk menguji penalaran numerik & analisis bisnis.'
+        });
+      }
+
+      const totalModules = activeModules.length;
+
+      // 2. Dynamically Update Instruction Card Title & Description
+      const instrTitle = document.getElementById('instructionTitle');
+      const instrDesc = document.getElementById('instructionDesc');
+
+      if (totalModules === 1) {
+        const m = activeModules[0];
+        if (instrTitle) instrTitle.innerHTML = `<span>${m.icon}</span> Petunjuk ${m.title}`;
+        if (instrDesc) {
+          if (m.key === 'bigfive') {
+            instrDesc.innerHTML = 'Kuesioner ini terdiri dari <strong>50 pernyataan singkat</strong> mengenai perilaku, preferensi, dan gaya kerja Anda sehari-hari. Jawablah secara spontan dan jujur pada skala 1 (Sangat Tidak Sesuai) hingga 5 (Sangat Sesuai). Tidak ada jawaban yang benar atau salah.';
+          } else if (m.key === 'disc') {
+            instrDesc.innerHTML = 'Asesmen ini adalah <strong>Tes Gaya Kerja &amp; Komunikasi (DISC)</strong> yang terdiri dari <strong>24 nomor pernyataan</strong>. Pada setiap nomor:<br>• Pilih <strong>[M] (Most / +)</strong> pada 1 karakteristik yang <strong>Paling Menggambarkan</strong> diri Anda.<br>• Pilih <strong>[L] (Least / -)</strong> pada 1 karakteristik yang <strong>Paling Tidak Menggambarkan</strong> diri Anda.<br>Pastikan setiap nomor memiliki tepat satu [M] dan satu [L] pada baris karakteristik yang berbeda.';
+          } else if (m.key === 'cognitive') {
+            instrDesc.innerHTML = 'Asesmen ini terdiri dari <strong>15 Soal Logika, Kognitif &amp; Bisnis Praktis</strong> (Pilihan Ganda A–E) yang mencakup Deret Angka, Aritmatika, Studi Kasus Komersial, dan Penalaran Analitis. Pilih satu opsi jawaban yang paling tepat menurut Anda pada setiap soal.';
+          }
+        }
+      } else {
+        if (instrTitle) instrTitle.innerHTML = `<span>📋</span> Petunjuk Asesmen On-Site (${totalModules} Modul Tes)`;
+        if (instrDesc) {
+          let descHtml = `Asesmen ini terdiri dari <strong>${totalModules} bagian modul tes terintegrasi</strong>:`;
+          descHtml += `<ol style="margin: 8px 0 10px 20px; padding: 0; line-height: 1.65;">`;
+          activeModules.forEach((m, idx) => {
+            descHtml += `<li><strong>Bagian ${idx + 1}: ${m.title} (${m.countText})</strong> – ${m.shortInstr}</li>`;
+          });
+          descHtml += `</ol>Kerjakan seluruh bagian secara berurutan dan teliti sebelum mengirimkan hasil tes.`;
+          instrDesc.innerHTML = descHtml;
+        }
+      }
+
+      // 3. Toggle Instruction / Scale Guides
+      const likertGuide = document.getElementById('likertScaleGuide');
+      if (likertGuide) likertGuide.style.display = hasBigFive ? 'grid' : 'none';
+
+      const discGuide = document.getElementById('discGuide');
+      if (discGuide) discGuide.style.display = hasDisc ? 'block' : 'none';
+
+      const cognitiveGuide = document.getElementById('cognitiveGuide');
+      if (cognitiveGuide) cognitiveGuide.style.display = hasCognitive ? 'block' : 'none';
+
+      // 4. Render Sections in Order
+      let partCounter = 0;
+
+      // --- SECTION: BIG FIVE ---
+      if (hasBigFive) {
+        partCounter++;
+        const mod = activeModules.find(m => m.key === 'bigfive');
+        
+        // Render Section Header Divider
+        const secHeader = document.createElement('div');
+        secHeader.className = 'section-divider-card';
+        secHeader.style.borderLeftColor = mod.borderColor;
+        const partLabel = totalModules > 1 ? `BAGIAN ${partCounter} DARI ${totalModules}` : 'MODUL ASESMEN';
+        secHeader.innerHTML = `
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; color: ${mod.accentColor}; letter-spacing: 0.05em;">${partLabel}</div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin-top: 2px;">${mod.icon} ${mod.title}</h3>
+            <p style="font-size: 12px; color: #64748B; margin-top: 2px;">${mod.subtitle}</p>
+          </div>
+          <span class="category-chip" style="background:${mod.tagBg}; color:${mod.accentColor};">${mod.countText}</span>
+        `;
+        container.appendChild(secHeader);
+
+        // Render Big Five Questions
+        QUESTIONS.forEach((q, idx) => {
+          const qIndex = idx + 1;
+          const currentVal = userAnswers[q.id];
+
+          const card = document.createElement('div');
+          card.className = `question-card ${currentVal ? 'is-answered' : ''}`;
+          card.id = `qcard_${q.id}`;
+          card.setAttribute('tabindex', '0');
+
+          let optionsHtml = '';
+          for (let v = 1; v <= 5; v++) {
+            const isSel = currentVal === v;
+            optionsHtml += `
+              <button type="button" 
+                      class="likert-btn ${isSel ? 'selected' : ''}" 
+                      data-qid="${q.id}" 
+                      data-val="${v}"
+                      onclick="selectAnswer('${q.id}', ${v})">
+                <span class="likert-val">${v}</span>
+                <span class="likert-text">${LIKERT_LABELS[v]}</span>
+              </button>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="question-header">
+              <span class="question-num">#${qIndex}</span>
+              <div class="question-text">${q.text}</div>
+            </div>
+            <div class="likert-options" id="options_${q.id}">
+              ${optionsHtml}
+            </div>
+          `;
+
+          card.addEventListener('keydown', (e) => {
+            if (['1', '2', '3', '4', '5'].includes(e.key)) {
+              e.preventDefault();
+              selectAnswer(q.id, parseInt(e.key, 10));
+              const nextIdx = idx + 1;
+              if (nextIdx < QUESTIONS.length) {
+                const nextCard = document.getElementById(`qcard_${QUESTIONS[nextIdx].id}`);
+                if (nextCard) nextCard.focus();
+              }
+            }
+          });
+
+          container.appendChild(card);
+        });
+      }
+
+      // --- SECTION: DISC ---
+      if (hasDisc) {
+        partCounter++;
+        const mod = activeModules.find(m => m.key === 'disc');
+
+        // Render Section Header Divider
+        const secHeader = document.createElement('div');
+        secHeader.className = 'section-divider-card';
+        secHeader.style.borderLeftColor = mod.borderColor;
+        const partLabel = totalModules > 1 ? `BAGIAN ${partCounter} DARI ${totalModules}` : 'MODUL ASESMEN';
+        secHeader.innerHTML = `
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; color: ${mod.accentColor}; letter-spacing: 0.05em;">${partLabel}</div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin-top: 2px;">${mod.icon} ${mod.title}</h3>
+            <p style="font-size: 12px; color: #64748B; margin-top: 2px;">${mod.subtitle}</p>
+          </div>
+          <span class="category-chip" style="background:${mod.tagBg}; color:${mod.accentColor}; border-color:#DDD6FE;">${mod.countText}</span>
+        `;
+        container.appendChild(secHeader);
+
+        // Render DISC Questions
+        DISC_QUESTIONS.forEach((q, idx) => {
+          const qNum = idx + 1;
+          const currentAns = userAnswers[q.id] || {}; // { mostIdx: number, leastIdx: number }
+          const isAnswered = currentAns.mostIdx !== undefined && currentAns.leastIdx !== undefined;
+
+          const card = document.createElement('div');
+          card.className = `disc-card ${isAnswered ? 'is-answered' : ''}`;
+          card.id = `qcard_${q.id}`;
+
+          let rowsHtml = '';
+          q.options.forEach((opt, optIdx) => {
+            const isMost = currentAns.mostIdx === optIdx;
+            const isLeast = currentAns.leastIdx === optIdx;
+
+            rowsHtml += `
+              <tr>
+                <td style="width: 48px; text-align: center;">
+                  <button type="button" 
+                          class="disc-btn ${isMost ? 'selected-most' : ''}" 
+                          title="Paling sesuai dengan saya"
+                          onclick="selectDiscAnswer('${q.id}', 'most', ${optIdx})">
+                    M
+                  </button>
+                </td>
+                <td style="width: 48px; text-align: center;">
+                  <button type="button" 
+                          class="disc-btn ${isLeast ? 'selected-least' : ''}" 
+                          title="Paling tidak sesuai dengan saya"
+                          onclick="selectDiscAnswer('${q.id}', 'least', ${optIdx})">
+                    L
+                  </button>
+                </td>
+                <td>
+                  <div class="disc-statement-text">${escapeHtml(opt.text)}</div>
+                </td>
+              </tr>
+            `;
+          });
+
+          card.innerHTML = `
+            <div class="question-header" style="justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span class="question-num" style="background: #4C1D95; color: #DDD6FE;">#${qNum}</span>
+              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Pilih [M] = Paling Sesuai | [L] = Paling Tidak Sesuai</span>
+            </div>
+            <table class="disc-table">
+              <thead>
+                <tr>
+                  <th style="color: #059669;">[M] Most (+)</th>
+                  <th style="color: #DC2626;">[L] Least (-)</th>
+                  <th style="text-align: left; padding-left: 12px;">Pernyataan Karakteristik</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          `;
+
+          container.appendChild(card);
+        });
+      }
+
+      // --- SECTION: COGNITIVE & BUSINESS LOGIC ---
+      if (hasCognitive) {
+        partCounter++;
+        const mod = activeModules.find(m => m.key === 'cognitive');
+
+        // Render Section Header Divider
+        const secHeader = document.createElement('div');
+        secHeader.className = 'section-divider-card';
+        secHeader.style.borderLeftColor = mod.borderColor;
+        const partLabel = totalModules > 1 ? `BAGIAN ${partCounter} DARI ${totalModules}` : 'MODUL ASESMEN';
+        secHeader.innerHTML = `
+          <div>
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; color: ${mod.accentColor}; letter-spacing: 0.05em;">${partLabel}</div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin-top: 2px;">${mod.icon} ${mod.title}</h3>
+            <p style="font-size: 12px; color: #64748B; margin-top: 2px;">${mod.subtitle}</p>
+          </div>
+          <span class="category-chip" style="background:${mod.tagBg}; color:${mod.accentColor}; border-color:#A7F3D0;">${mod.countText}</span>
+        `;
+        container.appendChild(secHeader);
+
+        const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+        COGNITIVE_QUESTIONS.forEach((q, idx) => {
+          const qNum = idx + 1;
+          const currentAns = userAnswers[q.id];
+
+          const card = document.createElement('div');
+          card.className = `question-card ${currentAns ? 'is-answered' : ''}`;
+          card.id = `qcard_${q.id}`;
+          card.setAttribute('tabindex', '0');
+
+          let mcOptionsHtml = '';
+          (q.options || []).forEach((optText, optIdx) => {
+            const letter = LETTERS[optIdx] || String(optIdx + 1);
+            const isSel = (currentAns === optText);
+            mcOptionsHtml += `
+              <button type="button" 
+                      class="mc-btn ${isSel ? 'selected' : ''}" 
+                      onclick="selectCognitiveAnswer('${q.id}', '${escapeJsAttr(optText)}')">
+                <span class="mc-letter">${letter}</span>
+                <span class="mc-text">${escapeHtml(optText)}</span>
+              </button>
+            `;
+          });
+
+          card.innerHTML = `
+            <div class="question-header" style="justify-content: space-between; align-items: flex-start;">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span class="question-num" style="background: #064E3B; color: #A7F3D0;">#${qNum}</span>
+                <div class="question-text" style="font-size: 14.5px;">${escapeHtml(q.question)}</div>
+              </div>
+              <span class="category-chip">${escapeHtml(q.category || 'Kognitif')}</span>
+            </div>
+            <div class="mc-options" style="margin-top: 14px;">
+              ${mcOptionsHtml}
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeJsAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function selectAnswer(qid, val) {
+      userAnswers[qid] = val;
+
+      const card = document.getElementById(`qcard_${qid}`);
+      if (card) {
+        card.classList.add('is-answered');
+        card.classList.remove('pulse-highlight');
+        const btns = card.querySelectorAll('.likert-btn');
+        btns.forEach(btn => {
+          const bVal = parseInt(btn.getAttribute('data-val'), 10);
+          btn.classList.toggle('selected', bVal === val);
+        });
+      }
+
+      persistUserAnswers();
+      flashAutosaveIndicator();
+      updateProgress();
+    }
+
+    
+    function selectDiscAnswer(qid, type, optIdx) {
+      if (!userAnswers[qid] || typeof userAnswers[qid] !== 'object') {
+        userAnswers[qid] = {};
+      }
+
+      if (type === 'most') {
+        // If this option was already least, unset least
+        if (userAnswers[qid].leastIdx === optIdx) {
+          delete userAnswers[qid].leastIdx;
+        }
+        userAnswers[qid].mostIdx = optIdx;
+      } else if (type === 'least') {
+        // If this option was already most, unset most
+        if (userAnswers[qid].mostIdx === optIdx) {
+          delete userAnswers[qid].mostIdx;
+        }
+        userAnswers[qid].leastIdx = optIdx;
+      }
+
+      // Re-render this specific card only for performance
+      const card = document.getElementById(`qcard_${qid}`);
+      if (card) {
+        const q = DISC_QUESTIONS.find(item => item.id === qid);
+        if (q) {
+          const isAnswered = userAnswers[qid].mostIdx !== undefined && userAnswers[qid].leastIdx !== undefined;
+          card.classList.toggle('is-answered', isAnswered);
+          card.classList.remove('pulse-highlight');
+
+          const rows = card.querySelectorAll('tbody tr');
+          rows.forEach((tr, rIdx) => {
+            const btnM = tr.querySelectorAll('.disc-btn')[0];
+            const btnL = tr.querySelectorAll('.disc-btn')[1];
+            if (btnM) btnM.classList.toggle('selected-most', userAnswers[qid].mostIdx === rIdx);
+            if (btnL) btnL.classList.toggle('selected-least', userAnswers[qid].leastIdx === rIdx);
+          });
+        }
+      }
+
+      persistUserAnswers();
+      flashAutosaveIndicator();
+      updateProgress();
+    }
+
+    function selectCognitiveAnswer(qid, chosenOption) {
+      userAnswers[qid] = chosenOption;
+
+      const card = document.getElementById(`qcard_${qid}`);
+      if (card) {
+        card.classList.add('is-answered');
+        card.classList.remove('pulse-highlight');
+        const btns = card.querySelectorAll('.mc-btn');
+        btns.forEach(btn => {
+          const textEl = btn.querySelector('.mc-text');
+          const isSelected = textEl && textEl.textContent.trim() === chosenOption.trim();
+          btn.classList.toggle('selected', Boolean(isSelected));
+        });
+      }
+
+      persistUserAnswers();
+      flashAutosaveIndicator();
+      updateProgress();
+    }
+
+    function persistUserAnswers() {
+      try {
+        sessionStorage.setItem('ipip_answers_' + candidateId, JSON.stringify(userAnswers));
+      } catch (e) {}
+    }
+
+    function flashAutosaveIndicator() {
+      const el = document.getElementById('autosaveIndicator');
+      if (!el) return;
+      el.style.opacity = '1';
+      clearTimeout(window._autoSaveTimer);
+      window._autoSaveTimer = setTimeout(() => {
+        el.style.opacity = '0.7';
+      }, 1500);
+    }
+
+    function updateProgress() {
+      const activeQuestions = getActiveQuestions();
+      const total = activeQuestions.length;
+      let answeredCount = 0;
+
+      activeQuestions.forEach(q => {
+        const ans = userAnswers[q.id];
+        if (q._type === 'disc') {
+          if (ans && typeof ans === 'object' && ans.mostIdx !== undefined && ans.leastIdx !== undefined) {
+            answeredCount++;
+          }
+        } else {
+          if (ans !== undefined && ans !== null && ans !== '') {
+            answeredCount++;
+          }
+        }
+      });
+
+      const pct = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
+
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressText').textContent = `${answeredCount} / ${total} (${pct}%)`;
+
+      const remaining = total - answeredCount;
+      const statusText = document.getElementById('submitStatusText');
+      if (statusText) {
+        if (remaining === 0 && total > 0) {
+          statusText.innerHTML = `<strong style="color: var(--accent-emerald);">✓ Seluruh ${total} pertanyaan telah dijawab! Anda siap mengirimkan tes.</strong>`;
+          document.getElementById('unansweredBanner').style.display = 'none';
+        } else {
+          statusText.innerHTML = `Tersisa <strong>${remaining}</strong> pertanyaan yang belum terjawab.`;
+        }
+      }
+    }
+
+    // Calculation Engine (Standard IPIP Reverse-Keyed scoring)
+    
+    // Calculation Engine for Cognitive & Commercial Aptitude Test
+    
+    // Calculation Engine for DISC (24 Items Ipsative Most / Least)
+    function calculateDiscScores(answers) {
+      const tally = {
+        most: { D: 0, I: 0, S: 0, C: 0 },
+        least: { D: 0, I: 0, S: 0, C: 0 },
+        change: { D: 0, I: 0, S: 0, C: 0 } // Most - Least
+      };
+
+      DISC_QUESTIONS.forEach(q => {
+        const ans = answers[q.id];
+        if (ans && typeof ans === 'object') {
+          // Most selection
+          if (ans.mostIdx !== undefined && q.options[ans.mostIdx]) {
+            const traitM = q.options[ans.mostIdx].most;
+            if (tally.most[traitM] !== undefined) tally.most[traitM] += 1;
+          }
+          // Least selection
+          if (ans.leastIdx !== undefined && q.options[ans.leastIdx]) {
+            const traitL = q.options[ans.leastIdx].least;
+            if (tally.least[traitL] !== undefined) tally.least[traitL] += 1;
+          }
+        }
+      });
+
+      ['D', 'I', 'S', 'C'].forEach(dim => {
+        tally.change[dim] = tally.most[dim] - tally.least[dim];
+      });
+
+      // Determine Primary and Secondary Traits based on change score
+      const sortedTraits = ['D', 'I', 'S', 'C'].sort((a, b) => tally.change[b] - tally.change[a]);
+      const primary = sortedTraits[0];
+      const secondary = sortedTraits[1];
+      const profilePattern = primary + (tally.change[secondary] > 0 ? secondary.toLowerCase() : '');
+
+      const traitNames = {
+        D: 'Dominance (Eksekutor & Tegas)',
+        I: 'Influence (Komunikator & Persuasif)',
+        S: 'Steadiness (Stabil & Harmonis)',
+        C: 'Conscientiousness (Analitis & Presisi)'
+      };
+
+      const traitSummary = {
+        D: 'Cenderung mandiri, cepat mengambil keputusan, berani menghadapi tantangan, dan berfokus kuat pada pencapaian target.',
+        I: 'Cenderung antusias, ramah, persuasif, membangun hubungan interpersonal dengan cepat, dan membawa energi positif ke dalam tim.',
+        S: 'Cenderung sabar, pendengar yang baik, dapat diandalkan menjaga konsistensi kerja, loyal, dan menjaga ketenangan suasana kerja.',
+        C: 'Cenderung cermat, teliti memeriksa detail, taat aturan dan SOP baku, serta memastikan standar mutu kerja yang tinggi.'
+      };
+
+      return {
+        tally: tally,
+        primary: primary,
+        secondary: secondary,
+        profilePattern: profilePattern,
+        primaryName: traitNames[primary] || primary,
+        summary: traitSummary[primary] || ''
+      };
+    }
+
+    function calculateCognitiveScores(answers) {
+      let correctCount = 0;
+      const total = COGNITIVE_QUESTIONS.length; // 15
+      const categoryStats = {
+        "Deret Angka": { total: 0, correct: 0 },
+        "Aritmatika Dasar": { total: 0, correct: 0 },
+        "Logika Komersial": { total: 0, correct: 0 },
+        "Analisis Data": { total: 0, correct: 0 },
+        "Silogisme": { total: 0, correct: 0 },
+        "Penalaran Kritis": { total: 0, correct: 0 }
+      };
+
+      const itemDetails = [];
+
+      COGNITIVE_QUESTIONS.forEach(q => {
+        const cat = q.category || 'Lainnya';
+        if (!categoryStats[cat]) categoryStats[cat] = { total: 0, correct: 0 };
+        categoryStats[cat].total += 1;
+
+        const candidateAns = answers[q.id] || null;
+        const isCorrect = String(candidateAns).trim() === String(q.correct_answer).trim();
+
+        if (isCorrect) {
+          correctCount += 1;
+          categoryStats[cat].correct += 1;
+        }
+
+        itemDetails.push({
+          id: q.id,
+          category: cat,
+          question: q.question,
+          candidateAnswer: candidateAns,
+          correctAnswer: q.correct_answer,
+          isCorrect: isCorrect,
+          explanation: q.explanation || ''
+        });
+      });
+
+      const percentage = Math.round((correctCount / total) * 100);
+
+      let level = 'Kurang';
+      if (percentage >= 85) level = 'Sangat Unggul';
+      else if (percentage >= 70) level = 'Kompeten / Baik';
+      else if (percentage >= 50) level = 'Cukup';
+
+      return {
+        score: correctCount,
+        total: total,
+        percentage: percentage,
+        level: level,
+        categories: categoryStats,
+        items: itemDetails
+      };
+    }
+
+    function calculateBigFiveScores(answers) {
+      const dimensions = {
+        Extraversion: { raw: 0, items: [] },
+        Agreeableness: { raw: 0, items: [] },
+        Conscientiousness: { raw: 0, items: [] },
+        "Emotional Stability": { raw: 0, items: [] },
+        Intellect: { raw: 0, items: [] }
+      };
+
+      QUESTIONS.forEach(q => {
+        const val = Number(answers[q.id]);
+        let scoredVal = val;
+        
+        // Reverse scoring logic for negative items: (6 - Likert Value)
+        if (q.scoring_key === 'negative') {
+          scoredVal = 6 - val;
+        }
+
+        dimensions[q.dimension].raw += scoredVal;
+        dimensions[q.dimension].items.push({
+          id: q.id,
+          rawAnswer: val,
+          scoredVal: scoredVal,
+          scoring_key: q.scoring_key
+        });
+      });
+
+      function categorize(pct) {
+        if (pct < 45) return 'Rendah';
+        if (pct <= 65) return 'Sedang';
+        if (pct <= 85) return 'Tinggi';
+        return 'Sangat Tinggi';
+      }
+
+      function formatTrait(raw) {
+        // Raw range for 10 items: 10 to 50
+        const percentage = Math.round(((raw - 10) / 40) * 100);
+        return {
+          rawScore: raw,
+          percentage: Math.max(0, Math.min(100, percentage)),
+          level: categorize(percentage)
+        };
+      }
+
+      return {
+        extraversion: formatTrait(dimensions['Extraversion'].raw),
+        agreeableness: formatTrait(dimensions['Agreeableness'].raw),
+        conscientiousness: formatTrait(dimensions['Conscientiousness'].raw),
+        emotionalStability: formatTrait(dimensions['Emotional Stability'].raw),
+        intellect: formatTrait(dimensions['Intellect'].raw)
+      };
+    }
+
+    async function handleVerifyAndSubmit() {
+      const activeQuestions = getActiveQuestions();
+      const unanswered = activeQuestions.filter(q => {
+        const val = userAnswers[q.id];
+        if (q._type === 'disc') {
+          return !val || typeof val !== 'object' || val.mostIdx === undefined || val.leastIdx === undefined;
+        }
+        return val === undefined || val === null || val === '';
+      });
+
+      if (unanswered.length > 0) {
+        showUnansweredBanner(unanswered);
+        return;
+      }
+
+      // Confirmation Prompt
+      const confirmed = window.confirm(
+        `Apakah Anda yakin telah mengisi semua ${activeQuestions.length} pertanyaan dengan teliti dan ingin mengirimkan hasil asesmen ini?`
+      );
+      if (!confirmed) return;
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Menyimpan respon...</span> <div class="spinner" style="width:16px; height:16px; border-width:2px;"></div>`;
+
+      try {
+        const now = Date.now();
+        const payload = {
+          completedAt: now,
+          status: 'completed',
+          enabledTests: enabledTests,
+          totalQuestions: activeQuestions.length,
+          answeredCount: activeQuestions.length,
+          answers: userAnswers
+        };
+
+        if (enabledTests.includes('bigfive')) {
+          payload.scores = calculateBigFiveScores(userAnswers);
+        }
+
+        if (enabledTests.includes('cognitive')) {
+          payload.cognitive = calculateCognitiveScores(userAnswers);
+        }
+
+        if (enabledTests.includes('disc')) {
+          payload.disc = calculateDiscScores(userAnswers);
+        }
+
+        // Write to Firebase Realtime Database
+        await rtdb.ref('candidate_assessments/' + candidateId).set(payload);
+
+        try {
+          await rtdb.ref('talents/' + candidateId + '/assessment').set(payload);
+        } catch (e1) {}
+
+        // Clear local session storage
+        try {
+          sessionStorage.removeItem('ipip_answers_' + candidateId);
+        } catch (e) {}
+
+        showCompletionScreen();
+
+      } catch (err) {
+        console.error('Gagal menyimpan hasil tes', err);
+        alert('Terjadi kesalahan saat menyimpan respon: ' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Kirim Jawaban Asesmen</span>`;
+      }
+    }
+
+    function showUnansweredBanner(unanswered) {
+      const banner = document.getElementById('unansweredBanner');
+      const chipsContainer = document.getElementById('unansweredChips');
+      const titleText = document.getElementById('unansweredTitleText');
+
+      titleText.textContent = `Masih ada ${unanswered.length} pertanyaan yang belum Anda jawab:`;
+      chipsContainer.innerHTML = '';
+
+      unanswered.forEach(q => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'unanswered-chip';
+        let typeLabel = 'Big Five';
+        if (q._type === 'disc') typeLabel = 'DISC';
+        else if (q._type === 'cognitive') typeLabel = 'Kognitif';
+        chip.textContent = `#${q._num} (${typeLabel})`;
+        chip.onclick = () => {
+          const targetCard = document.getElementById(`qcard_${q.id}`);
+          if (targetCard) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetCard.classList.remove('pulse-highlight');
+            void targetCard.offsetWidth; // trigger reflow
+            targetCard.classList.add('pulse-highlight');
+            targetCard.focus();
+          }
+        };
+        chipsContainer.appendChild(chip);
+      });
+
+      banner.style.display = 'block';
+      banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function showCompletionScreen(isAlreadyCompleted = false) {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      document.getElementById('topHeader').style.display = 'none';
+      document.getElementById('mainContainer').style.display = 'none';
+      
+      const comp = document.getElementById('completionScreen');
+      if (isAlreadyCompleted) {
+        comp.querySelector('.completion-title').textContent = 'Asesmen Sudah Pernah Diisi';
+        comp.querySelector('.completion-desc').textContent = 'Kandidat ini telah menyelesaikan seluruh rangkaian asesmen yang ditugaskan sebelumnya. Jawaban telah tersimpan di sistem.';
+      }
+      comp.style.display = 'flex';
+    }
+
+    // Run on page load
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

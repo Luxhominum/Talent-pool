@@ -13,8 +13,12 @@
       ".write": "auth != null"
     },
     "talents": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": true,
+      ".write": true
+    },
+    "candidate_assessments": {
+      ".read": true,
+      ".write": true
     },
     "metadata": {
       ".read": true,

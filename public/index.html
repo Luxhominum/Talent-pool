@@ -27,6 +27,8 @@
   </script>
 
   <style>
+    
+    body { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size: 24px;'><text y='24'>🥡</text></svg>"), auto; }
     :root {
       /* Clean Editorial / Swiss Minimalist Design Tokens */
       --bg-canvas: #F8F9FA;
@@ -1261,9 +1263,7 @@
 
     /* Floating Messenger Trigger & Panel */
     .messenger-trigger {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
+      position: relative;
       z-index: 1050;
       display: flex;
       align-items: center;
@@ -1467,6 +1467,8 @@
       perspective: 1200px;
       pointer-events: none;
       user-select: none;
+    }
+      100% { transform: translateX(110vw); }
     }
     
     .psyduck-speech-bubble {
@@ -1695,6 +1697,71 @@
       0% { opacity: 1; transform: translate3d(0, 0, 0) scale(0.6); }
       100% { opacity: 0; transform: translate3d(var(--tx), var(--ty), 0) scale(1.4) rotate(var(--rot)); }
     }
+  
+    .outreach-status-pill {
+      appearance: none;
+      background-color: var(--bg-element);
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      padding: 4px 20px 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      transition: all 0.2s ease;
+    }
+    .outreach-status-pill:hover { filter: brightness(0.95); }
+    .status-pending { background-color: #F3F4F6; color: #4B5563; border-color: #D1D5DB; }
+    .status-wa-sent { background-color: #DBEAFE; color: #1D4ED8; border-color: #BFDBFE; }
+    .status-confirmed { background-color: #DCFCE7; color: #166534; border-color: #BBF7D0; }
+    .status-cant-attend { background-color: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+    .status-tidak-hadir { background-color: #FEE2E2; color: #991B1B; border-color: #FECACA; font-weight: 600; }
+    .bottom-actions-dock {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1050;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .floating-chicken-toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1F2937;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(0, 0, 0, 0.12);
+      border-radius: 9999px;
+      box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      white-space: nowrap;
+    }
+    .floating-chicken-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px -4px rgba(0, 0, 0, 0.2);
+      background: #FFFFFF;
+      border-color: rgba(0, 0, 0, 0.2);
+    }
+    .floating-chicken-toggle.is-paused {
+      background: #FEF3C7;
+      border-color: #F59E0B;
+      color: #92400E;
+    }
+    .status-reschedule { background-color: #FEF3C7; color: #D97706; border-color: #FDE68A; }
+
   </style>
 </head>
 <body>
@@ -1769,6 +1836,20 @@
         <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV" onclick="handleExportCSV()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           Export CSV
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenScheduleModal" onclick="openFinalScheduleModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Interview Schedule
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnOpenScheduleModal" onclick="openFinalScheduleModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 500;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Interview Schedule
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnAssessmentPortal" onclick="openAssessmentLauncherModal()" style="border-color: #111827; color: #111827; font-weight: 600; background: #FFFFFF; display: inline-flex; align-items: center; gap: 6px;">
+          <span>🧠</span> Portal Asesmen On-Site
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnNavToggleChicken" onclick="toggleChickenRunning(event)" title="Nyalakan / Matikan kejar kursor maskot ayam" style="display: inline-flex; align-items: center; gap: 5px; font-weight: 500;">
+          🐥 <span id="btnNavToggleChickenText">Pause Ayam</span>
         </button>
         <button type="button" class="btn btn-secondary btn-sm" id="btnManageWhitelist" onclick="openWhitelistModal()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -1961,116 +2042,153 @@
 
       <!-- 4. WhatsApp Broadcast Center & Schedule Coordinator -->
       <div id="broadcastContainer" class="broadcast-container" style="display: none;">
-        <!-- Top Control: Schedule & Custom Message Composer -->
-        <div class="broadcast-control-card">
-          <!-- Left: Schedule Parameters & Target Audience -->
-          <div>
-            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #16A34A; margin-bottom: 12px;">
-              📅 1. Interview Schedule &amp; Target Slot
-            </div>
+        <!-- High-End Sub-Tabs Navigation -->
+        <div style="border-bottom: 1px solid var(--border-light); margin-bottom: 24px; padding: 0 20px;">
+          <div style="display: flex; gap: 24px;">
+            <button type="button" class="bc-tab-btn active" onclick="switchBcTab('queue')" id="bcNavQueue" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: #2563EB; border-bottom: 2px solid #2563EB;">1. Candidate Queue</button>
+            <button type="button" class="bc-tab-btn" onclick="switchBcTab('automation')" id="bcNavAutomation" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">2. Smart Scheduling</button>
+            <button type="button" class="bc-tab-btn" onclick="switchBcTab('template')" id="bcNavTemplate" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">3. Message Template</button>
+          </div>
+        </div>
 
-            <div class="form-group">
-              <label class="form-label">Target Candidate Stage:</label>
-              <select id="bcStageFilter" class="form-select" onchange="renderBroadcastTable()">
-                <option value="ALL">All Active Candidates</option>
-                <option value="Screening" selected>Screening Candidates Only</option>
-                <option value="Prospect">Prospect Candidates</option>
-                <option value="Interviewed">Interviewed Candidates</option>
-                <option value="Shortlisted">Shortlisted Candidates</option>
-                <option value="Hired">Hired Candidates</option>
-              </select>
+        <!-- TAB 1: QUEUE -->
+        <div id="bcTabQueue" style="display: block;">
+          <div class="table-container">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
+              <div>
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Broadcast Outreach Queue</h3>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                  Select candidates for the outreach sequence. Smart scheduling will assign times sequentially.
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="bcStageFilter" class="form-select" onchange="renderBroadcastTable()" style="font-size: 12px; padding: 6px 10px;">
+                  <option value="ALL">All Active Candidates</option>
+                  <option value="Screening" selected>Screening Candidates Only</option>
+                  <option value="Prospect">Prospect Candidates</option>
+                  <option value="Interviewed">Interviewed Candidates</option>
+                  <option value="Shortlisted">Shortlisted Candidates</option>
+                  <option value="Hired">Hired Candidates</option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="recalculateBroadcastSlots(true)" title="Hitung ulang jam interview berurutan dari jam awal" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; font-weight: 500; cursor: pointer;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                  Recalculate Slots
+                </button>
+                <div style="font-family: var(--font-mono); font-size: 12px;">
+                  Queue: <span id="bcQueueCount" style="font-weight: 600; color: #16A34A;">0</span> selected
+                </div>
+              </div>
             </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">
+                    <input type="checkbox" id="bcSelectAll" checked onchange="toggleSelectAllBroadcast(this.checked)">
+                  </th>
+                  <th>Candidate Profile</th>
+                  <th>Stage</th>
+                  <th>WhatsApp Number</th>
+                  <th>Assigned Schedule</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="bcTableBody"></tbody>
+            </table>
+          </div>
+        </div>
 
-            <div class="form-row-2">
+        <!-- TAB 2: AUTOMATION SETTINGS -->
+        <div id="bcTabAutomation" style="display: none; padding: 0 20px;">
+          <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 600px;">
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #16A34A; margin-bottom: 12px;">
+                ⚙️ Smart Scheduling Parameters
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Set the base time and interval. Candidates in the queue will be automatically assigned sequential time slots to avoid overlap.</p>
+
               <div class="form-group">
                 <label class="form-label">Interview Date:</label>
-                <input type="date" id="bcDateInput" class="form-input" onchange="updateBroadcastPreview()">
+                <input type="date" id="bcDateInput" class="form-input" onchange="renderBroadcastTable()">
               </div>
+              
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Base Start Time:</label>
+                  <input type="time" id="bcTimeInput" class="form-input" value="09:00" onchange="renderBroadcastTable()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Interval (mins) per candidate:</label>
+                  <input type="number" id="bcIntervalInput" class="form-input" value="30" min="5" oninput="renderBroadcastTable()">
+                </div>
+              </div>
+
               <div class="form-group">
-                <label class="form-label">Interview Time / Slot:</label>
-                <input type="text" id="bcTimeInput" class="form-input" value="10:00 WIB" placeholder="e.g. 10:00 WIB" oninput="updateBroadcastPreview()">
+                <label class="form-label">Interview Location (Onsite):</label>
+                <input type="text" id="bcLocationInput" class="form-input" value="s.id/lokasipge" placeholder="e.g. s.id/lokasipge" oninput="renderBroadcastTable()">
               </div>
-            </div>
 
-            <div class="form-group">
-              <label class="form-label">Meeting Link / Location:</label>
-              <input type="text" id="bcLocationInput" class="form-input" value="Google Meet: https://meet.google.com/pge-interview" placeholder="e.g. Google Meet link or Kantor PGE Surakarta" oninput="updateBroadcastPreview()">
-            </div>
-
-            <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px;">
-              <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; color: #166534;">
-                <input type="checkbox" id="bcAutoUpdateStage" checked style="margin-top: 2px;">
-                <span><strong>Auto-Sync ke Appwrite:</strong> Otomatis simpan catatan jadwal &amp; ubah status kandidat ke <em>Interviewed</em> saat pesan dikirim.</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Right: Custom Message Composer Box -->
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF;">
-                💬 2. Custom Message Box
+              <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px;">
+                <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; color: #166534;">
+                  <input type="checkbox" id="bcAutoUpdateStage" checked style="margin-top: 2px;">
+                  <span><strong>Auto-Sync ke Appwrite:</strong> Otomatis simpan catatan jadwal &amp; ubah status kandidat ke <em>Interviewed</em> saat pesan dikirim.</span>
+                </label>
               </div>
-              <select id="bcTemplateSelect" class="form-select" style="width: auto; padding: 4px 8px; font-size: 11px;" onchange="handleBroadcastTemplateChange()">
-                <option value="interview">Template: Undangan Interview</option>
-                <option value="screening">Template: Follow-up Screening</option>
-                <option value="offering">Template: Pemberitahuan Shortlist</option>
-                <option value="custom">Template: Pesan Kustom Bebas</option>
-              </select>
-            </div>
-
-            <div style="margin-bottom: 8px;">
-              <span style="font-size: 11px; color: var(--text-muted); margin-right: 6px;">Insert Variable:</span>
-              <div style="display: inline-flex; gap: 4px; flex-wrap: wrap;">
-                <span class="variable-chip" onclick="insertVariableIntoMessage('{name}')">{name}</span>
-                <span class="variable-chip" onclick="insertVariableIntoMessage('{role}')">{role}</span>
-                <span class="variable-chip" onclick="insertVariableIntoMessage('{date}')">{date}</span>
-                <span class="variable-chip" onclick="insertVariableIntoMessage('{time}')">{time}</span>
-                <span class="variable-chip" onclick="insertVariableIntoMessage('{location}')">{location}</span>
+              <div style="display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+                <button type="button" class="btn btn-primary" id="btnSaveScheduleSettings" onclick="handleSaveScheduleSettings()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; background: #16A34A; border-color: #16A34A; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 8px 16px; cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  Simpan Pengaturan Jadwal
+                </button>
               </div>
-            </div>
-
-            <textarea id="bcCustomMessage" class="form-textarea" rows="7" style="font-family: var(--font-sans); font-size: 12px; line-height: 1.6;" oninput="updateBroadcastPreview()"></textarea>
-
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic;">
-              💡 Variabel di atas otomatis diganti sesuai data kandidat dan jadwal yang Anda atur.
             </div>
           </div>
         </div>
 
-        <!-- Broadcast Queue Table -->
-        <div class="table-container">
-          <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
+        <!-- TAB 3: MESSAGE TEMPLATE -->
+        <div id="bcTabTemplate" style="display: none; padding: 0 20px;">
+          <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 800px;">
             <div>
-              <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Broadcast Outreach Queue</h3>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
-                Antrean pengiriman pesan WhatsApp resmi ke kandidat yang dipilih.
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF;">
+                  📝 Custom Message Box
+                </div>
+                <select id="bcTemplateSelect" class="form-select" style="width: auto; padding: 4px 8px; font-size: 11px;" onchange="handleBroadcastTemplateChange()">
+                  <option value="interview">Template: Undangan Interview</option>
+                  <option value="screening">Template: Follow-up Screening</option>
+                  <option value="offering">Template: Pemberitahuan Shortlist</option>
+                  <option value="custom">Template: Pesan Kustom Bebas</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--text-muted); margin-right: 6px;">Insert Variable:</span>
+                <div style="display: inline-flex; gap: 4px; flex-wrap: wrap;">
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{name}')">{name}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{role}')">{role}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{date}')">{date}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{time}')">{time}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{location}')">{location}</span>
+                </div>
+              </div>
+
+              <textarea id="bcCustomMessage" class="form-textarea" rows="10" style="font-family: var(--font-sans); font-size: 13px; line-height: 1.6;"></textarea>
+
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic;">
+                💡 Variabel di atas otomatis diganti sesuai data kandidat dan slot waktu mereka.
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+                <span style="font-size: 12px; color: var(--text-muted);">
+                  Format template pesan akan disimpan dan digunakan saat klik &ldquo;Send to WA&rdquo;.
+                </span>
+                <button type="button" class="btn btn-primary" id="btnSaveTemplateSettings" onclick="handleSaveTemplateSettings()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; background: #2563EB; border-color: #2563EB; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 8px 16px; cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  Simpan Template Pesan
+                </button>
               </div>
             </div>
-            <div style="font-family: var(--font-mono); font-size: 12px;">
-              Queue: <span id="bcQueueCount" style="font-weight: 600; color: #16A34A;">0</span> candidate(s) ready
-            </div>
           </div>
-
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th style="width: 40px; text-align: center;">
-                  <input type="checkbox" id="bcSelectAll" checked onchange="toggleSelectAllBroadcast(this.checked)">
-                </th>
-                <th>Candidate Profile</th>
-                <th>Stage</th>
-                <th>WhatsApp Number</th>
-                <th>Resolved Message Preview</th>
-                <th style="text-align: right;">Action &amp; Tracking</th>
-              </tr>
-            </thead>
-            <tbody id="bcTableBody"></tbody>
-          </table>
         </div>
       </div>
-
-      <div id="emptyState" class="empty-state" style="display: none;">
+<div id="emptyState" class="empty-state" style="display: none;">
         <p style="font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text-primary);">No candidates match your filter.</p>
         <button type="button" class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset Filters</button>
       </div>
@@ -2107,6 +2225,365 @@
     <button type="button" class="btn btn-secondary btn-sm" style="background: transparent; color: #9CA3AF; border-color: rgba(255,255,255,0.2);" onclick="clearComparison()">Clear</button>
   </div>
 
+  
+  <!-- Reschedule Modal -->
+  <div class="modal-backdrop" id="rescheduleModalBackdrop" style="display: none; z-index: 2000;" onclick="if(event.target === this) closeRescheduleModal()">
+    <div class="modal-card" style="max-width: 400px;">
+      <div class="modal-header">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Update Schedule</span>
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Reschedule Interview</h2>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeRescheduleModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+          Enter the new agreed date and time for the candidate. This will be recorded in their profile notes.
+        </p>
+        <div class="form-group">
+          <label class="form-label">New Date</label>
+          <input type="date" id="rescheduleDate" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Time</label>
+          <input type="time" id="rescheduleTime" class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-secondary" onclick="closeRescheduleModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitReschedule()" style="background: #D97706; color: white; border-color: #D97706;">Save Reschedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final Interview Schedule Modal -->
+  <div class="modal-backdrop" id="finalScheduleModalBackdrop" style="display: none; z-index: 2100;" onclick="if(event.target === this) closeFinalScheduleModal()">
+    <div class="modal-card" style="max-width: 860px; width: 92%; max-height: 88vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+      <!-- Header -->
+      <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid var(--border-light); background: #FFFFFF;">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #2563EB; font-weight: 600;">Master Agenda</span>
+          <h2 style="font-size: 19px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">Final Interview Schedule</h2>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Jadwal sesi interview seluruh kandidat terkonfirmasi & terjadwal secara kronologis.</p>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeFinalScheduleModal()" style="cursor: pointer;">✕</button>
+      </div>
+
+      <!-- Controls & Metrics Bar -->
+      <div style="padding: 12px 24px; background: #F9FAFB; border-bottom: 1px solid var(--border-light); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px; flex-wrap: wrap;">
+          <input type="text" id="schedSearchInput" class="form-input" placeholder="Cari nama / ID..." oninput="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 6px 12px; max-width: 180px;">
+          <select id="schedDateFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 6px 10px;">
+            <option value="ALL">Semua Tanggal</option>
+          </select>
+          <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 6px 10px; font-weight: 500; color: #166534; background: #F0FDF4; border-color: #BBF7D0;">
+            <option value="CONFIRMED_ONLY" selected>✅ Hanya Konfirmasi Hadir (Confirmed &amp; Reschedule)</option>
+            <option value="ALL">Semua Sesi Wawancara (Termasuk WA Sent)</option>
+            <option value="TIDAK_HADIR">❌ Tidak Hadir / No-Show</option>
+          </select>
+        </div>
+        <div id="schedSummaryBadges" style="display: flex; gap: 8px; font-family: var(--font-mono); font-size: 11px; flex-wrap: wrap;">
+          <!-- Dynamically populated badges -->
+        </div>
+      </div>
+
+      <!-- Scrollable Timeline Body -->
+      <div class="modal-body" id="finalScheduleAgendaBody" style="padding: 20px 24px; overflow-y: auto; flex: 1; max-height: calc(88vh - 180px); background: #FAFAFA;">
+        <!-- Dynamically populated cards -->
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
+        <div style="font-size: 12px; color: var(--text-secondary);" id="schedFooterSummary">
+          Total sessions
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="copyScheduleAgendaText()" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Salin Teks Agenda
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeFinalScheduleModal()" style="cursor: pointer;">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Post-Interview Evaluation Modal -->
+  <div class="modal-backdrop" id="postInterviewModalBackdrop" style="display: none; z-index: 2200;" onclick="if(event.target === this) closePostInterviewModal()">
+    <div class="modal-card" style="max-width: 520px; width: 92%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 12px; overflow: hidden; padding: 0;">
+      <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid var(--border-light); background: #FFFFFF;">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #4F46E5; font-weight: 600;">Post-Interview Adjustment</span>
+          <h2 id="postInterviewCandidateName" style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">Evaluasi Hasil Wawancara</h2>
+          <div id="postInterviewCandidateSub" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">PGE-000 • Role</div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closePostInterviewModal()" style="cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; background: #FAFAFA;">
+        <!-- Status Kehadiran Wawancara -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Status Kehadiran Kandidat:</label>
+          <select id="postInterviewAttendance" class="form-select" onchange="handlePostInterviewAttendanceChange(this.value)" style="margin-top: 4px; font-size: 12px; font-weight: 500; background: #FFFFFF;">
+            <option value="Confirmed">✅ Hadir Wawancara (Sesuai Jadwal)</option>
+            <option value="Tidak Hadir">❌ Tidak Hadir / No-Show (Gugurkan)</option>
+            <option value="Reschedule">🔄 Minta Reschedule (Atur Ulang Jadwal)</option>
+          </select>
+        </div>
+
+        <!-- Keputusan Tahap (Stage) -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Keputusan / Pindahkan ke Tahap:</label>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px;" id="postInterviewStageOptions">
+            <button type="button" class="stage-opt-btn active" data-stage="Shortlisted" onclick="selectPostInterviewStage('Shortlisted')" style="padding: 10px; border-radius: 8px; border: 1.5px solid #2563EB; background: #EFF6FF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
+              <div style="font-weight: 600; font-size: 12px; color: #1D4ED8;">⭐ Shortlisted</div>
+              <div style="font-size: 10px; color: #3B82F6; margin-top: 2px;">Lolos ke tahap shortlist</div>
+            </button>
+            <button type="button" class="stage-opt-btn" data-stage="Offered" onclick="selectPostInterviewStage('Offered')" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #FFFFFF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
+              <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">💼 Offering</div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Penawaran kerja / kontrak</div>
+            </button>
+            <button type="button" class="stage-opt-btn" data-stage="Hired" onclick="selectPostInterviewStage('Hired')" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #FFFFFF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
+              <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">🎉 Hired</div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Resmi diterima bergabung</div>
+            </button>
+            <button type="button" class="stage-opt-btn" data-stage="Archived" onclick="selectPostInterviewStage('Archived')" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #FFFFFF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
+              <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">📁 Archived / Gugur</div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Belum sesuai kriteria</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rating Stars -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Rating Evaluasi Wawancara:</label>
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <div id="postInterviewStarRating" style="display: inline-flex; gap: 4px; font-size: 24px; cursor: pointer;">
+              <!-- Dynamically populated stars -->
+            </div>
+            <span id="postInterviewRatingText" style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #1E40AF; margin-left: 6px;">4 / 5</span>
+          </div>
+        </div>
+
+        <!-- Catatan Evaluasi -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Catatan Evaluasi / Feedback Interviewer:</label>
+          <textarea id="postInterviewNotes" class="form-textarea" rows="4" placeholder="Misal: Komunikasi sangat lancar, portofolio video sesuai arahan estetika PGE, siap kerja onsite..." style="font-size: 12px; font-family: var(--font-sans); margin-top: 4px; background: #FFFFFF;"></textarea>
+        </div>
+
+        <!-- Kesepakatan Gaji -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Kesepakatan / Ekspektasi Salary:</label>
+          <input type="text" id="postInterviewSalary" class="form-input" placeholder="e.g. Standard Uang Saku / Rp 1.500.000" style="margin-top: 4px; background: #FFFFFF; font-size: 12px;">
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="openFullDrawerFromPostInterview()" style="color: #2563EB; font-weight: 500;">
+          Edit Profil Lengkap ↗
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closePostInterviewModal()">Batal</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="submitPostInterviewEvaluation()" style="background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 500;">
+            💾 Simpan Hasil Interview
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Vacancy / Position Modal -->
+  <div class="modal-backdrop" id="renameVacancyModalBackdrop" style="display: none; z-index: 2300;" onclick="if(event.target === this) closeRenameVacancyModal()">
+    <div class="modal-card" style="max-width: 480px; width: 92%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 12px; overflow: hidden; padding: 0;">
+      <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid var(--border-light); background: #FFFFFF;">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #4F46E5; font-weight: 600;">Job Opening Settings</span>
+          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">Ubah Nama Lowongan</h2>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Ganti judul posisi lowongan kerja untuk seluruh pelamar terkait</div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeRenameVacancyModal()" style="cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; background: #FAFAFA;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Nama Posisi Saat Ini:</label>
+          <div id="renameVacancyOldNameDisplay" style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #374151; background: #E5E7EB; padding: 8px 12px; border-radius: 6px; margin-top: 4px;">
+            -
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Judul Posisi Baru:</label>
+          <input type="text" id="renameVacancyInput" class="form-input" placeholder="Misal: Marketplace Specialist, Senior Content Creator..." style="margin-top: 4px; background: #FFFFFF; font-size: 13px; font-weight: 500;" onkeydown="if(event.key === 'Enter') submitRenameVacancy()">
+          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;" id="renameVacancyImpactText">
+            ℹ️ Mengubah judul ini akan memperbarui semua profil kandidat terkait di Appwrite Cloud &amp; tampilan secara otomatis.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 8px; background: #FFFFFF;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeRenameVacancyModal()">Batal</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSubmitRenameVacancy" onclick="submitRenameVacancy()" style="background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 500;">
+          💾 Simpan Perubahan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- On-Site Assessment Launcher Modal (Navbar) -->
+  <div class="modal-backdrop" id="assessmentLauncherModalBackdrop" onclick="if(event.target === this) closeAssessmentLauncherModal()">
+    <div class="modal-card" style="max-width: 780px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 8px; background: #111827; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            🧠
+          </div>
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #059669; font-weight: 600;">HR On-Site Testing System</span>
+            <h2 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">
+              Portal Pelaksanaan Asesmen On-Site
+            </h2>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeAssessmentLauncherModal()">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 16px 20px; overflow-y: auto; flex: 1;">
+        
+        <!-- Module / Test Selection Options -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #1E293B;">
+              1. Pilih Modul Tes yang Diberikan ke Kandidat:
+            </div>
+            <span style="font-size: 11px; color: #64748B;">Centang modul yang ingin diujikan</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s;">
+              <input type="checkbox" id="launcherChkBigFive" checked style="margin-top: 3px; accent-color: #111827; width: 16px; height: 16px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 600; color: #0F172A;">IPIP Big Five (50 Soal)</div>
+                <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Mengukur profil kepribadian kerja: E, A, C, EM, I</div>
+              </div>
+            </label>
+
+            <label style="display: flex; align-items: flex-start; gap: 10px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s;">
+              <input type="checkbox" id="launcherChkCognitive" checked style="margin-top: 3px; accent-color: #111827; width: 16px; height: 16px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 600; color: #0F172A;">Logika &amp; Bisnis Praktis (15 Soal)</div>
+                <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Deret Angka, Aritmatika, Komersial &amp; Analisis Data</div>
+              </div>
+            </label>
+
+            <label style="display: flex; align-items: flex-start; gap: 10px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s; grid-column: 1 / -1;">
+              <input type="checkbox" id="launcherChkDisc" checked style="margin-top: 3px; accent-color: #111827; width: 16px; height: 16px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 600; color: #0F172A;">Tes Gaya Kerja &amp; Komunikasi DISC (24 Soal)</div>
+                <div style="font-size: 11px; color: #64748B; margin-top: 2px;">Dominance, Influence, Steadiness, Conscientiousness (Most/Least)</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Filters Bar: Lowongan + Stage + Search -->
+        <div style="background: #F9FAFB; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; font-family: var(--font-mono); font-weight: 600; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">
+                Posisi Lowongan:
+              </label>
+              <select id="launcherVacancySelect" class="form-select" onchange="renderAssessmentLauncherCandidates()" style="width: 100%; font-size: 12px; padding: 7px 10px;">
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 11px; font-family: var(--font-mono); font-weight: 600; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">
+                Filter Tahapan:
+              </label>
+              <select id="launcherStageSelect" class="form-select" onchange="renderAssessmentLauncherCandidates()" style="width: 100%; font-size: 12px; padding: 7px 10px;">
+                <option value="Screening" selected>🎯 Hanya Tahap Screening</option>
+                <option value="ALL">🌐 Semua Tahapan</option>
+                <option value="Prospect">Prospect</option>
+                <option value="Interviewed">Interviewed</option>
+                <option value="Shortlisted">Shortlisted</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <input type="text" id="launcherSearchInput" class="form-input" placeholder="Cari nama kandidat atau ID (e.g. Ghayu, PGE-052)..." oninput="renderAssessmentLauncherCandidates()" style="width: 100%; font-size: 12px; padding: 7px 12px;">
+          </div>
+        </div>
+
+        <!-- Candidate List Stream Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">
+            2. Daftar Kandidat Terfilter (<span id="launcherCountBadge">0</span>):
+          </span>
+          <span style="font-size: 11px; color: var(--text-muted);">
+            💻 Klik tombol peluncur untuk membuka lembar tes di laptop ini
+          </span>
+        </div>
+
+        <div id="launcherCandidatesContainer" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
+          PGE Talent Pool • On-Site Assessment Launcher
+        </span>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeAssessmentLauncherModal()">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Access & Whitelist Modal -->
+  <div class="modal-backdrop" id="whitelistModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #2563EB;">Security & Access Control</span>
+          <h2 style="font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--text-primary);">HR Team Whitelist Manager</h2>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeWhitelistModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+          Kelola akun email Google yang diizinkan login ke dashboard PGE Talent Pool.
+        </div>
+
+        <!-- Add New Email Bar -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <input type="email" id="inputNewWhitelistEmail" class="form-input" placeholder="Masukkan email Google baru (e.g. recruiter@gmail.com)" style="flex: 1;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="handleAddWhitelistEmail()">+ Add Email</button>
+        </div>
+
+        <!-- Whitelist List Table -->
+        <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+          Authorized Accounts:
+        </div>
+        <div id="whitelistItemsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeWhitelistModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Floating Background Upload Indicator -->
+  <div class="global-upload-pill" id="globalUploadPill">
+    <span id="globalUploadIcon">☁️</span>
+    <span id="globalUploadText">Uploading to Appwrite Storage...</span>
+    <div class="mini-track" id="globalUploadTrack">
+      <div class="mini-fill" id="globalUploadBar"></div>
+    </div>
+  </div>
+
+    
   <!-- Candidate Comparison Modal -->
   <div class="modal-backdrop" id="compareModalBackdrop">
     <div class="modal-card modal-card-lg">
@@ -2220,12 +2697,21 @@
     </div>
   </div>
 
-  <!-- Floating HR Team Messenger Trigger & Panel -->
-  <button type="button" class="messenger-trigger" id="messengerTrigger" onclick="toggleTeamMessenger()">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-    <span>Team Chat</span>
-    <span class="messenger-unread-badge" id="messengerUnreadBadge" style="display: none;">0</span>
-  </button>
+    <!-- Floating Bottom-Right Actions Dock (STATIONARY STAY IN CORNER) -->
+  <div class="bottom-actions-dock" id="bottomActionsDock">
+    <!-- Stationary Chicken Toggle Pill in Bottom-Right -->
+    <button type="button" id="floatingChickenToggle" class="floating-chicken-toggle" onclick="toggleChickenRunning(event)" title="Klik untuk menghentikan / menjalankan ayam mengejar kursor">
+      <span id="floatingChickenIcon">⏸️</span>
+      <span id="floatingChickenText">Stop Kejar</span>
+    </button>
+
+    <!-- Floating HR Team Messenger Trigger -->
+    <button type="button" class="messenger-trigger" id="messengerTrigger" onclick="toggleTeamMessenger()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span>Team Chat</span>
+      <span class="messenger-unread-badge" id="messengerUnreadBadge" style="display: none;">0</span>
+    </button>
+  </div>
 
   <div class="messenger-panel" id="messengerPanel">
     <div class="messenger-header">
@@ -2282,6 +2768,7 @@
 
   <!-- 3D Psyduck Animated Assistant Widget -->
   <div class="psyduck-widget-container" id="psyduckWidgetContainer">
+    
     <!-- Speech Bubble -->
     <div class="psyduck-speech-bubble" id="psyduckSpeechBubble">
       <div class="psyduck-bubble-header">
@@ -2517,6 +3004,108 @@
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
+    
+    function saveBcSettings() {
+      const settings = {
+        filter: el.bcStageFilter ? el.bcStageFilter.value : '',
+        date: el.bcDateInput ? el.bcDateInput.value : '',
+        time: el.bcTimeInput ? el.bcTimeInput.value : '',
+        interval: el.bcIntervalInput ? el.bcIntervalInput.value : '',
+        location: el.bcLocationInput ? el.bcLocationInput.value : '',
+        template: el.bcTemplateSelect ? el.bcTemplateSelect.value : '',
+        customMsg: el.bcCustomMessage ? el.bcCustomMessage.value : '',
+        autoUpdate: el.bcAutoUpdateStage ? el.bcAutoUpdateStage.checked : true
+      };
+      try {
+        localStorage.setItem('pge_bc_settings', JSON.stringify(settings));
+        return true;
+      } catch (e) {
+        console.warn('Failed to save bc settings:', e);
+        return false;
+      }
+    }
+
+    function loadBcSettings() {
+      try {
+        const raw = localStorage.getItem('pge_bc_settings');
+        if (!raw) return false;
+        const saved = JSON.parse(raw);
+        if (saved) {
+          if (el.bcStageFilter && saved.filter) el.bcStageFilter.value = saved.filter;
+          if (el.bcDateInput && saved.date) el.bcDateInput.value = saved.date;
+          if (el.bcTimeInput && saved.time) el.bcTimeInput.value = saved.time;
+          if (el.bcIntervalInput && saved.interval) el.bcIntervalInput.value = saved.interval;
+          if (el.bcLocationInput && saved.location) el.bcLocationInput.value = saved.location;
+          if (el.bcTemplateSelect && saved.template) el.bcTemplateSelect.value = saved.template;
+          if (el.bcCustomMessage && typeof saved.customMsg === 'string' && saved.customMsg.length > 0) {
+            el.bcCustomMessage.value = saved.customMsg;
+          }
+          if (el.bcAutoUpdateStage && saved.hasOwnProperty('autoUpdate')) {
+            el.bcAutoUpdateStage.checked = saved.autoUpdate;
+          }
+          return true;
+        }
+      } catch (e) {
+        console.warn('Error reading saved broadcast settings:', e);
+      }
+      return false;
+    }
+
+    function recalculateBroadcastSlots(notify = true) {
+      const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
+      const targetTalents = state.talents.filter(t => {
+        if (t.stage === 'Archived') return false;
+        if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
+        return true;
+      });
+      const selectedTalents = targetTalents.filter(t => state.broadcastSelectedIds.has(t.id));
+
+      state.smartScheduleMap = {};
+      state.smartScheduleSlotIndex = {};
+
+      let slotIdx = 0;
+      selectedTalents.forEach(t => {
+        if (t.outreachStatus === 'Reschedule') {
+          // Exempt rescheduled candidates from standard sequential slotting
+          return;
+        }
+        state.smartScheduleSlotIndex[t.id] = slotIdx;
+        state.smartScheduleMap[t.id] = calculateSmartTime(slotIdx);
+        slotIdx++;
+      });
+
+      try {
+        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
+        localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
+      } catch(e) {}
+
+      renderBroadcastTable();
+      if (notify) {
+        showToast('🔄 Slot jam dihitung ulang berurutan dari jam awal (kecuali kandidat reschedule)!');
+      }
+    }
+    window.recalculateBroadcastSlots = recalculateBroadcastSlots;
+
+    function handleSaveScheduleSettings() {
+      const ok = saveBcSettings();
+      recalculateBroadcastSlots(false);
+      if (ok) {
+        showToast('✅ Pengaturan jadwal & interval disimpan, slot dihitung ulang!');
+      } else {
+        showToast('⚠️ Gagal menyimpan pengaturan jadwal.');
+      }
+    }
+
+    function handleSaveTemplateSettings() {
+      const ok = saveBcSettings();
+      updateBroadcastPreview();
+      if (ok) {
+        showToast('✅ Template pesan WhatsApp berhasil disimpan!');
+      } else {
+        showToast('⚠️ Gagal menyimpan template pesan.');
+      }
+    }
+
     function cacheDOMElements() {
       el = {
         authGate: document.getElementById('authGate'),
@@ -2537,7 +3126,13 @@
         bcDateInput: document.getElementById('bcDateInput'),
         bcTimeInput: document.getElementById('bcTimeInput'),
         bcLocationInput: document.getElementById('bcLocationInput'),
+        bcIntervalInput: document.getElementById('bcIntervalInput'),
+        btnSaveScheduleSettings: document.getElementById('btnSaveScheduleSettings'),
+        btnSaveTemplateSettings: document.getElementById('btnSaveTemplateSettings'),
+        bcIntervalInput: document.getElementById('bcIntervalInput'),
         bcAutoUpdateStage: document.getElementById('bcAutoUpdateStage'),
+        btnSaveScheduleSettings: document.getElementById('btnSaveScheduleSettings'),
+        btnSaveTemplateSettings: document.getElementById('btnSaveTemplateSettings'),
         bcTemplateSelect: document.getElementById('bcTemplateSelect'),
         bcCustomMessage: document.getElementById('bcCustomMessage'),
         bcTableBody: document.getElementById('bcTableBody'),
@@ -2569,6 +3164,15 @@
         compareModalBackdrop: document.getElementById('compareModalBackdrop'),
         compareModalBody: document.getElementById('compareModalBody')
       };
+
+      loadBcSettings();
+
+      ['bcStageFilter', 'bcDateInput', 'bcTimeInput', 'bcIntervalInput', 'bcLocationInput', 'bcTemplateSelect', 'bcCustomMessage', 'bcAutoUpdateStage'].forEach(id => {
+        if (el[id]) {
+          el[id].addEventListener('input', saveBcSettings);
+          el[id].addEventListener('change', saveBcSettings);
+        }
+      });
 
       if (el.bcDateInput && !el.bcDateInput.value) {
         const tomorrow = new Date();
@@ -2678,6 +3282,7 @@
         listenTeamPresence();
         listenTeamChat();
         listenCandidateDiscussions();
+        listenCandidateAssessments();
 
         if (state.talents.length === 0) {
           loadAppwriteTalents();
@@ -2855,11 +3460,550 @@
       animate();
     }
 
+    
+    window.handleSaveScheduleSettings = handleSaveScheduleSettings;
+    window.handleSaveTemplateSettings = handleSaveTemplateSettings;
+
+    function correctCandidateScheduleSequence(talents) {
+      if (!state.smartScheduleMap) state.smartScheduleMap = {};
+
+      talents.forEach(t => {
+        const sched = getTalentAssignedSchedule(t);
+        if (sched.assignedTime && sched.assignedTime !== '-') {
+          state.smartScheduleMap[t.id] = sched.assignedTime;
+        }
+      });
+
+      try {
+        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
+      } catch (e) {}
+    }
+
+    function extractCandidateScheduleInfo(talent) {
+      let time = '-';
+      let date = '-';
+      let location = 's.id/lokasipge';
+      let isRescheduled = false;
+
+      // Priority 1: Rescheduled info
+      if (talent.outreachStatus === 'Reschedule' || (talent.notes && talent.notes.includes('[Rescheduled to:'))) {
+        isRescheduled = true;
+        const match = talent.notes.match(/\[Rescheduled to:\s*(.*?)\]/);
+        if (match) {
+          const parts = match[1].trim().split(' ');
+          if (parts.length >= 3) {
+            const tWIB = parts.pop();
+            const tNum = parts.pop();
+            time = tNum + ' ' + tWIB;
+            date = parts.join(' ');
+          } else {
+            time = 'Rescheduled';
+            date = match[1];
+          }
+        }
+      } else if (talent.notes && talent.notes.includes('[Interview Scheduled:')) {
+        // Priority 2: Stamped schedule from notes
+        const match = talent.notes.match(/\[Interview Scheduled:\s*(.*?)\s+(\d{1,2}:\d{2}\s*WIB)\s*@\s*(.*?)\]/);
+        if (match) {
+          date = match[1].trim();
+          time = match[2].trim();
+          location = match[3].trim();
+        }
+      } else if (state.smartScheduleMap && state.smartScheduleMap[talent.id]) {
+        // Priority 3: Assigned in smartScheduleMap
+        time = state.smartScheduleMap[talent.id];
+        date = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+        if (document.getElementById('bcLocationInput')) {
+          location = document.getElementById('bcLocationInput').value.trim() || 's.id/lokasipge';
+        }
+      }
+
+      return { time, date, location, isRescheduled };
+    }
+
+    window.openFinalScheduleModal = function() {
+      // Collect all scheduled dates across talents who are confirmed to attend
+      const dateSet = new Set();
+      (state.talents || []).forEach(t => {
+        if (t.outreachStatus === 'Confirmed' || t.outreachStatus === 'Reschedule') {
+          const info = extractCandidateScheduleInfo(t);
+          if (info.date !== '-' && info.time !== '-') {
+            dateSet.add(info.date);
+          }
+        }
+      });
+
+      const dateSelect = document.getElementById('schedDateFilter');
+      if (dateSelect) {
+        let options = '<option value="ALL">Semua Tanggal</option>';
+        dateSet.forEach(d => {
+          options += '<option value="' + escapeHtml(d) + '">' + escapeHtml(d) + '</option>';
+        });
+        dateSelect.innerHTML = options;
+      }
+
+      const searchInput = document.getElementById('schedSearchInput');
+      if (searchInput) searchInput.value = '';
+
+      renderFinalScheduleAgenda();
+      document.getElementById('finalScheduleModalBackdrop').style.display = 'flex';
+    };
+
+    window.closeFinalScheduleModal = function() {
+      document.getElementById('finalScheduleModalBackdrop').style.display = 'none';
+    };
+
+    window.renderFinalScheduleAgenda = function() {
+      const conflicts = detectScheduleConflicts();
+      const container = document.getElementById('finalScheduleAgendaBody');
+      const badgesContainer = document.getElementById('schedSummaryBadges');
+      const footerSummary = document.getElementById('schedFooterSummary');
+      if (!container) return;
+
+      const dateFilter = document.getElementById('schedDateFilter') ? document.getElementById('schedDateFilter').value : 'ALL';
+      const searchKeyword = (document.getElementById('schedSearchInput') ? document.getElementById('schedSearchInput').value : '').toLowerCase().trim();
+
+      const attendanceFilter = document.getElementById('schedAttendanceFilter') ? document.getElementById('schedAttendanceFilter').value : 'CONFIRMED_ONLY';
+
+      // Gather candidate items that have scheduled times
+      const candidatesWithSchedule = [];
+      (state.talents || []).forEach(t => {
+        if (attendanceFilter === 'CONFIRMED_ONLY') {
+          const isConfirmedToAttend = (t.outreachStatus === 'Confirmed' || t.outreachStatus === 'Reschedule') && t.stage !== 'Archived';
+          if (!isConfirmedToAttend) return;
+        } else if (attendanceFilter === 'TIDAK_HADIR') {
+          const isTidakHadir = t.outreachStatus === 'Tidak Hadir' || (t.notes && t.notes.toLowerCase().includes('tidak hadir'));
+          if (!isTidakHadir) return;
+        }
+
+        const info = extractCandidateScheduleInfo(t);
+        if (info.date !== '-' && info.time !== '-') {
+          candidatesWithSchedule.push({
+            talent: t,
+            ...info
+          });
+        }
+      });
+
+      // Filter
+      const filtered = candidatesWithSchedule.filter(item => {
+        if (dateFilter !== 'ALL' && item.date !== dateFilter) return false;
+        if (searchKeyword) {
+          const name = (item.talent.name || '').toLowerCase();
+          const id = (item.talent.id || '').toLowerCase();
+          const role = (item.talent.role || '').toLowerCase();
+          const dom = (item.talent.domisili || '').toLowerCase();
+          if (!name.includes(searchKeyword) && !id.includes(searchKeyword) && !role.includes(searchKeyword) && !dom.includes(searchKeyword)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Compute statistics
+      const totalCount = filtered.length;
+      const confirmedCount = filtered.filter(x => x.talent.outreachStatus === 'Confirmed').length;
+      const waSentCount = filtered.filter(x => x.talent.outreachStatus === 'WA Sent').length;
+      const rescheduleCount = filtered.filter(x => x.isRescheduled || x.talent.outreachStatus === 'Reschedule').length;
+      const tidakHadirCount = (state.talents || []).filter(t => t.outreachStatus === 'Tidak Hadir').length;
+
+      if (badgesContainer) {
+        badgesContainer.innerHTML = `
+          <span style="background: #EFF6FF; color: #1E40AF; padding: 4px 8px; border-radius: 6px; border: 1px solid #BFDBFE; font-weight: 600;">Total: ${totalCount} Sesi</span>
+          <span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 6px; border: 1px solid #BBF7D0;">✅ Confirmed: ${confirmedCount}</span>
+          <span style="background: #FEF3C7; color: #B45309; padding: 4px 8px; border-radius: 6px; border: 1px solid #FDE68A;">🔄 Rescheduled: ${rescheduleCount}</span>
+          ${tidakHadirCount > 0 ? `<span style="background: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 6px; border: 1px solid #FECACA;">❌ Tidak Hadir: ${tidakHadirCount}</span>` : ''}
+          ${attendanceFilter === 'ALL' ? `<span style="background: #DBEAFE; color: #1D4ED8; padding: 4px 8px; border-radius: 6px; border: 1px solid #BFDBFE;">💬 WA Sent: ${waSentCount}</span>` : ''}
+        `;
+      }
+
+      if (footerSummary) {
+        footerSummary.textContent = `Menampilkan ${totalCount} sesi wawancara terdaftar`;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <div style="font-size: 32px; margin-bottom: 8px;">📅</div>
+            <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Tidak ada jadwal interview yang sesuai filter.</div>
+            <div style="font-size: 12px; margin-top: 4px;">Pastikan kandidat telah dijadwalkan di tab WA Broadcast atau dipindahkan ke Interviewed.</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Group by Date
+      const groups = {};
+      filtered.forEach(item => {
+        if (!groups[item.date]) groups[item.date] = [];
+        groups[item.date].push(item);
+      });
+
+      // Sort each group chronologically
+      Object.keys(groups).forEach(date => {
+        groups[date].sort((a, b) => {
+          const timeA = (a.time.match(/\d{2}:\d{2}/) || ['00:00'])[0];
+          const timeB = (b.time.match(/\d{2}:\d{2}/) || ['00:00'])[0];
+          return timeA.localeCompare(timeB);
+        });
+      });
+
+      let htmlContent = '';
+      Object.keys(groups).forEach(date => {
+        const items = groups[date];
+        htmlContent += `
+          <div style="margin-bottom: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: #EEF2FF; border-left: 4px solid #4F46E5; border-radius: 6px; margin-bottom: 12px;">
+              <div style="font-weight: 600; font-size: 13px; color: #3730A3; display: flex; align-items: center; gap: 8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                ${escapeHtml(date)}
+              </div>
+              <span style="font-size: 11px; font-family: var(--font-mono); color: #4338CA; font-weight: 600; background: #E0E7FF; padding: 2px 8px; border-radius: 4px;">
+                ${items.length} Kandidat
+              </span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+        `;
+
+        items.forEach(item => {
+          const t = item.talent;
+          const conflictList = conflicts[t.id] || [];
+          const hasConflict = conflictList.length > 0;
+          const conflictWithNames = conflictList.map(c => escapeHtml(c.name)).join(', ');
+          const phone = formatToInternationalPhone(t.phone);
+          const status = t.outreachStatus || 'Pending';
+          const cleanLoc = item.location.replace(/^https?:\/\//, '');
+
+          htmlContent += `
+            <div style="display: grid; grid-template-columns: 110px 1fr auto; align-items: center; gap: 16px; padding: 12px 16px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: transform 0.15s ease;">
+              <!-- Time -->
+              <div>
+                ${hasConflict ? `
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 5px 8px; border-radius: 6px; background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;" title="Jadwal bentrok dengan: ${conflictWithNames}">
+                    ⚠️ ${escapeHtml(item.time)} (Bentrok)
+                  </span>
+                ` : `
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 6px; background: ${item.isRescheduled ? '#FEF3C7' : '#F0FDF4'}; color: ${item.isRescheduled ? '#B45309' : '#166534'}; border: 1px solid ${item.isRescheduled ? '#FDE68A' : '#BBF7D0'};">
+                    ${item.isRescheduled ? '🔄 ' : '⏰ '}${escapeHtml(item.time)}
+                  </span>
+                `}
+              </div>
+
+              <!-- Candidate Info & Location -->
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); background: #F3F4F6; padding: 1px 5px; border-radius: 3px; flex-shrink: 0;">${t.id}</span>
+                  <span style="font-size: 14px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: underline; white-space: nowrap;" onclick="closeFinalScheduleModal(); openCandidateProfileModal('${t.id}')">
+                    ${escapeHtml(t.name)}
+                  </span>
+                  <span class="stage-select-pill stage-${(t.stage || 'interviewed').toLowerCase()}" style="font-size: 10px; padding: 2px 7px; flex-shrink: 0;">${t.stage || 'Interviewed'}</span>
+                  ${item.isRescheduled ? '<span style="font-size: 10px; font-weight: 600; background: #FEF3C7; color: #B45309; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; white-space: nowrap;">Rescheduled</span>' : ''}
+                </div>
+                ${hasConflict ? `<div style="font-size: 11px; color: #DC2626; font-weight: 600; margin-top: 2px;">⚠️ Jadwal bertabrakan dengan: ${conflictWithNames}</div>` : ''}
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <span>${escapeHtml(t.role || 'Freelance')}</span>
+                  <span>•</span>
+                  <span>📍 <a href="https://${escapeHtml(cleanLoc)}" target="_blank" style="color: #2563EB; font-weight: 500; text-decoration: underline;">${escapeHtml(item.location)}</a></span>
+                  <span>•</span>
+                  <span>🏠 ${escapeHtml(t.domisili || '-')}</span>
+                </div>
+              </div>
+
+              <!-- Status & WhatsApp Action -->
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                <select class="outreach-status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${t.id}', this.value); setTimeout(renderFinalScheduleAgenda, 100);" style="font-size: 11px; padding: 4px 18px 4px 8px;">
+                  <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                  <option value="WA Sent" ${status === 'WA Sent' ? 'selected' : ''}>💬 WA Sent</option>
+                  <option value="Confirmed" ${status === 'Confirmed' ? 'selected' : ''}>✅ Confirmed</option>
+                  <option value="Tidak Hadir" ${status === 'Tidak Hadir' ? 'selected' : ''}>❌ Tidak Hadir</option>
+                  <option value="Cant Attend" ${status === 'Cant Attend' ? 'selected' : ''}>🚫 Can't Attend</option>
+                  <option value="Reschedule" ${status === 'Reschedule' ? 'selected' : ''}>🔄 Reschedule</option>
+                </select>
+
+                ${phone ? `
+                  <a href="https://wa.me/${phone.replace(/\+/g, '')}" target="_blank" class="btn btn-secondary btn-sm" title="Buka WhatsApp" style="padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; color: #16A34A; font-weight: 500; text-decoration: none;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    Chat ↗
+                  </a>
+                ` : ''}
+
+                <button type="button" class="btn btn-primary btn-sm" onclick="openPostInterviewModal('${t.id}')" title="Evaluasi & sesuaikan kandidat pasca-interview" style="padding: 4px 10px; font-size: 11px; background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  Evaluasi
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        htmlContent += '</div></div>';
+      });
+
+      container.innerHTML = htmlContent;
+    };
+
+    window.copyScheduleAgendaText = function() {
+      const candidatesWithSchedule = [];
+      (state.talents || []).forEach(t => {
+        if (t.outreachStatus === 'Confirmed' || t.outreachStatus === 'Reschedule') {
+          const info = extractCandidateScheduleInfo(t);
+          if (info.date !== '-' && info.time !== '-') {
+            candidatesWithSchedule.push({
+              talent: t,
+              ...info
+            });
+          }
+        }
+      });
+
+      if (candidatesWithSchedule.length === 0) {
+        showToast('Tidak ada jadwal untuk disalin');
+        return;
+      }
+
+      // Group by date
+      const groups = {};
+      candidatesWithSchedule.forEach(item => {
+        if (!groups[item.date]) groups[item.date] = [];
+        groups[item.date].push(item);
+      });
+
+      Object.keys(groups).forEach(date => {
+        groups[date].sort((a, b) => {
+          const timeA = (a.time.match(/\d{2}:\d{2}/) || ['00:00'])[0];
+          const timeB = (b.time.match(/\d{2}:\d{2}/) || ['00:00'])[0];
+          return timeA.localeCompare(timeB);
+        });
+      });
+
+      let agenda = '📅 JADWAL INTERVIEW PGE TALENT POOL\n';
+      agenda += '====================================\n';
+
+      Object.keys(groups).forEach(date => {
+        agenda += '\n' + date + ':\n';
+        groups[date].forEach(item => {
+          const t = item.talent;
+          const phone = t.phone || '-';
+          const status = t.outreachStatus || 'Pending';
+          agenda += '• ' + item.time + ' - ' + t.name + ' (' + t.id + ') | WA: ' + phone + ' [' + status + ']\n';
+        });
+      });
+
+      agenda += '\n📍 Lokasi Interview: s.id/lokasipge\n';
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(agenda).then(() => {
+          showToast('📋 Teks agenda interview berhasil disalin ke clipboard!');
+        }).catch(() => {
+          showToast('Gagal menyalin otomatis');
+        });
+      } else {
+        showToast('Clipboard API tidak didukung browser');
+      }
+    };
+
+    
+    /* ---------------------------------------------------- */
+    /* POST-INTERVIEW EVALUATION & ADJUSTMENT LOGIC        */
+    /* ---------------------------------------------------- */
+    let currentPostInterviewTalentId = null;
+    let currentPostInterviewStage = 'Shortlisted';
+    let currentPostInterviewRating = 4;
+
+    function renderStarPicker(selectedRating) {
+      const container = document.getElementById('postInterviewStarRating');
+      const text = document.getElementById('postInterviewRatingText');
+      if (!container) return;
+      currentPostInterviewRating = selectedRating;
+
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        const isFilled = i <= selectedRating;
+        html += '<span onclick="setPostInterviewRating(' + i + ')" style="color: ' + (isFilled ? '#F59E0B' : '#D1D5DB') + '; transition: transform 0.1s;">★</span>';
+      }
+      container.innerHTML = html;
+      if (text) text.textContent = selectedRating + ' / 5 Bintang';
+    }
+
+    window.setPostInterviewRating = function(rating) {
+      renderStarPicker(rating);
+    };
+
+    window.selectPostInterviewStage = function(stage) {
+      currentPostInterviewStage = stage;
+      const buttons = document.querySelectorAll('#postInterviewStageOptions .stage-opt-btn');
+      buttons.forEach(btn => {
+        const btnStage = btn.getAttribute('data-stage');
+        if (btnStage === stage) {
+          btn.style.border = '1.5px solid #2563EB';
+          btn.style.background = '#EFF6FF';
+          btn.querySelector('div:first-child').style.color = '#1D4ED8';
+        } else {
+          btn.style.border = '1px solid var(--border-light)';
+          btn.style.background = '#FFFFFF';
+          btn.querySelector('div:first-child').style.color = 'var(--text-primary)';
+        }
+      });
+    };
+
+    window.handlePostInterviewAttendanceChange = function(status) {
+      if (status === 'Tidak Hadir') {
+        selectPostInterviewStage('Archived');
+        const notesEl = document.getElementById('postInterviewNotes');
+        if (notesEl && !notesEl.value.includes('Tidak Hadir')) {
+          notesEl.value = (notesEl.value ? notesEl.value + '\n' : '') + 'Kandidat tidak hadir pada jadwal wawancara yang telah disepakati (No-Show).';
+        }
+      } else if (status === 'Confirmed') {
+        if (currentPostInterviewStage === 'Archived') {
+          selectPostInterviewStage('Shortlisted');
+        }
+      }
+    };
+
+    window.openPostInterviewModal = function(id) {
+      const talent = state.talents.find(t => t.id === id || t.$id === id);
+      if (!talent) return;
+      currentPostInterviewTalentId = talent.id;
+
+      // Set header
+      const nameEl = document.getElementById('postInterviewCandidateName');
+      const subEl = document.getElementById('postInterviewCandidateSub');
+      if (nameEl) nameEl.textContent = talent.name;
+      if (subEl) subEl.textContent = talent.id + ' • ' + (talent.role || 'Freelance Content Creator') + ' • ' + (talent.domisili || 'Surakarta');
+
+      // Set attendance dropdown
+      const attendanceEl = document.getElementById('postInterviewAttendance');
+      if (attendanceEl) {
+        if (talent.outreachStatus === 'Tidak Hadir') {
+          attendanceEl.value = 'Tidak Hadir';
+        } else if (talent.outreachStatus === 'Reschedule') {
+          attendanceEl.value = 'Reschedule';
+        } else {
+          attendanceEl.value = 'Confirmed';
+        }
+      }
+
+      // Set current or suggested stage
+      let defaultStage = 'Shortlisted';
+      if (talent.outreachStatus === 'Tidak Hadir') {
+        defaultStage = 'Archived';
+      } else if (talent.stage && talent.stage !== 'Prospect' && talent.stage !== 'Screening' && talent.stage !== 'Interviewed') {
+        defaultStage = talent.stage;
+      }
+      selectPostInterviewStage(defaultStage);
+
+      // Set current rating
+      const rating = Number(talent.overallRating) || 4;
+      renderStarPicker(rating);
+
+      // Set notes and salary (PRE-FILL, DO NOT WIPE OUT!)
+      const notesEl = document.getElementById('postInterviewNotes');
+      const salaryEl = document.getElementById('postInterviewSalary');
+      if (notesEl) {
+        notesEl.value = talent.notes || '';
+      }
+      if (salaryEl) salaryEl.value = talent.expectedSalary || 'Standard Uang Saku';
+
+      document.getElementById('postInterviewModalBackdrop').style.display = 'flex';
+    };
+
+    window.closePostInterviewModal = function() {
+      currentPostInterviewTalentId = null;
+      document.getElementById('postInterviewModalBackdrop').style.display = 'none';
+    };
+
+    window.openFullDrawerFromPostInterview = function() {
+      const id = currentPostInterviewTalentId;
+      closePostInterviewModal();
+      closeFinalScheduleModal();
+      if (id) openTalentDetail(id);
+    };
+
+    window.submitPostInterviewEvaluation = async function() {
+      if (!currentPostInterviewTalentId) return;
+      const talent = state.talents.find(t => t.id === currentPostInterviewTalentId || t.$id === currentPostInterviewTalentId);
+      if (!talent) return;
+
+      const feedback = (document.getElementById('postInterviewNotes') ? document.getElementById('postInterviewNotes').value : '').trim();
+      const salary = (document.getElementById('postInterviewSalary') ? document.getElementById('postInterviewSalary').value : '').trim();
+      const attendance = (document.getElementById('postInterviewAttendance') ? document.getElementById('postInterviewAttendance').value : 'Confirmed');
+      let newStage = currentPostInterviewStage || 'Shortlisted';
+      const newRating = currentPostInterviewRating || 4;
+
+      if (attendance === 'Tidak Hadir') {
+        talent.outreachStatus = 'Tidak Hadir';
+        newStage = 'Archived';
+      } else if (attendance === 'Reschedule') {
+        talent.outreachStatus = 'Reschedule';
+      } else {
+        talent.outreachStatus = 'Confirmed';
+      }
+
+      const now = new Date();
+      const timestamp = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+      let updatedNotes = feedback;
+      if (feedback && !feedback.includes('[Interview Result') && attendance !== 'Tidak Hadir') {
+        const evalRemark = '\n[Interview Result (' + newStage + ' - ' + timestamp + '): Rating ' + newRating + '/5]';
+        updatedNotes = feedback + evalRemark;
+      }
+
+      // Update in-memory talent
+      talent.stage = newStage;
+      talent.overallRating = newRating;
+      if (salary) talent.expectedSalary = salary;
+      talent.notes = updatedNotes;
+
+      const packedNotes = packOutreachStatus(updatedNotes, talent.outreachStatus);
+
+      closePostInterviewModal();
+      renderFinalScheduleAgenda();
+      renderBroadcastTable();
+      renderBentoGrid();
+      renderTableView();
+      renderKanbanBoard();
+      updateMetrics();
+
+      showToast('✅ Evaluasi ' + talent.name + ' berhasil disimpan (' + newStage + ')');
+
+      // Save to Appwrite Cloud
+      try {
+        const docId = talent.$id || (talent.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        await databases.updateDocument(
+          APPWRITE_CONFIG.databaseId,
+          APPWRITE_CONFIG.collectionId,
+          docId,
+          {
+            stage: newStage,
+            overallRating: newRating,
+            expectedSalary: salary || talent.expectedSalary || 'Standard Uang Saku',
+            notes: packedNotes
+          }
+        );
+        console.log('Appwrite document successfully updated:', docId);
+      } catch (err) {
+        console.warn('Appwrite post-interview update error:', err);
+        showToast('Tersimpan di sesi lokal, gagal sinkron ke cloud.');
+      }
+    };
+
     function bootApp() {
       cacheDOMElements();
       initParticleBackground();
       initEventListeners();
+      loadBcSettings();
       initDefaultBroadcastTemplate();
+
+      // Attach auto-save listeners on change
+      ['bcStageFilter', 'bcDateInput', 'bcTimeInput', 'bcIntervalInput', 'bcLocationInput', 'bcTemplateSelect', 'bcAutoUpdateStage'].forEach(id => {
+        if (el[id]) {
+          el[id].addEventListener('change', saveBcSettings);
+        }
+      });
+      if (el.bcCustomMessage) {
+        el.bcCustomMessage.addEventListener('input', saveBcSettings);
+      }
+
       initAuthListener();
       initPsyduckAssistant();
     }
@@ -2867,10 +4011,11 @@
     /* ---------------------------------------------------- */
     /* APPWRITE DATABASE LOAD & REALTIME                    */
     /* ---------------------------------------------------- */
-    async function loadAppwriteTalents() {
+    async function loadAppwriteTalents(isSilent = false) {
       if (!state.currentUser) return;
 
-      if (el.syncStatus) {
+      // Only show loading indicator on initial cold load, not during background syncs
+      if (el.syncStatus && !isSilent && (!state.talents || state.talents.length === 0)) {
         el.syncStatus.textContent = 'Loading Appwrite... ⏳';
         el.syncStatus.style.background = 'var(--pastel-yellow-bg)';
         el.syncStatus.style.color = 'var(--pastel-yellow-text)';
@@ -2898,7 +4043,7 @@
             email: cleanEmail(doc.email || ''),
             experienceLevel: doc.experienceLevel || 'Junior',
             overallRating: Number(doc.overallRating) || 4,
-            stage: doc.stage || 'Prospect',
+            stage: doc.stage || (parsedNotes.status === 'Reschedule' ? 'Interviewed' : (parsedNotes.status === 'Tidak Hadir' ? 'Archived' : 'Prospect')),
             expectedSalary: doc.expectedSalary || 'Standard Uang Saku',
             domisili: toTitleCase(doc.domisili || ''),
             education: cleanEducation(doc.education || ''),
@@ -2906,7 +4051,8 @@
             portfolioUrl: doc.portfolioUrl || '',
             portfolioItems: portfolioItems,
             skills: skills,
-            notes: doc.notes || ''
+            notes: doc.notes || '',
+            outreachStatus: doc.outreachStatus || 'Pending'
           };
         });
 
@@ -2918,6 +4064,7 @@
         });
 
         state.talents = items;
+        correctCandidateScheduleSequence(state.talents);
         selectVacancy(state.activeVacancy);
 
         if (el.syncStatus) {
@@ -2937,13 +4084,17 @@
       }
     }
 
+    let realtimeDebounceTimer = null;
     function subscribeAppwriteRealtime() {
       try {
         client.subscribe(
           `databases.${APPWRITE_CONFIG.databaseId}.collections.${APPWRITE_CONFIG.collectionId}.documents`,
           response => {
             console.log('Appwrite Realtime Event:', response.events);
-            loadAppwriteTalents();
+            if (realtimeDebounceTimer) clearTimeout(realtimeDebounceTimer);
+            realtimeDebounceTimer = setTimeout(() => {
+              loadAppwriteTalents(true);
+            }, 800);
           }
         );
       } catch (e) {
@@ -3076,9 +4227,14 @@
         return `
           <div class="vacancy-card" onclick="selectVacancy('${escapeHtml(v.name)}')">
             <div>
-              <div class="vacancy-card-header">
+                            <div class="vacancy-card-header">
                 <div class="vacancy-icon-badge">${icon}</div>
-                <span class="vacancy-badge-active">🟢 Active Screening</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="vacancy-badge-active">🟢 Active Screening</span>
+                  <button type="button" class="btn btn-secondary btn-sm" data-role="${escapeHtml(v.name)}" onclick="event.stopPropagation(); openRenameVacancyModal(this.dataset.role)" title="Ubah Nama Lowongan" style="padding: 2px 7px; font-size: 10px; display: inline-flex; align-items: center; gap: 3px; border-radius: 4px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #4B5563; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                    ✏️ Ubah Judul
+                  </button>
+                </div>
               </div>
               <div class="vacancy-title">${escapeHtml(v.name)}</div>
               <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
@@ -3124,6 +4280,114 @@
       }).join('');
     }
 
+    let currentRenameOldRole = '';
+
+    window.openRenameVacancyModal = function(oldRoleName) {
+      if (!oldRoleName || oldRoleName === 'ALL' || oldRoleName === 'HUB') {
+        showToast('Pilih lowongan spesifik untuk diubah namanya.');
+        return;
+      }
+      currentRenameOldRole = oldRoleName;
+      const displayEl = document.getElementById('renameVacancyOldNameDisplay');
+      const inputEl = document.getElementById('renameVacancyInput');
+      const impactEl = document.getElementById('renameVacancyImpactText');
+      const modal = document.getElementById('renameVacancyModalBackdrop');
+
+      const count = (state.talents || []).filter(t => (t.role || '').trim().toLowerCase() === oldRoleName.trim().toLowerCase()).length;
+
+      if (displayEl) displayEl.textContent = oldRoleName;
+      if (inputEl) {
+        inputEl.value = oldRoleName;
+        setTimeout(() => { inputEl.focus(); inputEl.select(); }, 50);
+      }
+      if (impactEl) {
+        impactEl.textContent = 'ℹ️ Sebanyak ' + count + ' kandidat dengan posisi "' + oldRoleName + '" akan otomatis diperbarui ke judul baru.';
+      }
+      if (modal) modal.style.display = 'flex';
+    };
+
+    window.closeRenameVacancyModal = function() {
+      currentRenameOldRole = '';
+      const modal = document.getElementById('renameVacancyModalBackdrop');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.submitRenameVacancy = async function() {
+      const oldRole = currentRenameOldRole;
+      if (!oldRole) return;
+      const inputEl = document.getElementById('renameVacancyInput');
+      const newRole = inputEl ? inputEl.value.trim() : '';
+
+      if (!newRole) {
+        showToast('⚠️ Nama posisi / lowongan tidak boleh kosong.');
+        return;
+      }
+
+      if (newRole.toLowerCase() === oldRole.toLowerCase()) {
+        closeRenameVacancyModal();
+        return;
+      }
+
+      const saveBtn = document.getElementById('btnSubmitRenameVacancy');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = '⏳ Menyimpan...';
+      }
+
+      // 1. Update in-memory talents
+      const affectedTalents = (state.talents || []).filter(t => (t.role || '').trim().toLowerCase() === oldRole.trim().toLowerCase());
+      affectedTalents.forEach(t => {
+        t.role = newRole;
+      });
+
+      // 2. If active vacancy was this role, update activeVacancy
+      if (state.activeVacancy && state.activeVacancy.trim().toLowerCase() === oldRole.trim().toLowerCase()) {
+        state.activeVacancy = newRole;
+        try {
+          localStorage.setItem('pge_active_vacancy', newRole);
+        } catch (e) {}
+      }
+
+      // 3. Re-render UI
+      renderVacancyHub();
+      renderBentoGrid();
+      renderTableView();
+      renderKanbanBoard();
+      renderFinalScheduleAgenda();
+      updateMetrics();
+
+      const heading = document.getElementById('selectedVacancyHeading');
+      if (heading && state.activeVacancy === newRole) {
+        heading.innerHTML = 'Curated candidates for <em>' + escapeHtml(newRole) + '</em>. <button type="button" class="btn btn-secondary btn-sm" onclick="openRenameVacancyModal(state.activeVacancy)" title="Ubah Nama Posisi Ini" style="margin-left: 8px; font-size: 11px; padding: 3px 8px; vertical-align: middle; border-radius: 6px;">✏️ Ubah Judul</button>';
+      }
+
+      closeRenameVacancyModal();
+      showToast('✅ Berhasil mengubah lowongan menjadi "' + newRole + '" (' + affectedTalents.length + ' kandidat)');
+
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Simpan Perubahan';
+      }
+
+      // 4. Update in Appwrite Cloud
+      try {
+        const updatePromises = affectedTalents.map(t => {
+          const docId = t.$id || (t.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+          return databases.updateDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            docId,
+            { role: newRole }
+          );
+        });
+        await Promise.all(updatePromises);
+        console.log('Updated ' + affectedTalents.length + ' talents in Appwrite to role: ' + newRole);
+      } catch (err) {
+        console.warn('Gagal sinkronisasi role baru ke Appwrite Cloud:', err);
+        showToast('Tersimpan di sesi lokal, periksa koneksi cloud.');
+      }
+    };
+
     function selectVacancy(vacancyName) {
       state.activeVacancy = vacancyName;
       try {
@@ -3149,7 +4413,7 @@
         } else {
           const icon = getVacancyIcon(vacancyName);
           if (meta) meta.textContent = `${icon} Job Opening Screening Portal`;
-          if (heading) heading.innerHTML = `Curated candidates for <em>${escapeHtml(vacancyName)}</em>.`;
+          if (heading) heading.innerHTML = `Curated candidates for <em>${escapeHtml(vacancyName)}</em>. <button type="button" class="btn btn-secondary btn-sm" onclick="openRenameVacancyModal(state.activeVacancy)" title="Ubah Nama Posisi Ini" style="margin-left: 8px; font-size: 11px; padding: 3px 8px; vertical-align: middle; border-radius: 6px;">✏️ Ubah Judul</button>`;
         }
 
         applyFilters();
@@ -3553,12 +4817,13 @@
     /* WHATSAPP BROADCAST TAB LOGIC                         */
     /* ---------------------------------------------------- */
     function initDefaultBroadcastTemplate() {
-      if (el.bcCustomMessage) {
+      if (el.bcCustomMessage && (!el.bcCustomMessage.value || el.bcCustomMessage.value.trim() === '')) {
         el.bcCustomMessage.value = `Halo Kak {name},\n\nTerima kasih telah melamar posisi {role} di PGE Talent Pool.\n\nKami telah meninjau portofolio Kakak dan ingin mengundang Kakak untuk sesi Interview:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Lokasi: {location}\n\nMohon konfirmasi kehadiran Kakak dengan membalas pesan ini ya. Terima kasih!\n- Tim HR PGE Talent Pool`;
       }
     }
 
     function handleBroadcastTemplateChange() {
+      // Change template and save immediately
       const tmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
       const msgBox = el.bcCustomMessage;
       if (!msgBox) return;
@@ -3573,6 +4838,7 @@
         msgBox.value = `Halo Kak {name},\n\n`;
       }
 
+      saveBcSettings();
       updateBroadcastPreview();
     }
 
@@ -3585,6 +4851,7 @@
       textarea.value = text.substring(0, start) + variableTag + text.substring(end);
       textarea.focus();
       textarea.selectionStart = textarea.selectionEnd = start + variableTag.length;
+      saveBcSettings();
       updateBroadcastPreview();
     }
 
@@ -3598,10 +4865,85 @@
       }
     }
 
-    function resolveCandidateMessage(talent) {
+    
+    
+    function detectScheduleConflicts() {
+      const timeCounts = {};
+      (state.talents || []).forEach(t => {
+        const sched = getTalentAssignedSchedule(t);
+        if (sched.displayDate && sched.displayDate !== '-' && sched.assignedTime && sched.assignedTime !== '-') {
+          const key = sched.displayDate + '__' + sched.assignedTime;
+          if (!timeCounts[key]) timeCounts[key] = [];
+          timeCounts[key].push({ id: t.id, name: t.name, status: t.outreachStatus, isRescheduled: sched.isRescheduled });
+        }
+      });
+
+      const conflicts = {};
+      Object.values(timeCounts).forEach(list => {
+        // Collision (tabrakan) ONLY occurs if 2 or more candidates have actually CONFIRMED attendance
+        // (status 'Confirmed' or agreed 'Reschedule').
+        // If a candidate is merely 'WA Sent' or 'Pending', they have NOT confirmed attendance yet,
+        // so it does not count as a conflict.
+        const confirmedAttendees = list.filter(item => item.status === 'Confirmed' || item.status === 'Reschedule');
+
+        if (confirmedAttendees.length > 1) {
+          confirmedAttendees.forEach(item => {
+            conflicts[item.id] = confirmedAttendees.filter(other => other.id !== item.id);
+          });
+        }
+      });
+      return conflicts;
+    }
+
+    function getTalentAssignedSchedule(talent) {
+      let assignedTime = (state.smartScheduleMap && state.smartScheduleMap[talent.id]) ? state.smartScheduleMap[talent.id] : '-';
+      let displayDate = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+      let isRescheduled = false;
+
+      // Priority 1: Check for Reschedule in notes
+      if (talent.outreachStatus === 'Reschedule' && talent.notes) {
+        const matches = [...talent.notes.matchAll(/\[Rescheduled to: (.*?)\]/g)];
+        if (matches.length > 0) {
+          const lastMatch = matches[matches.length - 1][1];
+          const parts = lastMatch.split(' ');
+          if (parts.length >= 3) {
+            const tTimeWIB = parts.pop();
+            const tTimeNum = parts.pop();
+            assignedTime = tTimeNum + ' ' + tTimeWIB;
+            displayDate = parts.join(' ');
+            isRescheduled = true;
+          } else {
+            displayDate = lastMatch;
+            assignedTime = 'Rescheduled';
+            isRescheduled = true;
+          }
+          return { assignedTime, displayDate, isRescheduled };
+        }
+      }
+
+      // Priority 2: Check for permanently recorded [Interview Scheduled: ...] in notes
+      if (talent.notes) {
+        const schedMatches = [...talent.notes.matchAll(/\[Interview Scheduled:\s*(.*?)\s+@\s*.*?\]/g)];
+        if (schedMatches.length > 0) {
+          const lastSched = schedMatches[schedMatches.length - 1][1];
+          const parts = lastSched.split(' ');
+          if (parts.length >= 3) {
+            const tTimeWIB = parts.pop();
+            const tTimeNum = parts.pop();
+            assignedTime = tTimeNum + ' ' + tTimeWIB;
+            displayDate = parts.join(' ');
+            return { assignedTime, displayDate, isRescheduled: false };
+          }
+        }
+      }
+
+      return { assignedTime, displayDate, isRescheduled };
+    }
+
+    function resolveCandidateMessage(talent, assignedTime) {
       const template = el.bcCustomMessage ? el.bcCustomMessage.value : '';
       const dateVal = formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
-      const timeVal = el.bcTimeInput ? el.bcTimeInput.value.trim() : '10:00 WIB';
+      const timeVal = assignedTime || 'TBD';
       const locVal = el.bcLocationInput ? el.bcLocationInput.value.trim() : 'Online Meet';
 
       return template
@@ -3611,6 +4953,128 @@
         .replace(/{time}/g, timeVal)
         .replace(/{location}/g, locVal)
         .replace(/{id}/g, talent.id || '');
+    }
+
+    
+    window.switchBcTab = function(tabName) {
+      document.getElementById('bcTabQueue').style.display = tabName === 'queue' ? 'block' : 'none';
+      document.getElementById('bcTabAutomation').style.display = tabName === 'automation' ? 'block' : 'none';
+      document.getElementById('bcTabTemplate').style.display = tabName === 'template' ? 'block' : 'none';
+      
+      const navs = ['Queue', 'Automation', 'Template'];
+      navs.forEach(n => {
+        const btn = document.getElementById('bcNav' + n);
+        if (btn) {
+          if (n.toLowerCase() === tabName) {
+            btn.style.color = '#2563EB';
+            btn.style.borderBottomColor = '#2563EB';
+          } else {
+            btn.style.color = 'var(--text-secondary)';
+            btn.style.borderBottomColor = 'transparent';
+          }
+        }
+      });
+    };
+    
+    function calculateSmartTime(index) {
+      const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
+      const intervalStr = document.getElementById('bcIntervalInput') ? document.getElementById('bcIntervalInput').value : '30';
+      
+      let [hours, minutes] = baseTimeStr.split(':').map(Number);
+      if (isNaN(hours)) hours = 9;
+      if (isNaN(minutes)) minutes = 0;
+      let interval = parseInt(intervalStr, 10);
+      if (isNaN(interval)) interval = 30;
+      
+      const totalMinutes = (hours * 60) + minutes + (index * interval);
+      const newHours = Math.floor(totalMinutes / 60) % 24;
+      const newMins = totalMinutes % 60;
+      return String(newHours).padStart(2, '0') + ':' + String(newMins).padStart(2, '0') + ' WIB';
+    }
+
+    
+    async 
+    let currentRescheduleId = null;
+    function openRescheduleModal(id) {
+      currentRescheduleId = id;
+      document.getElementById('rescheduleDate').value = '';
+      document.getElementById('rescheduleTime').value = '';
+      document.getElementById('rescheduleModalBackdrop').style.display = 'flex';
+    }
+    window.closeRescheduleModal = function() {
+      currentRescheduleId = null;
+      document.getElementById('rescheduleModalBackdrop').style.display = 'none';
+      renderBroadcastTable();
+    };
+    window.submitReschedule = async function() {
+      if (!currentRescheduleId) return;
+      const dateVal = document.getElementById('rescheduleDate').value;
+      const timeVal = document.getElementById('rescheduleTime').value;
+      if (!dateVal || !timeVal) {
+        showToast('Please fill in both date and time');
+        return;
+      }
+      
+      const target = state.talents.find(t => t.id === currentRescheduleId || t.$id === currentRescheduleId);
+      if (!target) return;
+      
+      const displayDate = formatDisplayDate(dateVal);
+      const remark = `\n[Rescheduled to: ${displayDate} ${timeVal} WIB]`;
+      const updatedNotes = (target.notes || '') + remark;
+      
+      target.stage = 'Interviewed';
+      target.outreachStatus = 'Reschedule';
+      target.notes = updatedNotes;
+      
+      const packedNotes = packOutreachStatus(updatedNotes, 'Reschedule');
+      
+      closeRescheduleModal();
+      renderBroadcastTable();
+      updateMetrics();
+      
+      try {
+        const docId = target.$id || (target.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        await databases.updateDocument(
+          APPWRITE_CONFIG.databaseId,
+          APPWRITE_CONFIG.collectionId,
+          docId,
+          {
+            stage: 'Interviewed',
+            notes: packedNotes
+          }
+        );
+        showToast('Rescheduled to ' + displayDate + ' ' + timeVal + ' & moved to Interviewed for ' + target.name);
+      } catch (e) {
+        console.warn('Save error:', e);
+        showToast('Saved locally, but failed in Cloud');
+      }
+    };
+
+    async function updateOutreachStatus(id, newStatus) {
+      if (newStatus === 'Reschedule') {
+        openRescheduleModal(id);
+        return;
+      }
+
+      const target = state.talents.find(t => t.id === id || t.$id === id);
+      if (target) {
+        target.outreachStatus = newStatus;
+      }
+      renderBroadcastTable(); // update UI
+
+      try {
+        const docId = target && target.$id ? target.$id : (id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        await databases.updateDocument(
+          APPWRITE_CONFIG.databaseId,
+          APPWRITE_CONFIG.collectionId,
+          docId,
+          { outreachStatus: newStatus }
+        );
+        showToast('Status updated to ' + newStatus);
+      } catch (err) {
+        console.warn('Save error, ensure outreachStatus column exists in Appwrite', err);
+        showToast('Saved locally, but failed in Cloud. Check Appwrite attributes.');
+      }
     }
 
     function renderBroadcastTable() {
@@ -3629,10 +5093,104 @@
 
       if (el.bcQueueCount) el.bcQueueCount.textContent = targetTalents.length;
 
+      
+      // Calculate smart schedule assignments with LOCKED slots & notes priority
+      if (!state.smartScheduleMap) {
+        try {
+          state.smartScheduleMap = JSON.parse(localStorage.getItem('pge_smart_schedule_map') || '{}');
+        } catch(e) {
+          state.smartScheduleMap = {};
+        }
+      }
+      if (!state.smartScheduleSlotIndex) {
+        try {
+          state.smartScheduleSlotIndex = JSON.parse(localStorage.getItem('pge_smart_slot_indices') || '{}');
+        } catch(e) {
+          state.smartScheduleSlotIndex = {};
+        }
+      }
+
+      const selectedTalents = targetTalents.filter(t => state.broadcastSelectedIds.has(t.id));
+
+      // Gather all hard-locked occupied times (Tier 1: Rescheduled/Confirmed, Tier 2: Already Sent)
+      const occupiedTimes = new Set();
+      (state.talents || []).forEach(other => {
+        if (other.outreachStatus === 'Reschedule' || other.outreachStatus === 'Confirmed') {
+          const s = getTalentAssignedSchedule(other);
+          if (s.assignedTime && s.assignedTime !== '-') occupiedTimes.add(s.assignedTime);
+        }
+      });
+
+      // Sequential allocation with AUTO-SKIP of occupied slots
+      let nextSeqSlot = 0;
+      selectedTalents.forEach(t => {
+        if (t.outreachStatus === 'Reschedule') {
+          const s = getTalentAssignedSchedule(t);
+          if (s.assignedTime && s.assignedTime !== '-') {
+            state.smartScheduleMap[t.id] = s.assignedTime;
+          }
+          return;
+        }
+
+        // If candidate already has recorded schedule in notes, check if it collides with a Reschedule
+        const recorded = getTalentAssignedSchedule(t);
+        if (recorded.assignedTime && recorded.assignedTime !== '-') {
+          if (!occupiedTimes.has(recorded.assignedTime) || t.outreachStatus === 'Confirmed' || t.outreachStatus === 'Reschedule') {
+            state.smartScheduleMap[t.id] = recorded.assignedTime;
+            occupiedTimes.add(recorded.assignedTime);
+            return;
+          }
+        }
+
+        // If candidate doesn't have a slot or needs allocation, find next slot skipping occupied times
+        while (true) {
+          const candidateTime = calculateSmartTime(nextSeqSlot);
+          if (!occupiedTimes.has(candidateTime)) {
+            state.smartScheduleSlotIndex[t.id] = nextSeqSlot;
+            state.smartScheduleMap[t.id] = candidateTime;
+            occupiedTimes.add(candidateTime);
+            nextSeqSlot++;
+            break;
+          } else {
+            // Auto-skip occupied slot!
+            nextSeqSlot++;
+          }
+        }
+      });
+
+      try {
+        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
+        localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
+      } catch(e) {}
+
       el.bcTableBody.innerHTML = targetTalents.map(talent => {
         const isSelected = state.broadcastSelectedIds.has(talent.id);
         const phone = formatToInternationalPhone(talent.phone);
-        const resolvedMsg = resolveCandidateMessage(talent);
+        let assignedTime = state.smartScheduleMap[talent.id] || '-';
+        let displayDate = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+        let isRescheduled = false;
+
+        if (talent.outreachStatus === 'Reschedule' && talent.notes) {
+          // Check for the most recent Reschedule remark
+          const matches = [...talent.notes.matchAll(/\[Rescheduled to: (.*?)\]/g)];
+          if (matches.length > 0) {
+            const lastMatch = matches[matches.length - 1][1];
+            const parts = lastMatch.split(' ');
+            if (parts.length >= 3) {
+              const tTimeWIB = parts.pop();
+              const tTimeNum = parts.pop();
+              assignedTime = tTimeNum + ' ' + tTimeWIB;
+              displayDate = parts.join(' ');
+              isRescheduled = true;
+            } else {
+              displayDate = lastMatch;
+              assignedTime = 'Rescheduled';
+              isRescheduled = true;
+            }
+          }
+        }
+
+        const resolvedMsg = resolveCandidateMessage(talent, assignedTime);
         const sentTime = state.broadcastSentHistory[talent.id];
         const isSent = !!sentTime;
 
@@ -3652,17 +5210,29 @@
             <td style="font-family: var(--font-mono); font-size: 12px;">
               ${phone ? `<span style="color: #166534; font-weight: 500;">${phone}</span>` : '<span style="color: #DC2626;">No WhatsApp</span>'}
             </td>
-            <td style="max-width: 320px;">
-              <div style="font-size: 11px; color: var(--text-secondary); background: #F9FAFB; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-light); max-height: 55px; overflow-y: auto; white-space: pre-wrap; line-height: 1.4;">${escapeHtml(resolvedMsg)}</div>
+            <td>
+              ${(detectScheduleConflicts()[talent.id]) ? `
+                <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #DC2626; background: #FEE2E2; border: 1px solid #FCA5A5; padding: 2px 6px; border-radius: 4px; display: inline-block;">
+                  ⚠️ ${assignedTime} (Bentrok)
+                </div>
+              ` : `
+                <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'};">
+                  ${isRescheduled ? '🔄 ' : ''}${assignedTime}
+                </div>
+              `}
+              <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'};">${displayDate}</div>
             </td>
             <td style="text-align: right;">
               ${phone ? `
                 <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                  ${isSent ? `
-                    <span style="font-family: var(--font-mono); font-size: 11px; color: #16A34A; font-weight: 600; display: inline-flex; align-items: center; gap: 3px;">
-                      ✓ Sent (${sentTime})
-                    </span>
-                  ` : '<span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">⏳ Pending</span>'}
+                  <select class="outreach-status-pill status-${(talent.outreachStatus || 'Pending').toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${talent.id}', this.value)">
+                    <option value="Pending" ${(talent.outreachStatus || 'Pending') === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                    <option value="WA Sent" ${talent.outreachStatus === 'WA Sent' ? 'selected' : ''}>💬 WA Sent</option>
+                    <option value="Confirmed" ${talent.outreachStatus === 'Confirmed' ? 'selected' : ''}>✅ Confirmed</option>
+                    <option value="Tidak Hadir" ${talent.outreachStatus === 'Tidak Hadir' ? 'selected' : ''}>❌ Tidak Hadir</option>
+                    <option value="Cant Attend" ${talent.outreachStatus === 'Cant Attend' ? 'selected' : ''}>❌ Can't Attend</option>
+                    <option value="Reschedule" ${talent.outreachStatus === 'Reschedule' ? 'selected' : ''}>🔄 Reschedule</option>
+                  </select>
                   <button type="button" class="btn btn-wa btn-sm" onclick="sendBroadcastSingle('${talent.id}')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     Send to WA ↗
@@ -3713,7 +5283,10 @@
         return;
       }
 
-      const msg = resolveCandidateMessage(talent);
+      const sched = getTalentAssignedSchedule(talent);
+      const assignedTime = sched.assignedTime || 'TBD';
+      const assignedDate = sched.displayDate;
+      const msg = resolveCandidateMessage(talent, assignedTime, assignedDate);
       const cleanNum = phone.replace(/\+/g, '');
       const waUrl = `https://wa.me/${cleanNum}?text=${encodeURIComponent(msg)}`;
 
@@ -3725,7 +5298,7 @@
       const autoUpdate = el.bcAutoUpdateStage && el.bcAutoUpdateStage.checked;
       if (autoUpdate) {
         const dateVal = formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
-        const timeVal = el.bcTimeInput ? el.bcTimeInput.value.trim() : '10:00 WIB';
+        const timeVal = assignedTime || 'TBD';
         const locVal = el.bcLocationInput ? el.bcLocationInput.value.trim() : 'Online Meet';
         
         const scheduleRemark = `\n[Interview Scheduled: ${dateVal} ${timeVal} @ ${locVal}]`;
@@ -3742,7 +5315,8 @@
             docId,
             {
               stage: 'Interviewed',
-              notes: updatedNotes
+              notes: updatedNotes,
+              outreachStatus: 'WA Sent'
             }
           );
           showToast(`✅ Sent & Recorded Schedule for ${talent.name} in Appwrite!`);
@@ -3778,12 +5352,18 @@
       state.activeProfileTab = tabName;
       const btnPorto = document.getElementById('profTabBtnPorto');
       const btnDiscuss = document.getElementById('profTabBtnDiscuss');
+      const btnAssess = document.getElementById('profTabBtnAssess');
       const contentPorto = document.getElementById('profTabPortoContent');
       const contentDiscuss = document.getElementById('profTabDiscussContent');
+      const contentAssess = document.getElementById('profTabAssessContent');
 
       if (btnPorto) btnPorto.classList.toggle('active', tabName === 'portfolio');
       if (btnDiscuss) btnDiscuss.classList.toggle('active', tabName === 'discussion');
+      if (btnAssess) btnAssess.classList.toggle('active', tabName === 'assessment');
+
       if (contentPorto) contentPorto.style.display = tabName === 'portfolio' ? 'flex' : 'none';
+      if (contentAssess) contentAssess.style.display = tabName === 'assessment' ? 'flex' : 'none';
+
       if (contentDiscuss) {
         contentDiscuss.style.display = tabName === 'discussion' ? 'flex' : 'none';
         if (tabName === 'discussion' && state.activeProfileTalentId) {
@@ -4180,6 +5760,9 @@
         <div class="profile-tabs-nav">
           <button type="button" id="profTabBtnPorto" class="profile-tab-btn ${state.activeProfileTab === 'portfolio' ? 'active' : ''}" onclick="switchProfileTab('portfolio')">
             📁 Portfolio &amp; CV (${validPortoList.length + (isValidDisplayUrl(talent.cvUrl) ? 1 : 0)})
+          </button>
+          <button type="button" id="profTabBtnAssess" class="profile-tab-btn ${state.activeProfileTab === 'assessment' ? 'active' : ''}" onclick="switchProfileTab('assessment')">
+            🧠 Hasil Asesmen (${isCompletedAssessment ? '✓ Selesai' : 'Belum Tes'})
           </button>
           <button type="button" id="profTabBtnDiscuss" class="profile-tab-btn ${state.activeProfileTab === 'discussion' ? 'active' : ''}" onclick="switchProfileTab('discussion')">
             💬 Tim Diskusi &amp; Evaluasi (<span id="profModalDiscussCount">${commentCount}</span>)
@@ -5450,6 +7033,144 @@
         sphere.style.transform = `perspective(600px) rotateX(${rotX.toFixed(1)}deg) rotateY(${rotY.toFixed(1)}deg) translateZ(12px)`;
       });
 
+
+      // Chicken Chasing State Machine
+      const widgetContainer = document.getElementById('psyduckWidgetContainer');
+      if (widgetContainer) {
+        
+        // Feed dropping mechanic permanently removed per user request
+        
+        let currentX = 0;
+        let currentY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        let currentTheta = -90; // Default facing right
+        
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let lastMouseMoveTime = Date.now();
+        let isMouseInWindow = true;
+        
+        // Use existing mousemove for coordinates without overriding anything
+        window.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          lastMouseMoveTime = Date.now();
+          isMouseInWindow = true;
+        });
+        
+        document.addEventListener('mouseleave', () => {
+          isMouseInWindow = false;
+        });
+        document.addEventListener('mouseenter', () => {
+          isMouseInWindow = true;
+        });
+        
+        function updateChickenPosition() {
+          const now = Date.now();
+          const idleTime = now - lastMouseMoveTime;
+          
+          const rect = widgetContainer.getBoundingClientRect();
+          
+          
+          let state = 'IDLE';
+          if (!isChickenRunning) {
+            state = 'STOPPED';
+            targetX = 0;
+            targetY = 0;
+          } else if (!isMouseInWindow || idleTime > 15000) {
+            state = 'RETURNING_HOME';
+            targetX = 0;
+            targetY = 0;
+          } else if (idleTime > 5000) {
+            state = 'WANDERING';
+            if (!widgetContainer.lastWander || now - widgetContainer.lastWander > 3000) {
+              // Wander around in the bottom half of the screen randomly
+              targetX = Math.random() * (window.innerWidth - 300); // 300px buffer to prevent bubble overflow
+              targetY = -Math.random() * 200; // Hop up to 200px
+              widgetContainer.lastWander = now;
+            }
+          } else {
+            state = 'CHASING';
+            const padding = 130; // Stop 130px away from cursor
+            
+            // Raw target calculation based on center of the chicken widget
+            let rawTargetX = mouseX - 24 - (rect.width / 2);
+            let rawTargetY = mouseY - (window.innerHeight - 24) + (rect.height / 2) - 40; // Aim slightly below cursor
+            
+            if (rawTargetX < currentX) {
+              targetX = rawTargetX + padding;
+            } else {
+              targetX = rawTargetX - padding;
+            }
+            targetY = rawTargetY;
+            
+            // Clamp to screen bounds
+            targetX = Math.max(0, Math.min(targetX, window.innerWidth - rect.width - 24));
+            targetY = Math.min(0, Math.max(targetY, -(window.innerHeight - rect.height - 24)));
+          }
+          
+          const maxSpeed = (state === 'CHASING') ? 4.0 : 1.5; // Constant walking speed
+          const distToTarget = Math.hypot(targetX - currentX, targetY - currentY);
+          
+          if (distToTarget > maxSpeed) {
+            currentX += ((targetX - currentX) / distToTarget) * maxSpeed;
+            currentY += ((targetY - currentY) / distToTarget) * maxSpeed;
+          } else {
+            currentX = targetX;
+            currentY = targetY;
+          }
+          
+          widgetContainer.style.transform = `translate(${currentX}px, ${currentY}px)`;
+  
+          // Face the target (Full 360 degree rotation)
+          const assistantModel = document.getElementById('assistantModel');
+          if (assistantModel) {
+            const chickenCenterX = rect.left + (rect.width / 2);
+            const chickenCenterY = rect.top + (rect.height / 2);
+            
+            if (state === 'STOPPED') {
+              // Smoothly transition rotation to neutral forward angle
+              let targetTheta = 0;
+              let diff = targetTheta - currentTheta;
+              while (diff < -180) diff += 360;
+              while (diff > 180) diff -= 360;
+              currentTheta += diff * 0.08;
+              assistantModel.setAttribute('camera-orbit', `${currentTheta.toFixed(1)}deg 75deg 105%`);
+            } else {
+              let dx, dy;
+              if (state === 'WANDERING' || state === 'RETURNING_HOME') {
+                dx = targetX - currentX;
+                dy = targetY - currentY;
+                if (Math.abs(dx) < 2 && Math.abs(dy) < 2) {
+                  dx = 0; dy = 1; // Default face forward
+                }
+              } else {
+                dx = mouseX - chickenCenterX;
+                dy = mouseY - chickenCenterY;
+              }
+              
+              let targetTheta = (Math.atan2(dy, dx) * 180 / Math.PI) - 90;
+              
+              // Smoothly interpolate rotation (taking shortest path)
+              let diff = targetTheta - currentTheta;
+              while (diff < -180) diff += 360;
+              while (diff > 180) diff -= 360;
+              currentTheta += diff * 0.1; // Smooth turning
+              
+              let phi = 75 - (dy / window.innerHeight) * 15;
+              
+              assistantModel.setAttribute('camera-orbit', `${currentTheta.toFixed(1)}deg ${phi.toFixed(1)}deg 105%`);
+            }
+          }
+
+          
+          requestAnimationFrame(updateChickenPosition);
+        }
+        
+        requestAnimationFrame(updateChickenPosition);
+      }
+
       renderPsyduckBubbleContent();
     }
 
@@ -5536,7 +7257,7 @@
       const bubble = document.getElementById('psyduckSpeechBubble');
       if (!bubble) return;
       if (bubble.classList.contains('open')) {
-        renderPsyduckBubbleContent();
+        bubble.classList.remove('open');
       } else {
         renderPsyduckBubbleContent();
         bubble.classList.add('open');
@@ -5610,6 +7331,349 @@
       }
     }
 
+    /* ON-SITE ASSESSMENT LAUNCHER & SCORING MODULE        */
+    /* ---------------------------------------------------- */
+    let expandedAssessmentScoreTalentId = null;
+
+    function getSelectedLauncherTests() {
+      const selected = [];
+      const chkBigFive = document.getElementById('launcherChkBigFive');
+      const chkCognitive = document.getElementById('launcherChkCognitive');
+      const chkDisc = document.getElementById('launcherChkDisc');
+      if (chkBigFive && chkBigFive.checked) selected.push('bigfive');
+      if (chkCognitive && chkCognitive.checked) selected.push('cognitive');
+      if (chkDisc && chkDisc.checked) selected.push('disc');
+      if (selected.length === 0) return ['bigfive', 'cognitive', 'disc'];
+      return selected;
+    }
+
+    function launchOnSiteAssessment(talentId) {
+      const talent = (state.talents || []).find(t => t.id === talentId);
+      if (!talent) return;
+      const tests = getSelectedLauncherTests();
+      const url = 'assessment.html?id=' + encodeURIComponent(talent.id) + 
+                  '&name=' + encodeURIComponent(talent.name || '') + 
+                  '&role=' + encodeURIComponent(talent.role || '') +
+                  '&tests=' + encodeURIComponent(tests.join(','));
+      window.open(url, '_blank');
+    }
+
+    async function resetCandidateAssessment(talentId) {
+      if (!isSuperAdmin()) {
+        showToast('⚠️ Hanya Super Admin yang berwenang mereset hasil tes.');
+        return;
+      }
+      const talent = (state.talents || []).find(t => t.id === talentId);
+      const name = talent ? talent.name : talentId;
+      if (!confirm(`Apakah Anda yakin ingin mereset seluruh hasil asesmen (Big Five & Logika Bisnis) untuk ${name} (${talentId})?\n\nRespon dan skor akan dihapus dari database agar kandidat dapat mengerjakan ulang.`)) {
+        return;
+      }
+
+      try {
+        await Promise.all([
+          rtdb.ref('talents/' + talentId + '/assessment').remove(),
+          rtdb.ref('candidate_assessments/' + talentId).remove()
+        ]);
+        if (talent) talent.assessment = null;
+        if (state.candidateAssessments) delete state.candidateAssessments[talentId];
+
+        showToast(`✓ Seluruh hasil asesmen ${name} berhasil direset.`);
+        renderAssessmentLauncherCandidates();
+        if (state.activeProfileTalentId === talentId) {
+          openCandidateProfileModal(talentId, 'assessment');
+        }
+      } catch (err) {
+        console.error('Reset assessment error:', err);
+        showToast('Gagal mereset: ' + err.message);
+      }
+    }
+
+    function openAssessmentLauncherModal() {
+      const modal = document.getElementById('assessmentLauncherModalBackdrop');
+      const vacSelect = document.getElementById('launcherVacancySelect');
+      if (!modal || !vacSelect) return;
+
+      const vacancies = getUniqueVacancies();
+      let vacHtml = `<option value="ALL">🌐 Semua Posisi (${state.talents.length})</option>`;
+      vacancies.forEach(v => {
+        const isSel = (state.activeVacancy === v.name);
+        vacHtml += `<option value="${escapeHtml(v.name)}" ${isSel ? 'selected' : ''}>${getVacancyIcon(v.name)} ${escapeHtml(v.name)} (${v.total})</option>`;
+      });
+      vacSelect.innerHTML = vacHtml;
+
+      const stageSelect = document.getElementById('launcherStageSelect');
+      if (stageSelect) stageSelect.value = 'Screening';
+
+      const searchInput = document.getElementById('launcherSearchInput');
+      if (searchInput) searchInput.value = '';
+
+      expandedAssessmentScoreTalentId = null;
+      renderAssessmentLauncherCandidates();
+      modal.classList.add('open');
+    }
+
+    function closeAssessmentLauncherModal() {
+      const modal = document.getElementById('assessmentLauncherModalBackdrop');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function toggleAssessmentScorePreview(talentId) {
+      if (expandedAssessmentScoreTalentId === talentId) {
+        expandedAssessmentScoreTalentId = null;
+      } else {
+        expandedAssessmentScoreTalentId = talentId;
+      }
+      renderAssessmentLauncherCandidates();
+    }
+
+    function renderAssessmentLauncherCandidates() {
+      const container = document.getElementById('launcherCandidatesContainer');
+      const countBadge = document.getElementById('launcherCountBadge');
+      const vacSelect = document.getElementById('launcherVacancySelect');
+      const stageSelect = document.getElementById('launcherStageSelect');
+      const searchInput = document.getElementById('launcherSearchInput');
+
+      if (!container || !vacSelect || !stageSelect) return;
+
+      const selectedVac = vacSelect.value;
+      const selectedStage = stageSelect.value;
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+      const filtered = (state.talents || []).filter(talent => {
+        if (selectedVac !== 'ALL') {
+          const roleClean = (talent.role || 'Freelance Content Creator').toLowerCase().trim();
+          if (roleClean !== selectedVac.toLowerCase().trim()) return false;
+        }
+
+        if (selectedStage !== 'ALL') {
+          const stClean = (talent.stage || 'Prospect').toLowerCase().trim();
+          if (stClean !== selectedStage.toLowerCase().trim()) return false;
+        }
+
+        if (query) {
+          const matchName = (talent.name || '').toLowerCase().includes(query);
+          const matchId = (talent.id || '').toLowerCase().includes(query);
+          if (!matchName && !matchId) return false;
+        }
+
+        return true;
+      });
+
+      if (countBadge) countBadge.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 36px 16px; color: var(--text-secondary); background: #FFFFFF; border: 1px dashed var(--border-light); border-radius: var(--radius-sm);">
+            <div style="font-size: 28px; margin-bottom: 6px;">🔍</div>
+            <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Tidak ada kandidat di tahap ini</div>
+            <div style="font-size: 11.5px; margin-top: 4px; color: var(--text-muted);">
+              Coba ganti filter lowongan atau pilih "Semua Tahapan" untuk melihat kandidat di tahap lain.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(talent => {
+        const assessment = talent.assessment || (state.candidateAssessments ? state.candidateAssessments[talent.id] : null);
+        const isCompleted = Boolean(assessment && assessment.status === 'completed');
+        const initials = (talent.name || 'KD').split(' ').map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
+        const stageClass = 'stage-' + (talent.stage || 'prospect').toLowerCase();
+        const isExpanded = (expandedAssessmentScoreTalentId === talent.id);
+
+        let previewScoreHtml = '';
+        if (isExpanded && isCompleted) {
+          const sc = assessment.scores;
+          const cog = assessment.cognitive;
+
+          let bigFivePreview = '';
+          if (sc) {
+            const renderMiniBar = (label, trait) => {
+              const raw = trait ? trait.rawScore : 0;
+              const pct = trait ? trait.percentage : 0;
+              const lvl = trait ? trait.level : '-';
+              return `
+                <div style="font-size: 11px;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="font-weight: 500;">${label}</span>
+                    <span style="font-family: var(--font-mono); font-weight: 600;">${raw}/50 (${lvl})</span>
+                  </div>
+                  <div style="height: 4px; background: #E5E7EB; border-radius: 2px; overflow: hidden;">
+                    <div style="height: 100%; width: ${pct}%; background: #10B981; border-radius: 2px;"></div>
+                  </div>
+                </div>`;
+            };
+
+            bigFivePreview = `
+              <div style="margin-bottom: 10px;">
+                <div style="font-size: 10.5px; font-weight: 700; color: #166534; margin-bottom: 6px; font-family: var(--font-mono);">
+                  IPIP BIG FIVE:
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  ${renderMiniBar('Extraversion (E)', sc.extraversion)}
+                  ${renderMiniBar('Agreeableness (A)', sc.agreeableness)}
+                  ${renderMiniBar('Conscientiousness (C)', sc.conscientiousness)}
+                  ${renderMiniBar('Emotional Stability (EM)', sc.emotionalStability)}
+                  <div style="grid-column: 1 / -1;">
+                    ${renderMiniBar('Intellect / Openness (I)', sc.intellect)}
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+
+          let cogPreview = '';
+          if (cog) {
+            cogPreview = `
+              <div style="padding-top: 8px; border-top: 1px dashed #BBF7D0;">
+                <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                  <span style="font-weight: 700; color: #166534; font-family: var(--font-mono);">LOGIKA &amp; BISNIS PRAKTIS:</span>
+                  <span style="font-weight: 700; font-family: var(--font-mono); color: #047857;">${cog.score}/${cog.total} (${cog.percentage}%) • ${cog.level}</span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                  ${Object.entries(cog.categories || {}).map(([cName, s]) => `
+                    <span style="font-size: 10px; background: #FFFFFF; border: 1px solid #BBF7D0; padding: 1px 6px; border-radius: 4px; color: #15803D;">
+                      ${cName}: ${s.correct}/${s.total}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          }
+
+          previewScoreHtml = `
+            <div style="margin-top: 10px; padding: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-sm);">
+              ${bigFivePreview}
+              ${cogPreview}
+              ${assessment.disc ? `
+                <div style="padding-top: 8px; border-top: 1px dashed #BBF7D0; font-size: 11px;">
+                  <span style="font-weight: 700; color: #166534; font-family: var(--font-mono);">DISC PROFILE:</span>
+                  <span style="font-weight: 700; font-family: var(--font-mono); color: #7C3AED; margin-left: 6px;">Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})</span>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        // Badges for assessment status
+        let statusBadgeHtml = '';
+        if (isCompleted) {
+          const cogScoreStr = assessment.cognitive ? ` • Logika: ${assessment.cognitive.score}/${assessment.cognitive.total}` : '';
+          const discPatternStr = assessment.disc ? ` • DISC: ${assessment.disc.profilePattern}` : '';
+          statusBadgeHtml = `
+            <span class="doc-badge" style="background:#F0FDF4; border-color:#86EFAC; color:#15803D; font-weight:600; font-size: 11px;">
+              ✓ Selesai${cogScoreStr}${discPatternStr}
+            </span>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAssessmentScorePreview('${talent.id}')" style="font-size: 11px; padding: 4px 10px;">
+              ${isExpanded ? '▲ Tutup Skor' : '📊 Lihat Skor'}
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="launchOnSiteAssessment('${talent.id}')" style="font-size: 11px; padding: 4px 10px;" title="Buka lembar tes">
+              Buka ↗
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetCandidateAssessment('${talent.id}')" style="font-size: 11px; padding: 4px 8px; color: #DC2626; border-color: #FECACA;" title="Reset data hasil tes">
+              🔄 Reset
+            </button>
+          `;
+        } else {
+          statusBadgeHtml = `
+            <span class="doc-badge" style="background:#F3F4F6; border-color:#E5E7EB; color:#6B7280; font-size: 11px;">
+              ⏳ Belum Tes
+            </span>
+            <button type="button" class="btn btn-primary btn-sm" onclick="launchOnSiteAssessment('${talent.id}')" style="font-size: 11px; padding: 5px 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+              <span>🚀 Mulai Tes di Laptop Ini ↗</span>
+            </button>
+          `;
+        }
+
+        return `
+          <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px 14px; box-shadow: var(--shadow-sm); transition: border-color 0.2s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 8px; background: #111827; color: #FFFFFF; font-family: var(--font-mono); font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  ${initials}
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: var(--text-primary);">${escapeHtml(talent.name)}</span>
+                    <span class="candidate-tag" style="font-size: 10px;">${talent.id}</span>
+                    <span class="stage-badge ${stageClass}" style="font-size: 10px; padding: 1px 6px;">${talent.stage || 'Prospect'}</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                    💼 ${escapeHtml(talent.role || 'Freelance Content Creator')} 
+                    ${talent.domisili ? ' • 📍 ' + escapeHtml(talent.domisili) : ''}
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                ${statusBadgeHtml}
+              </div>
+            </div>
+
+            ${previewScoreHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ---------------------------------------------------- */
+    /* REALTIME CANDIDATE ASSESSMENTS LISTENER             */
+    /* ---------------------------------------------------- */
+    function listenCandidateAssessments() {
+      try {
+        const handleAssessmentUpdate = () => {
+          (state.talents || []).forEach(t => {
+            const fromAss = state.candidateAssessments ? state.candidateAssessments[t.id] : null;
+            if (fromAss) {
+              t.assessment = fromAss;
+            }
+          });
+
+          if (state.activeProfileTalentId) {
+            const currentTalent = (state.talents || []).find(t => t.id === state.activeProfileTalentId);
+            if (currentTalent && currentTalent.assessment) {
+              const assessBadge = document.getElementById('profModalAssessmentBadge');
+              if (assessBadge) {
+                assessBadge.textContent = '✓ Selesai';
+                assessBadge.style.background = '#DCFCE7';
+                assessBadge.style.color = '#15803D';
+              }
+              if (state.activeProfileTab === 'assessment') {
+                openCandidateProfileModal(state.activeProfileTalentId, 'assessment');
+              }
+            }
+          }
+
+          renderActiveView();
+          const launcherModal = document.getElementById('assessmentLauncherModalBackdrop');
+          if (launcherModal && launcherModal.classList.contains('open')) {
+            renderAssessmentLauncherCandidates();
+          }
+        };
+
+        rtdb.ref('/candidate_assessments').on('value', (snapshot) => {
+          const data = snapshot.val() || {};
+          state.candidateAssessments = { ...(state.candidateAssessments || {}), ...data };
+          handleAssessmentUpdate();
+        });
+
+        rtdb.ref('/talents').on('value', (snapshot) => {
+          const data = snapshot.val() || {};
+          const talentAssessments = {};
+          Object.keys(data).forEach(id => {
+            if (data[id] && data[id].assessment) {
+              talentAssessments[id] = data[id].assessment;
+            }
+          });
+          state.candidateAssessments = { ...talentAssessments, ...(state.candidateAssessments || {}) };
+          handleAssessmentUpdate();
+        });
+      } catch (e) {
+        console.warn('Assessments RTDB listener error:', e);
+      }
+    }
+
+    
     /* Renders permanent attached CV Card in Drawer */
     function renderAttachedCvCard(url, customName) {
       const container = document.getElementById('cvAttachedContainer');
@@ -6200,7 +8264,8 @@
         cvUrl: cvUrl,
         portfolioUrl: primaryPorto,
         portfolioItemsJson: JSON.stringify(state.stagedPortfolioItems),
-        skillsJson: JSON.stringify(skills)
+        skillsJson: JSON.stringify(skills),
+        outreachStatus: state.selectedTalent ? (state.selectedTalent.outreachStatus || 'Pending') : 'Pending'
       };
 
       if (!state.selectedTalent && !isSuperAdmin()) {
@@ -6411,10 +8476,57 @@
     window.renderVacancyHub = renderVacancyHub;
     window.getUniqueVacancies = getUniqueVacancies;
     window.normalizeExternalUrl = normalizeExternalUrl;
+    window.openAssessmentLauncherModal = openAssessmentLauncherModal;
+    window.launchOnSiteAssessment = launchOnSiteAssessment;
+    window.resetCandidateAssessment = resetCandidateAssessment;
+    window.closeAssessmentLauncherModal = closeAssessmentLauncherModal;
+    window.renderAssessmentLauncherCandidates = renderAssessmentLauncherCandidates;
+    window.toggleAssessmentScorePreview = toggleAssessmentScorePreview;
     window.handlePsyduckClick = handlePsyduckClick;
     window.closePsyduckBubble = closePsyduckBubble;
     window.executePsyduckAction = executePsyduckAction;
     window.renderPsyduckBubbleContent = renderPsyduckBubbleContent;
+
+    let isChickenRunning = true;
+    function toggleChickenRunning(e) {
+      if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+      }
+      isChickenRunning = !isChickenRunning;
+
+      const bubbleBtn = document.getElementById('btnToggleChickenRun');
+      const navBtnText = document.getElementById('btnNavToggleChickenText');
+      const floatingBtn = document.getElementById('floatingChickenToggle');
+      const floatingIcon = document.getElementById('floatingChickenIcon');
+      const floatingText = document.getElementById('floatingChickenText');
+
+      if (isChickenRunning) {
+        if (bubbleBtn) bubbleBtn.innerHTML = '⏸️ Pause';
+        if (navBtnText) navBtnText.textContent = 'Pause Ayam';
+        if (floatingIcon) floatingIcon.textContent = '⏸️';
+        if (floatingText) floatingText.textContent = 'Stop Kejar';
+        if (floatingBtn) {
+          floatingBtn.classList.remove('is-paused');
+          floatingBtn.title = 'Klik untuk menghentikan ayam mengejar kursor';
+        }
+        showToast('▶️ Ayam aktif kembali & siap menemani!');
+      } else {
+        if (bubbleBtn) bubbleBtn.innerHTML = '▶️ Resume';
+        if (navBtnText) navBtnText.textContent = 'Jalankan Ayam';
+        if (floatingIcon) floatingIcon.textContent = '▶️';
+        if (floatingText) floatingText.textContent = 'Mulai Kejar';
+        if (floatingBtn) {
+          floatingBtn.classList.add('is-paused');
+          floatingBtn.title = 'Klik agar ayam kembali mengejar kursor';
+        }
+        showToast('⏸️ Ayam diam di tempat & berhenti mengejar.');
+      }
+    }
+    
+    // Add to window
+    window.toggleChickenRunning = toggleChickenRunning;
+
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', bootApp);
