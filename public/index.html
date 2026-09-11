@@ -3021,6 +3021,8 @@
     };
 
     let el = {};
+    window.state = state;
+    window.el = el;
 
     /* ---------------------------------------------------- */
     /* SMART AUTO-CAPITALIZATION & STRING SANITIZERS        */
@@ -3040,6 +3042,28 @@
         .join(' ')
         .trim();
     }
+
+    function packOutreachStatus(notes, status) {
+      if (typeof notes !== 'string') notes = '';
+      let cleanNotes = notes.replace(/\[Status:\s*[^\\\]]+\]/gi, '').trim();
+      if (status && status !== 'Pending') {
+        return cleanNotes ? cleanNotes + '\n[Status: ' + status + ']' : '[Status: ' + status + ']';
+      }
+      return cleanNotes;
+    }
+    window.packOutreachStatus = packOutreachStatus;
+
+    function extractOutreachStatus(notes) {
+      if (typeof notes !== 'string' || !notes) return { text: '', status: 'Pending' };
+      const match = notes.match(/\[Status:\s*([^\\\]]+)\]/i);
+      if (match) {
+        const status = match[1].trim();
+        const cleanNotes = notes.replace(/\[Status:\s*[^\\\]]+\]/gi, '').trim();
+        return { text: cleanNotes, status: status };
+      }
+      return { text: notes, status: 'Pending' };
+    }
+    window.extractOutreachStatus = extractOutreachStatus;
 
     function cleanEducation(str) {
       if (!str) return '';
@@ -3649,7 +3673,7 @@
       return { time, date, location, isRescheduled };
     }
 
-    window.openFinalScheduleModal = function() {
+    function openFinalScheduleModal() {
       // Collect all scheduled dates across talents who are confirmed to attend
       const dateSet = new Set();
       (state.talents || []).forEach(t => {
@@ -3671,17 +3695,19 @@
       }
 
       const searchInput = document.getElementById('schedSearchInput');
-      if (searchInput) searchInput.value = '';
-
       renderFinalScheduleAgenda();
-      document.getElementById('finalScheduleModalBackdrop').style.display = 'flex';
-    };
+      const modal = document.getElementById('finalScheduleModalBackdrop');
+      if (modal) modal.style.display = 'flex';
+    }
+    window.openFinalScheduleModal = openFinalScheduleModal;
 
-    window.closeFinalScheduleModal = function() {
-      document.getElementById('finalScheduleModalBackdrop').style.display = 'none';
-    };
+    function closeFinalScheduleModal() {
+      const modal = document.getElementById('finalScheduleModalBackdrop');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closeFinalScheduleModal = closeFinalScheduleModal;
 
-    window.renderFinalScheduleAgenda = function() {
+    function renderFinalScheduleAgenda() {
       const conflicts = detectScheduleConflicts();
       const container = document.getElementById('finalScheduleAgendaBody');
       const badgesContainer = document.getElementById('schedSummaryBadges');
@@ -3868,7 +3894,8 @@
       });
 
       container.innerHTML = htmlContent;
-    };
+    }
+    window.renderFinalScheduleAgenda = renderFinalScheduleAgenda;
 
     window.copyScheduleAgendaText = function() {
       const candidatesWithSchedule = [];
@@ -3953,28 +3980,33 @@
       if (text) text.textContent = selectedRating + ' / 5 Bintang';
     }
 
-    window.setPostInterviewRating = function(rating) {
+    function setPostInterviewRating(rating) {
       renderStarPicker(rating);
-    };
+    }
+    window.setPostInterviewRating = setPostInterviewRating;
 
-    window.selectPostInterviewStage = function(stage) {
+    function selectPostInterviewStage(stage) {
       currentPostInterviewStage = stage;
       const buttons = document.querySelectorAll('#postInterviewStageOptions .stage-opt-btn');
-      buttons.forEach(btn => {
-        const btnStage = btn.getAttribute('data-stage');
-        if (btnStage === stage) {
-          btn.style.border = '1.5px solid #2563EB';
-          btn.style.background = '#EFF6FF';
-          btn.querySelector('div:first-child').style.color = '#1D4ED8';
-        } else {
-          btn.style.border = '1px solid var(--border-light)';
-          btn.style.background = '#FFFFFF';
-          btn.querySelector('div:first-child').style.color = 'var(--text-primary)';
-        }
-      });
-    };
+      if (buttons) {
+        buttons.forEach(btn => {
+          const btnStage = btn.getAttribute ? btn.getAttribute('data-stage') : '';
+          const firstChild = btn.querySelector ? btn.querySelector('div:first-child') : null;
+          if (btnStage === stage) {
+            btn.style.border = '1.5px solid #2563EB';
+            btn.style.background = '#EFF6FF';
+            if (firstChild && firstChild.style) firstChild.style.color = '#1D4ED8';
+          } else {
+            btn.style.border = '1px solid var(--border-light)';
+            btn.style.background = '#FFFFFF';
+            if (firstChild && firstChild.style) firstChild.style.color = 'var(--text-primary)';
+          }
+        });
+      }
+    }
+    window.selectPostInterviewStage = selectPostInterviewStage;
 
-    window.handlePostInterviewAttendanceChange = function(status) {
+    function handlePostInterviewAttendanceChange(status) {
       if (status === 'Tidak Hadir') {
         selectPostInterviewStage('Archived');
         const notesEl = document.getElementById('postInterviewNotes');
@@ -3986,9 +4018,10 @@
           selectPostInterviewStage('Shortlisted');
         }
       }
-    };
+    }
+    window.handlePostInterviewAttendanceChange = handlePostInterviewAttendanceChange;
 
-    window.openPostInterviewModal = function(id) {
+    function openPostInterviewModal(id) {
       const talent = state.talents.find(t => t.id === id || t.$id === id);
       if (!talent) return;
       currentPostInterviewTalentId = talent.id;
@@ -4032,22 +4065,27 @@
       }
       if (salaryEl) salaryEl.value = talent.expectedSalary || 'Standard Uang Saku';
 
-      document.getElementById('postInterviewModalBackdrop').style.display = 'flex';
-    };
+      const modal = document.getElementById('postInterviewModalBackdrop');
+      if (modal) modal.style.display = 'flex';
+    }
+    window.openPostInterviewModal = openPostInterviewModal;
 
-    window.closePostInterviewModal = function() {
+    function closePostInterviewModal() {
       currentPostInterviewTalentId = null;
-      document.getElementById('postInterviewModalBackdrop').style.display = 'none';
-    };
+      const modal = document.getElementById('postInterviewModalBackdrop');
+      if (modal) modal.style.display = 'none';
+    }
+    window.closePostInterviewModal = closePostInterviewModal;
 
-    window.openFullDrawerFromPostInterview = function() {
+    function openFullDrawerFromPostInterview() {
       const id = currentPostInterviewTalentId;
       closePostInterviewModal();
       closeFinalScheduleModal();
       if (id) openTalentDetail(id);
-    };
+    }
+    window.openFullDrawerFromPostInterview = openFullDrawerFromPostInterview;
 
-    window.submitPostInterviewEvaluation = async function() {
+    async function submitPostInterviewEvaluation() {
       if (!currentPostInterviewTalentId) return;
       const talent = state.talents.find(t => t.id === currentPostInterviewTalentId || t.$id === currentPostInterviewTalentId);
       if (!talent) return;
@@ -4113,7 +4151,8 @@
         console.warn('Appwrite post-interview update error:', err);
         showToast('Tersimpan di sesi lokal, gagal sinkron ke cloud.');
       }
-    };
+    }
+    window.submitPostInterviewEvaluation = submitPostInterviewEvaluation;
 
     function bootApp() {
       cacheDOMElements();
@@ -5153,21 +5192,32 @@
     let currentRescheduleId = null;
     function openRescheduleModal(id) {
       currentRescheduleId = id;
-      document.getElementById('rescheduleDate').value = '';
-      document.getElementById('rescheduleTime').value = '';
-      document.getElementById('rescheduleModalBackdrop').style.display = 'flex';
+      const target = state.talents.find(t => t.id === id || t.$id === id);
+      const dateEl = document.getElementById('rescheduleDate');
+      const timeEl = document.getElementById('rescheduleTime');
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (dateEl) dateEl.value = dateEl.value || todayStr;
+      if (timeEl) timeEl.value = timeEl.value || '10:00';
+      const modal = document.getElementById('rescheduleModalBackdrop');
+      if (modal) modal.style.display = 'flex';
     }
-    window.closeRescheduleModal = function() {
+    window.openRescheduleModal = openRescheduleModal;
+
+    function closeRescheduleModal() {
       currentRescheduleId = null;
-      document.getElementById('rescheduleModalBackdrop').style.display = 'none';
-      renderBroadcastTable();
-    };
-    window.submitReschedule = async function() {
+      const modal = document.getElementById('rescheduleModalBackdrop');
+      if (modal) modal.style.display = 'none';
+      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+      if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
+    }
+    window.closeRescheduleModal = closeRescheduleModal;
+
+    async function submitReschedule() {
       if (!currentRescheduleId) return;
-      const dateVal = document.getElementById('rescheduleDate').value;
-      const timeVal = document.getElementById('rescheduleTime').value;
+      const dateVal = document.getElementById('rescheduleDate') ? document.getElementById('rescheduleDate').value : '';
+      const timeVal = document.getElementById('rescheduleTime') ? document.getElementById('rescheduleTime').value : '';
       if (!dateVal || !timeVal) {
-        showToast('Please fill in both date and time');
+        showToast('⚠️ Please fill in both date and time');
         return;
       }
       
@@ -5185,7 +5235,11 @@
       const packedNotes = packOutreachStatus(updatedNotes, 'Reschedule');
       
       closeRescheduleModal();
-      renderBroadcastTable();
+      if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
+      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+      if (typeof renderBentoGrid === 'function') renderBentoGrid();
+      if (typeof renderTableView === 'function') renderTableView();
+      if (typeof renderKanbanBoard === 'function') renderKanbanBoard();
       updateMetrics();
       
       try {
@@ -5199,12 +5253,13 @@
             notes: packedNotes
           }
         );
-        showToast('Rescheduled to ' + displayDate + ' ' + timeVal + ' & moved to Interviewed for ' + target.name);
+        showToast(`✅ Rescheduled to ${displayDate} ${timeVal} for ${target.name}`);
       } catch (e) {
         console.warn('Save error:', e);
-        showToast('Saved locally, but failed in Cloud');
+        showToast('⚠️ Saved locally, but failed in Cloud');
       }
-    };
+    }
+    window.submitReschedule = submitReschedule;
 
     async function updateOutreachStatus(id, newStatus) {
       if (newStatus === 'Reschedule') {
@@ -5215,21 +5270,25 @@
       const target = state.talents.find(t => t.id === id || t.$id === id);
       if (target) {
         target.outreachStatus = newStatus;
+        target.notes = packOutreachStatus(target.notes || '', newStatus);
       }
-      renderBroadcastTable(); // update UI
+      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+      if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
+      updateMetrics();
 
       try {
         const docId = target && target.$id ? target.$id : (id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        const packedNotes = packOutreachStatus(target ? target.notes : '', newStatus);
         await databases.updateDocument(
           APPWRITE_CONFIG.databaseId,
           APPWRITE_CONFIG.collectionId,
           docId,
-          { outreachStatus: newStatus }
+          { notes: packedNotes }
         );
-        showToast('Status updated to ' + newStatus);
+        showToast('✅ Status updated to ' + newStatus);
       } catch (err) {
-        console.warn('Save error, ensure outreachStatus column exists in Appwrite', err);
-        showToast('Saved locally, but failed in Cloud. Check Appwrite attributes.');
+        console.warn('Save error:', err);
+        showToast('⚠️ Saved locally, but failed in Cloud.');
       }
     }
 
@@ -5465,14 +5524,15 @@
 
         try {
           const docId = talent.$id || (talent.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+          const packedNotes = packOutreachStatus(updatedNotes, 'WA Sent');
+          talent.outreachStatus = 'WA Sent';
           await databases.updateDocument(
             APPWRITE_CONFIG.databaseId,
             APPWRITE_CONFIG.collectionId,
             docId,
             {
               stage: 'Interviewed',
-              notes: updatedNotes,
-              outreachStatus: 'WA Sent'
+              notes: packedNotes
             }
           );
           showToast(`✅ Sent & Recorded Schedule for ${talent.name} in Appwrite!`);
@@ -8084,12 +8144,11 @@
         expectedSalary: expectedSalary || 'Standard Uang Saku',
         domisili: domisili,
         education: education,
-        notes: structuredNotes.trim(),
+        notes: packOutreachStatus(structuredNotes.trim(), state.selectedTalent ? (state.selectedTalent.outreachStatus || 'Pending') : 'Pending'),
         cvUrl: cvUrl,
         portfolioUrl: primaryPorto,
         portfolioItemsJson: JSON.stringify(state.stagedPortfolioItems),
-        skillsJson: JSON.stringify(skills),
-        outreachStatus: state.selectedTalent ? (state.selectedTalent.outreachStatus || 'Pending') : 'Pending'
+        skillsJson: JSON.stringify(skills)
       };
 
       if (!state.selectedTalent && !isSuperAdmin()) {
@@ -8307,6 +8366,12 @@
     window.closeAssessmentLauncherModal = closeAssessmentLauncherModal;
     window.renderAssessmentLauncherCandidates = renderAssessmentLauncherCandidates;
     window.toggleAssessmentScorePreview = toggleAssessmentScorePreview;
+    window.updateOutreachStatus = updateOutreachStatus;
+    window.updateCandidateStage = updateCandidateStage;
+    window.submitPostInterviewEvaluation = submitPostInterviewEvaluation;
+    window.openRescheduleModal = openRescheduleModal;
+    window.closeRescheduleModal = closeRescheduleModal;
+    window.submitReschedule = submitReschedule;
 
     let isChickenRunning = true;
     function toggleChickenRunning(e) {
