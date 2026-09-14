@@ -1953,7 +1953,7 @@
           <!-- Operations -->
           <div class="sidebar-section">
             <div class="sidebar-section-title">Operations</div>
-            <button type="button" class="sidebar-nav-item" id="btnOpenScheduleModal" onclick="openFinalScheduleModal(); toggleAppSidebar(false);">
+            <button type="button" class="sidebar-nav-item" id="navBtnSchedule" onclick="openScheduleView(); toggleAppSidebar(false);">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>Jadwal Interview</span>
             </button>
@@ -2365,6 +2365,98 @@
       </div>
     </main>
     </div> <!-- /#screeningRoomView -->
+
+    <!-- ============================================== -->
+    <!-- VIEW C: DEDICATED MASTER INTERVIEW SCHEDULE    -->
+    <!-- ============================================== -->
+    <div id="interviewScheduleView" class="schedule-view-section" style="display: none; padding-bottom: 60px;">
+      <!-- Breadcrumb & Top Utility Bar -->
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="selectVacancy(state.activeVacancy || 'ALL')" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Kembali ke Screening Room
+        </button>
+
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="copyScheduleAgendaText()" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 14px; cursor: pointer;" title="Salin daftar jadwal ke clipboard untuk dibagikan ke WhatsApp tim">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Salin Run-Sheet WA
+          </button>
+        </div>
+      </div>
+
+      <!-- Page Hero Header with Stats -->
+      <section class="hero-section" style="margin-bottom: 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 12px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div class="hero-meta" style="color: #2563EB; font-weight: 600; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">
+              🗓️ Operations Command Center
+            </div>
+            <h1 class="hero-heading" style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0;">
+              Master Interview Schedule &amp; <em>Live Agenda</em>
+            </h1>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; max-width: 680px; line-height: 1.6;">
+              Jadwal sesi wawancara seluruh kandidat terkonfirmasi lintas lowongan kerja. Pantau run-sheet harian, kelola kehadiran, dan berikan penilaian evaluasi langsung.
+            </p>
+          </div>
+
+          <!-- Summary Metric Pills -->
+          <div id="schedSummaryBadges" style="display: flex; gap: 8px; font-family: var(--font-mono); font-size: 11px; flex-wrap: wrap; align-items: center;">
+            <!-- Dynamically populated stats -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Control Toolbar -->
+      <div class="table-container" style="margin-bottom: 20px; padding: 14px 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+          <input type="text" id="schedSearchInput" class="form-input" placeholder="🔍 Cari nama / ID..." oninput="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; width: 170px;">
+          
+          <select id="schedDateFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; min-width: 150px;">
+            <option value="ALL">📅 Semua Tanggal</option>
+          </select>
+
+          <select id="schedRoleFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; min-width: 170px;">
+            <option value="ALL">💼 Semua Lowongan</option>
+          </select>
+
+          <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; font-weight: 500; color: #166534; background: #F0FDF4; border-color: #BBF7D0;">
+            <option value="CONFIRMED_ONLY" selected>✅ Hanya Konfirmasi Hadir (Confirmed &amp; Reschedule)</option>
+            <option value="ALL">Semua Sesi Wawancara (Termasuk WA Sent)</option>
+            <option value="TIDAK_HADIR">❌ Tidak Hadir / Batal</option>
+          </select>
+        </div>
+
+        <!-- Mode Toggle: Agenda Run-Sheet vs Visual Slot Timeline -->
+        <div style="display: flex; gap: 4px; background: #F3F4F6; padding: 3px; border-radius: 8px; border: 1px solid var(--border-light);">
+          <button type="button" id="btnSchedModeAgenda" class="btn btn-sm active" onclick="switchSchedViewMode('agenda')" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; background: #FFFFFF; color: #2563EB; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border-light);">
+            📋 Agenda List
+          </button>
+          <button type="button" id="btnSchedModeTimeline" class="btn btn-sm" onclick="switchSchedViewMode('timeline')" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; font-weight: 500; cursor: pointer; color: var(--text-secondary); background: transparent; border: none;">
+            ⏱️ Visual Timeline
+          </button>
+        </div>
+      </div>
+
+      <!-- Agenda Mode Container -->
+      <div id="schedAgendaModeWrap">
+        <div id="finalScheduleAgendaBody" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Dynamically populated date blocks and candidate cards -->
+        </div>
+      </div>
+
+      <!-- Visual Timeline Mode Container -->
+      <div id="schedTimelineModeWrap" style="display: none;">
+        <div id="schedTimelineBody" style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+          <!-- Dynamically populated daily timeline ribbon -->
+        </div>
+      </div>
+
+      <!-- Footer Summary -->
+      <div style="margin-top: 20px; font-size: 12px; color: var(--text-secondary); text-align: center;" id="schedFooterSummary">
+        Menampilkan seluruh sesi wawancara
+      </div>
+    </div>
       </main> <!-- /.app-main-viewport -->
     </div> <!-- /.app-shell -->
   </div> <!-- /#mainApp -->
@@ -2519,57 +2611,7 @@
     </div>
   </div>
 
-  <!-- Final Interview Schedule Modal -->
-  <div class="modal-backdrop" id="finalScheduleModalBackdrop" style="display: none; z-index: 2100;" onclick="if(event.target === this) closeFinalScheduleModal()">
-    <div class="modal-card" style="max-width: 860px; width: 92%; max-height: 88vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
-      <!-- Header -->
-      <div class="modal-header" style="padding: 18px 24px; border-bottom: 1px solid var(--border-light); background: #FFFFFF;">
-        <div>
-          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #2563EB; font-weight: 600;">Master Agenda</span>
-          <h2 style="font-size: 19px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">Final Interview Schedule</h2>
-          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Jadwal sesi interview seluruh kandidat terkonfirmasi & terjadwal secara kronologis.</p>
-        </div>
-        <button type="button" class="btn btn-secondary btn-icon" onclick="closeFinalScheduleModal()" style="cursor: pointer;">✕</button>
-      </div>
 
-      <!-- Controls & Metrics Bar -->
-      <div style="padding: 12px 24px; background: #F9FAFB; border-bottom: 1px solid var(--border-light); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px; flex-wrap: wrap;">
-          <input type="text" id="schedSearchInput" class="form-input" placeholder="Cari nama / ID..." oninput="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 6px 12px; max-width: 180px;">
-          <select id="schedDateFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 6px 10px;">
-            <option value="ALL">Semua Tanggal</option>
-          </select>
-          <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 6px 10px; font-weight: 500; color: #166534; background: #F0FDF4; border-color: #BBF7D0;">
-            <option value="CONFIRMED_ONLY" selected>✅ Hanya Konfirmasi Hadir (Confirmed &amp; Reschedule)</option>
-            <option value="ALL">Semua Sesi Wawancara (Termasuk WA Sent)</option>
-            <option value="TIDAK_HADIR">❌ Tidak Hadir / No-Show</option>
-          </select>
-        </div>
-        <div id="schedSummaryBadges" style="display: flex; gap: 8px; font-family: var(--font-mono); font-size: 11px; flex-wrap: wrap;">
-          <!-- Dynamically populated badges -->
-        </div>
-      </div>
-
-      <!-- Scrollable Timeline Body -->
-      <div class="modal-body" id="finalScheduleAgendaBody" style="padding: 20px 24px; overflow-y: auto; flex: 1; max-height: calc(88vh - 180px); background: #FAFAFA;">
-        <!-- Dynamically populated cards -->
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
-        <div style="font-size: 12px; color: var(--text-secondary);" id="schedFooterSummary">
-          Total sessions
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="copyScheduleAgendaText()" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            Salin Teks Agenda
-          </button>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="closeFinalScheduleModal()" style="cursor: pointer;">Tutup</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   
   <!-- Post-Interview Evaluation Modal -->
@@ -3944,7 +3986,9 @@
       } else if (state.smartScheduleMap && state.smartScheduleMap[talent.id]) {
         // Priority 3: Assigned in smartScheduleMap
         time = state.smartScheduleMap[talent.id];
-        date = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+        date = (state.smartScheduleDates && state.smartScheduleDates[talent.id])
+          ? state.smartScheduleDates[talent.id]
+          : formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
         if (document.getElementById('bcLocationInput')) {
           location = document.getElementById('bcLocationInput').value.trim() || 's.id/lokasipge';
         }
@@ -3953,50 +3997,315 @@
       return { time, date, location, isRescheduled };
     }
 
-    function openFinalScheduleModal() {
-      // Collect all scheduled dates across talents who are confirmed to attend
-      const dateSet = new Set();
-      (state.talents || []).forEach(t => {
-        if (t.outreachStatus === 'Confirmed' || t.outreachStatus === 'Reschedule') {
+    let currentSchedViewMode = 'agenda';
+
+    function switchSchedViewMode(mode) {
+      currentSchedViewMode = mode;
+      const agendaWrap = document.getElementById('schedAgendaModeWrap');
+      const timelineWrap = document.getElementById('schedTimelineModeWrap');
+      const btnAgenda = document.getElementById('btnSchedModeAgenda');
+      const btnTimeline = document.getElementById('btnSchedModeTimeline');
+
+      if (mode === 'timeline') {
+        if (agendaWrap) agendaWrap.style.display = 'none';
+        if (timelineWrap) timelineWrap.style.display = 'block';
+
+        if (btnAgenda) {
+          btnAgenda.style.background = 'transparent';
+          btnAgenda.style.color = 'var(--text-secondary)';
+          btnAgenda.style.border = 'none';
+          btnAgenda.style.boxShadow = 'none';
+          btnAgenda.classList.remove('active');
+        }
+        if (btnTimeline) {
+          btnTimeline.style.background = '#FFFFFF';
+          btnTimeline.style.color = '#2563EB';
+          btnTimeline.style.border = '1px solid var(--border-light)';
+          btnTimeline.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+          btnTimeline.classList.add('active');
+        }
+      } else {
+        if (agendaWrap) agendaWrap.style.display = 'block';
+        if (timelineWrap) timelineWrap.style.display = 'none';
+
+        if (btnAgenda) {
+          btnAgenda.style.background = '#FFFFFF';
+          btnAgenda.style.color = '#2563EB';
+          btnAgenda.style.border = '1px solid var(--border-light)';
+          btnAgenda.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+          btnAgenda.classList.add('active');
+        }
+        if (btnTimeline) {
+          btnTimeline.style.background = 'transparent';
+          btnTimeline.style.color = 'var(--text-secondary)';
+          btnTimeline.style.border = 'none';
+          btnTimeline.style.boxShadow = 'none';
+          btnTimeline.classList.remove('active');
+        }
+      }
+
+      renderFinalScheduleAgenda();
+    }
+    window.switchSchedViewMode = switchSchedViewMode;
+
+    function openScheduleView() {
+      // Hide other main workspace views
+      const hubView = document.getElementById('vacancyHubView');
+      const roomView = document.getElementById('screeningRoomView');
+      const scheduleView = document.getElementById('interviewScheduleView');
+
+      if (hubView) hubView.style.display = 'none';
+      if (roomView) roomView.style.display = 'none';
+      if (scheduleView) scheduleView.style.display = 'block';
+
+      // Update sidebar navigation buttons
+      const navHub = document.getElementById('navBtnHub');
+      const navScreening = document.getElementById('navBtnScreening');
+      const navSchedule = document.getElementById('navBtnSchedule');
+      if (navHub) navHub.classList.remove('active');
+      if (navScreening) navScreening.classList.remove('active');
+      if (navSchedule) navSchedule.classList.add('active');
+
+      // Populate Role Filter dynamically
+      const roleSelect = document.getElementById('schedRoleFilter');
+      if (roleSelect) {
+        const currentSelectedRole = roleSelect.value || 'ALL';
+        const roleSet = new Set();
+        (state.talents || []).forEach(t => {
+          if (t.role && t.role.trim()) roleSet.add(t.role.trim());
+        });
+        let roleOptions = '<option value="ALL">💼 Semua Lowongan</option>';
+        roleSet.forEach(r => {
+          roleOptions += `<option value="${escapeHtml(r)}" ${r === currentSelectedRole ? 'selected' : ''}>${escapeHtml(r)}</option>`;
+        });
+        roleSelect.innerHTML = roleOptions;
+      }
+
+      // Populate Date Filter dynamically
+      const dateSelect = document.getElementById('schedDateFilter');
+      if (dateSelect) {
+        const currentSelectedDate = dateSelect.value || 'ALL';
+        const dateSet = new Set();
+        (state.talents || []).forEach(t => {
           const info = extractCandidateScheduleInfo(t);
           if (info.date !== '-' && info.time !== '-') {
             dateSet.add(info.date);
           }
-        }
-      });
-
-      const dateSelect = document.getElementById('schedDateFilter');
-      if (dateSelect) {
-        let options = '<option value="ALL">Semua Tanggal</option>';
-        dateSet.forEach(d => {
-          options += '<option value="' + escapeHtml(d) + '">' + escapeHtml(d) + '</option>';
         });
-        dateSelect.innerHTML = options;
+        let dateOptions = '<option value="ALL">📅 Semua Tanggal</option>';
+        dateSet.forEach(d => {
+          dateOptions += `<option value="${escapeHtml(d)}" ${d === currentSelectedDate ? 'selected' : ''}>${escapeHtml(d)}</option>`;
+        });
+        dateSelect.innerHTML = dateOptions;
       }
 
-      const searchInput = document.getElementById('schedSearchInput');
       renderFinalScheduleAgenda();
-      const modal = document.getElementById('finalScheduleModalBackdrop');
-      if (modal) modal.style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.openScheduleView = openScheduleView;
+
+    // Backward compatibility redirect
+    function openFinalScheduleModal() {
+      openScheduleView();
     }
     window.openFinalScheduleModal = openFinalScheduleModal;
 
     function closeFinalScheduleModal() {
-      const modal = document.getElementById('finalScheduleModalBackdrop');
-      if (modal) modal.style.display = 'none';
+      selectVacancy(state.activeVacancy || 'ALL');
     }
     window.closeFinalScheduleModal = closeFinalScheduleModal;
+
+    function renderVisualScheduleTimeline(groups, conflicts) {
+      const container = document.getElementById('schedTimelineBody');
+      if (!container) return;
+
+      const dates = Object.keys(groups);
+      if (dates.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <div style="font-size: 32px; margin-bottom: 8px;">⏱️</div>
+            <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Tidak ada sesi wawancara untuk visual timeline.</div>
+            <div style="font-size: 12px; margin-top: 4px;">Pilih filter tanggal atau lowongan lain untuk melihat jadwal.</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      dates.forEach(date => {
+        const items = groups[date];
+        if (!items || items.length === 0) return;
+
+        // Determine earliest start and latest end for this day
+        let minStartMins = 9 * 60; // 09:00 WIB
+        let maxEndMins = 16 * 60;  // 16:00 WIB
+        items.forEach(item => {
+          if (item.start < minStartMins) minStartMins = Math.floor(item.start / 60) * 60;
+          if (item.end > maxEndMins) maxEndMins = Math.ceil(item.end / 60) * 60;
+        });
+
+        const startHour = Math.floor(minStartMins / 60);
+        const endHour = Math.ceil(maxEndMins / 60);
+        const totalDayMins = (endHour - startHour) * 60;
+
+        // Greedy Lane Assignment for overlapping slots
+        const lanes = [];
+        items.forEach(item => {
+          let placed = false;
+          for (let l = 0; l < lanes.length; l++) {
+            const last = lanes[l][lanes[l].length - 1];
+            if (item.start >= last.end) {
+              lanes[l].push(item);
+              item.lane = l;
+              placed = true;
+              break;
+            }
+          }
+          if (!placed) {
+            item.lane = lanes.length;
+            lanes.push([item]);
+          }
+        });
+
+        html += `
+          <div style="margin-bottom: 28px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F3F4F6; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">📅</span>
+                <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">${escapeHtml(date)}</span>
+              </div>
+              <div style="display: flex; gap: 6px; font-size: 11px; font-family: var(--font-mono);">
+                <span style="background: #EFF6FF; color: #1D4ED8; padding: 3px 8px; border-radius: 4px; font-weight: 600;">${items.length} Sesi Terjadwal</span>
+                <span style="background: #F3F4F6; color: #4B5563; padding: 3px 8px; border-radius: 4px;">${lanes.length} Jalur Waktu</span>
+              </div>
+            </div>
+
+            <!-- Scrollable Timeline Grid -->
+            <div style="overflow-x: auto; padding-bottom: 8px;">
+              <div style="min-width: 750px; position: relative;">
+                <!-- Hour Markers Header -->
+                <div style="display: flex; border-bottom: 1.5px solid var(--border-light); padding-bottom: 6px; margin-bottom: 8px;">
+        `;
+
+        for (let h = startHour; h <= endHour; h++) {
+          const label = String(h).padStart(2, '0') + ':00';
+          const isLast = (h === endHour);
+          html += `
+            <div style="flex: ${isLast ? '0 0 auto' : '1'}; text-align: left; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); font-weight: 600;">
+              ${label}
+            </div>
+          `;
+        }
+
+        html += `
+                </div>
+
+                <!-- Grid Track Area with Parallel Lanes -->
+                <div style="position: relative; min-height: ${lanes.length * 64 + 10}px;">
+                  <!-- Background vertical grid lines -->
+                  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; pointer-events: none;">
+        `;
+
+        for (let h = startHour; h < endHour; h++) {
+          html += `<div style="flex: 1; border-right: 1px dashed var(--border-light); height: 100%;"></div>`;
+        }
+
+        html += `
+                  </div>
+
+                  <!-- Slotted Candidate Blocks -->
+        `;
+
+        lanes.forEach((lane, laneIdx) => {
+          const topOffset = laneIdx * 64 + 6;
+          lane.forEach(item => {
+            const t = item.talent;
+            const dur = item.duration;
+            const leftPercent = ((item.start - (startHour * 60)) / totalDayMins) * 100;
+            const widthPercent = (dur / totalDayMins) * 100;
+            const isConflict = (conflicts[t.id] && conflicts[t.id].length > 0);
+            const isMarketplace = (t.role || '').toLowerCase().includes('marketplace');
+            const isResched = item.isRescheduled;
+
+            let bgStyle = isMarketplace ? '#EEF2FF' : '#F0FDF4';
+            let borderStyle = isMarketplace ? '#818CF8' : '#34D399';
+            let textStyle = isMarketplace ? '#312E81' : '#064E3B';
+
+            if (isResched) {
+              bgStyle = '#FEF3C7';
+              borderStyle = '#F59E0B';
+              textStyle = '#92400E';
+            }
+
+            if (isConflict) {
+              bgStyle = '#FEE2E2';
+              borderStyle = '#EF4444';
+              textStyle = '#991B1B';
+            }
+
+            html += `
+              <div onclick="openCandidateProfileModal('${t.id}')"
+                   title="${escapeHtml(t.name)} (${escapeHtml(t.role)})&#10;Waktu: ${escapeHtml(item.timeRangeStr)}&#10;Domisili: ${escapeHtml(t.domisili || '-')}&#10;Status: ${escapeHtml(t.outreachStatus || 'Pending')}"
+                   style="position: absolute; top: ${topOffset}px; left: ${leftPercent}%; width: calc(${widthPercent}% - 4px); height: 52px; background: ${bgStyle}; border: 1.5px solid ${borderStyle}; border-radius: 8px; padding: 6px 8px; box-sizing: border-box; cursor: pointer; overflow: hidden; transition: transform 0.15s ease, box-shadow 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.03); z-index: 2;"
+                   onmouseenter="this.style.transform='scale(1.02)'; this.style.zIndex='10'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.08)';"
+                   onmouseleave="this.style.transform='scale(1)'; this.style.zIndex='2'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.03)';">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 4px;">
+                  <span style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: ${textStyle}; white-space: nowrap;">
+                    ${isConflict ? '⚠️ ' : ''}${isResched ? '🔄 ' : '⏱️ '}${item.startStr}-${item.endStr} (${dur}m)
+                  </span>
+                  <span style="font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: 600; background: rgba(0,0,0,0.06); color: ${textStyle}; flex-shrink: 0;">
+                    ${t.id}
+                  </span>
+                </div>
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-primary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${escapeHtml(t.name)}
+                </div>
+              </div>
+            `;
+          });
+        });
+
+        html += `
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini Legend -->
+            <div style="display: flex; gap: 14px; align-items: center; font-size: 11px; color: var(--text-secondary); margin-top: 14px; padding-top: 10px; border-top: 1px solid #F3F4F6; flex-wrap: wrap;">
+              <span style="display: inline-flex; align-items: center; gap: 5px;">
+                <span style="width: 12px; height: 12px; background: #F0FDF4; border: 1.5px solid #34D399; border-radius: 3px; display: inline-block;"></span>
+                Content Creator (60m)
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 5px;">
+                <span style="width: 12px; height: 12px; background: #EEF2FF; border: 1.5px solid #818CF8; border-radius: 3px; display: inline-block;"></span>
+                Marketplace Specialist (120m)
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 5px;">
+                <span style="width: 12px; height: 12px; background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 3px; display: inline-block;"></span>
+                Rescheduled
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 5px;">
+                <span style="width: 12px; height: 12px; background: #FEE2E2; border: 1.5px solid #EF4444; border-radius: 3px; display: inline-block;"></span>
+                Bentrok / Overlap
+              </span>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+    window.renderVisualScheduleTimeline = renderVisualScheduleTimeline;
 
     function renderFinalScheduleAgenda() {
       const conflicts = detectScheduleConflicts();
       const container = document.getElementById('finalScheduleAgendaBody');
       const badgesContainer = document.getElementById('schedSummaryBadges');
       const footerSummary = document.getElementById('schedFooterSummary');
-      if (!container) return;
 
       const dateFilter = document.getElementById('schedDateFilter') ? document.getElementById('schedDateFilter').value : 'ALL';
+      const roleFilter = document.getElementById('schedRoleFilter') ? document.getElementById('schedRoleFilter').value : 'ALL';
       const searchKeyword = (document.getElementById('schedSearchInput') ? document.getElementById('schedSearchInput').value : '').toLowerCase().trim();
-
       const attendanceFilter = document.getElementById('schedAttendanceFilter') ? document.getElementById('schedAttendanceFilter').value : 'CONFIRMED_ONLY';
 
       // Gather candidate items that have scheduled times
@@ -4012,16 +4321,32 @@
 
         const info = extractCandidateScheduleInfo(t);
         if (info.date !== '-' && info.time !== '-') {
+          const dur = getTalentInterviewDuration(t);
+          const startMins = timeToMinutes(info.time);
+          const endMins = (startMins !== null) ? startMins + dur : null;
+          const startStr = (startMins !== null) ? minutesToTime(startMins).replace(' WIB', '') : info.time;
+          const endStr = (endMins !== null) ? minutesToTime(endMins).replace(' WIB', '') : '-';
+          const timeRangeStr = (startMins !== null && endMins !== null)
+            ? `${startStr} - ${endStr} WIB (${dur}m)`
+            : `${info.time} (${dur}m)`;
+
           candidatesWithSchedule.push({
             talent: t,
-            ...info
+            ...info,
+            start: startMins || 0,
+            end: endMins || 0,
+            duration: dur,
+            startStr,
+            endStr,
+            timeRangeStr
           });
         }
       });
 
-      // Filter
+      // Filter by Date, Role, and Search Keyword
       const filtered = candidatesWithSchedule.filter(item => {
         if (dateFilter !== 'ALL' && item.date !== dateFilter) return false;
+        if (roleFilter !== 'ALL' && item.talent.role !== roleFilter) return false;
         if (searchKeyword) {
           const name = (item.talent.name || '').toLowerCase();
           const id = (item.talent.id || '').toLowerCase();
@@ -4043,27 +4368,16 @@
 
       if (badgesContainer) {
         badgesContainer.innerHTML = `
-          <span style="background: #EFF6FF; color: #1E40AF; padding: 4px 8px; border-radius: 6px; border: 1px solid #BFDBFE; font-weight: 600;">Total: ${totalCount} Sesi</span>
-          <span style="background: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 6px; border: 1px solid #BBF7D0;">✅ Confirmed: ${confirmedCount}</span>
-          <span style="background: #FEF3C7; color: #B45309; padding: 4px 8px; border-radius: 6px; border: 1px solid #FDE68A;">🔄 Rescheduled: ${rescheduleCount}</span>
-          ${tidakHadirCount > 0 ? `<span style="background: #FEE2E2; color: #991B1B; padding: 4px 8px; border-radius: 6px; border: 1px solid #FECACA;">❌ Tidak Hadir: ${tidakHadirCount}</span>` : ''}
-          ${attendanceFilter === 'ALL' ? `<span style="background: #DBEAFE; color: #1D4ED8; padding: 4px 8px; border-radius: 6px; border: 1px solid #BFDBFE;">💬 WA Sent: ${waSentCount}</span>` : ''}
+          <span style="background: #EFF6FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; border: 1px solid #BFDBFE; font-weight: 600;">Total: ${totalCount} Sesi</span>
+          <span style="background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 6px; border: 1px solid #BBF7D0;">✅ Confirmed: ${confirmedCount}</span>
+          <span style="background: #FEF3C7; color: #B45309; padding: 4px 10px; border-radius: 6px; border: 1px solid #FDE68A;">🔄 Rescheduled: ${rescheduleCount}</span>
+          ${tidakHadirCount > 0 ? `<span style="background: #FEE2E2; color: #991B1B; padding: 4px 10px; border-radius: 6px; border: 1px solid #FECACA;">❌ Tidak Hadir: ${tidakHadirCount}</span>` : ''}
+          ${attendanceFilter === 'ALL' ? `<span style="background: #DBEAFE; color: #1D4ED8; padding: 4px 10px; border-radius: 6px; border: 1px solid #BFDBFE;">💬 WA Sent: ${waSentCount}</span>` : ''}
         `;
       }
 
       if (footerSummary) {
         footerSummary.textContent = `Menampilkan ${totalCount} sesi wawancara terdaftar`;
-      }
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
-            <div style="font-size: 32px; margin-bottom: 8px;">📅</div>
-            <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Tidak ada jadwal interview yang sesuai filter.</div>
-            <div style="font-size: 12px; margin-top: 4px;">Pastikan kandidat telah dijadwalkan di tab WA Broadcast atau dipindahkan ke Interviewed.</div>
-          </div>
-        `;
-        return;
       }
 
       // Group by Date
@@ -4075,28 +4389,47 @@
 
       // Sort each group chronologically
       Object.keys(groups).forEach(date => {
-        groups[date].sort((a, b) => {
-          const timeA = (a.time.match(/\d{2}:\d{2}/) || ['00:00'])[0];
-          const timeB = (b.time.match(/\d{2}:\d{2}/) || ['00:00'])[0];
-          return timeA.localeCompare(timeB);
-        });
+        groups[date].sort((a, b) => a.start - b.start);
       });
+
+      // If Timeline mode is selected, render visual timeline
+      if (currentSchedViewMode === 'timeline') {
+        renderVisualScheduleTimeline(groups, conflicts);
+        return;
+      }
+
+      // Agenda Mode Rendering
+      if (!container) return;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 48px 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-muted);">
+            <div style="font-size: 36px; margin-bottom: 10px;">📅</div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Tidak ada jadwal interview yang sesuai filter.</div>
+            <div style="font-size: 13px; margin-top: 4px;">Pastikan kandidat telah dijadwalkan di Broadcast atau memiliki status Confirmed / Reschedule.</div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('schedSearchInput').value=''; document.getElementById('schedDateFilter').value='ALL'; document.getElementById('schedRoleFilter').value='ALL'; renderFinalScheduleAgenda();" style="margin-top: 14px; cursor: pointer;">
+              Reset Filter Pencarian
+            </button>
+          </div>
+        `;
+        return;
+      }
 
       let htmlContent = '';
       Object.keys(groups).forEach(date => {
         const items = groups[date];
         htmlContent += `
           <div style="margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: #EEF2FF; border-left: 4px solid #4F46E5; border-radius: 6px; margin-bottom: 12px;">
-              <div style="font-weight: 600; font-size: 13px; color: #3730A3; display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #EEF2FF; border-left: 4px solid #4F46E5; border-radius: 8px; margin-bottom: 12px;">
+              <div style="font-weight: 700; font-size: 13.5px; color: #3730A3; display: flex; align-items: center; gap: 8px;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 ${escapeHtml(date)}
               </div>
-              <span style="font-size: 11px; font-family: var(--font-mono); color: #4338CA; font-weight: 600; background: #E0E7FF; padding: 2px 8px; border-radius: 4px;">
+              <span style="font-size: 11px; font-family: var(--font-mono); color: #4338CA; font-weight: 600; background: #E0E7FF; padding: 3px 10px; border-radius: 5px;">
                 ${items.length} Kandidat
               </span>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
         `;
 
         items.forEach(item => {
@@ -4106,46 +4439,53 @@
           const conflictWithNames = conflictList.map(c => escapeHtml(c.name)).join(', ');
           const phone = formatToInternationalPhone(t.phone);
           const status = t.outreachStatus || 'Pending';
-          const cleanLoc = item.location.replace(/^https?:\/\//, '');
+          const cleanLoc = (item.location || 's.id/lokasipge').replace(/^https?:\/\//, '');
+          const isMarketplace = (t.role || '').toLowerCase().includes('marketplace');
 
           htmlContent += `
-            <div style="display: grid; grid-template-columns: 110px 1fr auto; align-items: center; gap: 16px; padding: 12px 16px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: transform 0.15s ease;">
-              <!-- Time -->
+            <div style="display: grid; grid-template-columns: 170px 1fr auto; align-items: center; gap: 18px; padding: 14px 18px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 9px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: transform 0.15s ease, box-shadow 0.15s ease;"
+                 onmouseenter="this.style.boxShadow='0 3px 8px rgba(0,0,0,0.04)';"
+                 onmouseleave="this.style.boxShadow='0 1px 2px rgba(0,0,0,0.02)';">
+              
+              <!-- Time & Duration Pill -->
               <div>
                 ${hasConflict ? `
-                  <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 5px 8px; border-radius: 6px; background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;" title="Jadwal bentrok dengan: ${conflictWithNames}">
-                    ⚠️ ${escapeHtml(item.time)} (Bentrok)
-                  </span>
+                  <div style="display: inline-flex; flex-direction: column; gap: 2px;">
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 6px 10px; border-radius: 6px; background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;" title="Jadwal bentrok dengan: ${conflictWithNames}">
+                      ⚠️ ${escapeHtml(item.timeRangeStr)}
+                    </span>
+                    <span style="font-size: 10px; color: #DC2626; font-weight: 600;">Jadwal Bentrok</span>
+                  </div>
                 ` : `
-                  <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 6px; background: ${item.isRescheduled ? '#FEF3C7' : '#F0FDF4'}; color: ${item.isRescheduled ? '#B45309' : '#166534'}; border: 1px solid ${item.isRescheduled ? '#FDE68A' : '#BBF7D0'};">
-                    ${item.isRescheduled ? '🔄 ' : '⏰ '}${escapeHtml(item.time)}
+                  <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 6px; background: ${item.isRescheduled ? '#FEF3C7' : (isMarketplace ? '#EEF2FF' : '#F0FDF4')}; color: ${item.isRescheduled ? '#B45309' : (isMarketplace ? '#312E81' : '#166534')}; border: 1px solid ${item.isRescheduled ? '#FDE68A' : (isMarketplace ? '#C7D2FE' : '#BBF7D0')};">
+                    ${item.isRescheduled ? '🔄 ' : (isMarketplace ? '💼 ' : '⏰ ')}${escapeHtml(item.timeRangeStr)}
                   </span>
                 `}
               </div>
 
               <!-- Candidate Info & Location -->
               <div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
-                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); background: #F3F4F6; padding: 1px 5px; border-radius: 3px; flex-shrink: 0;">${t.id}</span>
-                  <span style="font-size: 14px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: underline; white-space: nowrap;" onclick="closeFinalScheduleModal(); openCandidateProfileModal('${t.id}')">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); background: #F3F4F6; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;">${t.id}</span>
+                  <span style="font-size: 14.5px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: underline;" onclick="openCandidateProfileModal('${t.id}')">
                     ${escapeHtml(t.name)}
                   </span>
                   <span class="stage-select-pill stage-${(t.stage || 'interviewed').toLowerCase()}" style="font-size: 10px; padding: 2px 7px; flex-shrink: 0;">${t.stage || 'Interviewed'}</span>
-                  ${item.isRescheduled ? '<span style="font-size: 10px; font-weight: 600; background: #FEF3C7; color: #B45309; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; white-space: nowrap;">Rescheduled</span>' : ''}
+                  ${item.isRescheduled ? '<span style="font-size: 10px; font-weight: 600; background: #FEF3C7; color: #B45309; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; white-space: nowrap;">Rescheduled</span>' : ''}
                 </div>
-                ${hasConflict ? `<div style="font-size: 11px; color: #DC2626; font-weight: 600; margin-top: 2px;">⚠️ Jadwal bertabrakan dengan: ${conflictWithNames}</div>` : ''}
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                  <span>${escapeHtml(t.role || 'Freelance')}</span>
+                ${hasConflict ? `<div style="font-size: 11px; color: #DC2626; font-weight: 600; margin-top: 3px;">⚠️ Jadwal bertabrakan dengan: ${conflictWithNames}</div>` : ''}
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <span style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;">${escapeHtml(t.role || 'Freelance')}</span>
                   <span>•</span>
-                  <span>📍 <a href="https://${escapeHtml(cleanLoc)}" target="_blank" style="color: #2563EB; font-weight: 500; text-decoration: underline;">${escapeHtml(item.location)}</a></span>
+                  <span>📍 <a href="https://${escapeHtml(cleanLoc)}" target="_blank" style="color: #2563EB; font-weight: 500; text-decoration: underline;">${escapeHtml(cleanLoc)}</a></span>
                   <span>•</span>
                   <span>🏠 ${escapeHtml(t.domisili || '-')}</span>
                 </div>
               </div>
 
-              <!-- Status & WhatsApp Action -->
+              <!-- Status Dropdown & Actions -->
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                <select class="outreach-status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${t.id}', this.value); setTimeout(renderFinalScheduleAgenda, 100);" style="font-size: 11px; padding: 4px 18px 4px 8px;">
+                <select class="outreach-status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${t.id}', this.value); setTimeout(renderFinalScheduleAgenda, 100);" style="font-size: 11px; padding: 5px 18px 5px 10px; border-radius: 6px;">
                   <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
                   <option value="WA Sent" ${status === 'WA Sent' ? 'selected' : ''}>💬 WA Sent</option>
                   <option value="Confirmed" ${status === 'Confirmed' ? 'selected' : ''}>✅ Confirmed</option>
@@ -4155,13 +4495,13 @@
                 </select>
 
                 ${phone ? `
-                  <a href="https://wa.me/${phone.replace(/\+/g, '')}" target="_blank" class="btn btn-secondary btn-sm" title="Buka WhatsApp" style="padding: 4px 8px; display: inline-flex; align-items: center; gap: 4px; color: #16A34A; font-weight: 500; text-decoration: none;">
+                  <a href="https://wa.me/${phone.replace(/\+/g, '')}" target="_blank" class="btn btn-secondary btn-sm" title="Buka WhatsApp" style="padding: 5px 9px; display: inline-flex; align-items: center; gap: 4px; color: #16A34A; font-weight: 500; text-decoration: none; border-radius: 6px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     Chat ↗
                   </a>
                 ` : ''}
 
-                <button type="button" class="btn btn-primary btn-sm" onclick="openPostInterviewModal('${t.id}')" title="Evaluasi & sesuaikan kandidat pasca-interview" style="padding: 4px 10px; font-size: 11px; background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="openPostInterviewModal('${t.id}')" title="Evaluasi & sesuaikan kandidat pasca-interview" style="padding: 5px 11px; font-size: 11.5px; background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; border-radius: 6px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                   Evaluasi
                 </button>
@@ -4176,6 +4516,7 @@
       container.innerHTML = htmlContent;
     }
     window.renderFinalScheduleAgenda = renderFinalScheduleAgenda;
+
 
     window.copyScheduleAgendaText = function() {
       const candidatesWithSchedule = [];
@@ -5015,6 +5356,9 @@
 
       const navHub = document.getElementById('navBtnHub');
       const navScreening = document.getElementById('navBtnScreening');
+      const navSchedule = document.getElementById('navBtnSchedule');
+      if (navSchedule) navSchedule.classList.remove('active');
+
       if (navHub && navScreening) {
         if (vacancyName === 'HUB') {
           navHub.classList.add('active');
@@ -5027,6 +5371,9 @@
 
       const hubView = document.getElementById('vacancyHubView');
       const roomView = document.getElementById('screeningRoomView');
+      const scheduleView = document.getElementById('interviewScheduleView');
+      if (scheduleView) scheduleView.style.display = 'none';
+
       const heading = document.getElementById('selectedVacancyHeading');
       const meta = document.getElementById('selectedVacancyMeta');
 
