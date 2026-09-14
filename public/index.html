@@ -3255,6 +3255,25 @@
 
     
     function saveBcSettings() {
+      let savedCustomMsg = '';
+      try {
+        savedCustomMsg = localStorage.getItem('pge_saved_broadcast_custom_template') || '';
+        if (!savedCustomMsg) {
+          const prev = JSON.parse(localStorage.getItem('pge_bc_settings') || '{}');
+          savedCustomMsg = prev.customMsg || '';
+        }
+      } catch(e) {}
+
+      const currentMsg = (el.bcCustomMessage && el.bcCustomMessage.value && el.bcCustomMessage.value.trim().length > 0)
+        ? el.bcCustomMessage.value
+        : savedCustomMsg;
+
+      if (el.bcCustomMessage && el.bcCustomMessage.value && el.bcCustomMessage.value.trim().length > 0) {
+        try {
+          localStorage.setItem('pge_saved_broadcast_custom_template', el.bcCustomMessage.value);
+        } catch(e) {}
+      }
+
       const settings = {
         filter: el.bcStageFilter ? el.bcStageFilter.value : '',
         date: el.bcDateInput ? el.bcDateInput.value : '',
@@ -3264,7 +3283,7 @@
         durationMS: document.getElementById('bcDurationMS') ? document.getElementById('bcDurationMS').value : '120',
         location: el.bcLocationInput ? el.bcLocationInput.value : '',
         template: el.bcTemplateSelect ? el.bcTemplateSelect.value : '',
-        customMsg: el.bcCustomMessage ? el.bcCustomMessage.value : '',
+        customMsg: currentMsg,
         autoUpdate: el.bcAutoUpdateStage ? el.bcAutoUpdateStage.checked : true
       };
       try {
@@ -3279,7 +3298,13 @@
     function loadBcSettings() {
       try {
         const raw = localStorage.getItem('pge_bc_settings');
-        if (!raw) return false;
+        const dedicatedMsg = localStorage.getItem('pge_saved_broadcast_custom_template');
+
+        if (dedicatedMsg && el.bcCustomMessage) {
+          el.bcCustomMessage.value = dedicatedMsg;
+        }
+
+        if (!raw) return !!dedicatedMsg;
         const saved = JSON.parse(raw);
         if (saved) {
           if (el.bcStageFilter && saved.filter) el.bcStageFilter.value = saved.filter;
@@ -3290,7 +3315,7 @@
           if (document.getElementById('bcDurationMS') && saved.durationMS) document.getElementById('bcDurationMS').value = saved.durationMS;
           if (el.bcLocationInput && saved.location) el.bcLocationInput.value = saved.location;
           if (el.bcTemplateSelect && saved.template) el.bcTemplateSelect.value = saved.template;
-          if (el.bcCustomMessage && typeof saved.customMsg === 'string' && saved.customMsg.length > 0) {
+          if (!dedicatedMsg && el.bcCustomMessage && typeof saved.customMsg === 'string' && saved.customMsg.length > 0) {
             el.bcCustomMessage.value = saved.customMsg;
           }
           if (el.bcAutoUpdateStage && saved.hasOwnProperty('autoUpdate')) {
@@ -3461,10 +3486,15 @@
     }
 
     function handleSaveTemplateSettings() {
+      if (el.bcCustomMessage && el.bcCustomMessage.value.trim().length > 0) {
+        try {
+          localStorage.setItem('pge_saved_broadcast_custom_template', el.bcCustomMessage.value);
+        } catch(e) {}
+      }
       const ok = saveBcSettings();
       updateBroadcastPreview();
       if (ok) {
-        showToast('✅ Template pesan WhatsApp berhasil disimpan!');
+        showToast('✅ Template pesan WhatsApp berhasil disimpan secara permanen!');
       } else {
         showToast('⚠️ Gagal menyimpan template pesan.');
       }
@@ -5430,6 +5460,19 @@
     /* WHATSAPP BROADCAST TAB LOGIC                         */
     /* ---------------------------------------------------- */
     function initDefaultBroadcastTemplate() {
+      const dedicatedMsg = localStorage.getItem('pge_saved_broadcast_custom_template');
+      if (dedicatedMsg && el.bcCustomMessage) {
+        el.bcCustomMessage.value = dedicatedMsg;
+        return;
+      }
+      try {
+        const savedSettings = JSON.parse(localStorage.getItem('pge_bc_settings') || '{}');
+        if (savedSettings && savedSettings.customMsg && el.bcCustomMessage) {
+          el.bcCustomMessage.value = savedSettings.customMsg;
+          return;
+        }
+      } catch(e) {}
+
       if (el.bcCustomMessage && (!el.bcCustomMessage.value || el.bcCustomMessage.value.trim() === '')) {
         el.bcCustomMessage.value = `Halo Kak {name},\n\nTerima kasih telah melamar posisi {role} di PGE Talent Pool.\n\nKami telah meninjau portofolio Kakak dan ingin mengundang Kakak untuk sesi Interview:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Lokasi: {location}\n\nMohon konfirmasi kehadiran Kakak dengan membalas pesan ini ya. Terima kasih!\n- Tim HR PGE Talent Pool`;
       }
@@ -5950,6 +5993,15 @@
           state.smartScheduleMap = {};
         }
       }
+      if (!state.smartScheduleDates) {
+        try {
+          state.smartScheduleDates = JSON.parse(localStorage.getItem('pge_smart_schedule_dates') || '{}');
+        } catch(e) {
+          state.smartScheduleDates = {};
+        }
+      }
+      if (!state.smartScheduleMap) state.smartScheduleMap = {};
+      if (!state.smartScheduleDates) state.smartScheduleDates = {};
       if (!state.smartScheduleSlotIndex) {
         try {
           state.smartScheduleSlotIndex = JSON.parse(localStorage.getItem('pge_smart_slot_indices') || '{}');
@@ -6030,105 +6082,110 @@
         return;
       }
 
-      el.bcTableBody.innerHTML = targetTalents.map(talent => {
-        const isSelected = state.broadcastSelectedIds.has(talent.id);
-        const phone = formatToInternationalPhone(talent.phone);
-        const sched = getTalentAssignedSchedule(talent);
-        let assignedTime = sched.assignedTime;
-        let displayDate = sched.displayDate;
-        let isRescheduled = sched.isRescheduled;
+      try {
+        el.bcTableBody.innerHTML = targetTalents.map(talent => {
+          const isSelected = state.broadcastSelectedIds.has(talent.id);
+          const phone = formatToInternationalPhone(talent.phone);
+          const sched = getTalentAssignedSchedule(talent);
+          let assignedTime = sched.assignedTime;
+          let displayDate = sched.displayDate;
+          let isRescheduled = sched.isRescheduled;
 
-        const resolvedMsg = resolveCandidateMessage(talent, assignedTime);
-        const sentTime = state.broadcastSentHistory[talent.id];
-        const isSent = !!sentTime;
+          const resolvedMsg = resolveCandidateMessage(talent, assignedTime);
+          const sentTime = state.broadcastSentHistory[talent.id];
+          const isSent = !!sentTime;
 
-        return `
-          <tr>
-            <td style="text-align: center;">
-              <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleBroadcastSelect('${talent.id}')">
-            </td>
-            <td>
-              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${talent.id}</div>
-              <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${escapeHtml(talent.name)}</div>
-              <div style="font-size: 11px; color: var(--text-secondary);">${escapeHtml(talent.role || 'Freelance')} • ${escapeHtml(talent.domisili || '-')}</div>
-            </td>
-            <td>
-              <span class="stage-select-pill stage-${(talent.stage || 'prospect').toLowerCase()}">${talent.stage || 'Prospect'}</span>
-            </td>
-            <td style="font-family: var(--font-mono); font-size: 12px;">
-              ${phone ? `<span style="color: #166534; font-weight: 500;">${phone}</span>` : '<span style="color: #DC2626;">No WhatsApp</span>'}
-            </td>
-            <td>
-              ${(() => {
-                const conf = detectScheduleConflicts();
-                const hard = conf[talent.id];
-                const tent = conf.tentativeConflicts ? conf.tentativeConflicts[talent.id] : null;
+          return `
+            <tr>
+              <td style="text-align: center;">
+                <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleBroadcastSelect('${talent.id}')">
+              </td>
+              <td>
+                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${talent.id}</div>
+                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${escapeHtml(talent.name)}</div>
+                <div style="font-size: 11px; color: var(--text-secondary);">${escapeHtml(talent.role || 'Freelance')} • ${escapeHtml(talent.domisili || '-')}</div>
+              </td>
+              <td>
+                <span class="stage-select-pill stage-${(talent.stage || 'prospect').toLowerCase()}">${talent.stage || 'Prospect'}</span>
+              </td>
+              <td style="font-family: var(--font-mono); font-size: 12px;">
+                ${phone ? `<span style="color: #166534; font-weight: 500;">${phone}</span>` : '<span style="color: #DC2626;">No WhatsApp</span>'}
+              </td>
+              <td>
+                ${(() => {
+                  const conf = detectScheduleConflicts();
+                  const hard = conf[talent.id];
+                  const tent = conf.tentativeConflicts ? conf.tentativeConflicts[talent.id] : null;
 
-                if (!assignedTime || assignedTime === '-') {
-                  return `
-                    <div style="display: inline-flex; flex-direction: column; gap: 3px;">
-                      <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); font-style: italic;">— Belum Dijadwalkan —</span>
-                      <button type="button" class="btn btn-secondary btn-xs" onclick="planSingleCandidateSlot('${talent.id}')" style="font-size: 10.5px; padding: 2px 8px; color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; border-radius: 4px; cursor: pointer;">
-                        + Beri Jam
-                      </button>
-                    </div>
-                  `;
-                }
-
-                if (hard && hard.length > 0) {
-                  return `
-                    <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #DC2626; background: #FEE2E2; border: 1px solid #FCA5A5; padding: 2px 6px; border-radius: 4px; display: inline-block;">
-                      ⚠️ ${assignedTime} (Bentrok)
-                    </div>
-                  `;
-                } else if (tent && tent.length > 0 && talent.outreachStatus !== 'WA Sent') {
-                  const holder = tent[0];
-                  return `
-                    <div style="display: inline-flex; flex-direction: column; gap: 4px;">
-                      <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #92400E; background: #FEF3C7; border: 1px solid #FCD34D; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                        ⏳ ${assignedTime} (Menunggu Konfirmasi)
+                  if (!assignedTime || assignedTime === '-') {
+                    return `
+                      <div style="display: inline-flex; flex-direction: column; gap: 3px;">
+                        <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); font-style: italic;">— Belum Dijadwalkan —</span>
+                        <button type="button" class="btn btn-secondary btn-xs" onclick="planSingleCandidateSlot('${talent.id}')" style="font-size: 10.5px; padding: 2px 8px; color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; border-radius: 4px; cursor: pointer;">
+                          + Beri Jam
+                        </button>
                       </div>
-                      <button type="button" class="btn btn-secondary btn-xs" onclick="openTentativeConflictModal('${talent.id}', '${holder.id}')" style="font-size: 10.5px; padding: 2px 6px; color: #B45309; border-color: #FCD34D; background: #FFFBEB; border-radius: 4px; cursor: pointer;">
-                        ℹ️ Detail &amp; Kelola Slot
-                      </button>
-                    </div>
-                  `;
-                } else if (talent.outreachStatus === 'WA Sent') {
-                  return `
-                    <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #D97706;">
-                      💬 ${assignedTime}
-                    </div>
-                  `;
-                } else {
-                  return `
-                    <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'};">
-                      ${isRescheduled ? '🔄 ' : ''}${assignedTime}
-                    </div>
-                  `;
-                }
-              })()}
-              <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'};">${displayDate}</div>
-            </td>
-            <td style="text-align: right;">
-              ${phone ? `
-                <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                  <select class="outreach-status-pill status-${(talent.outreachStatus || 'Pending').toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${talent.id}', this.value)">
-                    <option value="Pending" ${(talent.outreachStatus || 'Pending') === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
-                    <option value="WA Sent" ${talent.outreachStatus === 'WA Sent' ? 'selected' : ''}>💬 WA Sent</option>
-                    <option value="Confirmed" ${talent.outreachStatus === 'Confirmed' ? 'selected' : ''}>✅ Confirmed</option>
-                    <option value="Tidak Hadir" ${talent.outreachStatus === 'Tidak Hadir' ? 'selected' : ''}>❌ Tidak Hadir</option>
-                    <option value="Cant Attend" ${talent.outreachStatus === 'Cant Attend' ? 'selected' : ''}>❌ Can't Attend</option>
-                    <option value="Reschedule" ${talent.outreachStatus === 'Reschedule' ? 'selected' : ''}>🔄 Reschedule</option>
-                  </select>
-                  <button type="button" class="btn btn-wa btn-sm" onclick="sendBroadcastSingle('${talent.id}')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Send to WA ↗
-                  </button>
-                </div>
-              ` : '<span style="font-size: 11px; color: var(--text-muted);">Cannot send</span>'}
-            </td>
-          </tr>`;
-      }).join('');
+                    `;
+                  }
+
+                  if (hard && hard.length > 0) {
+                    return `
+                      <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #DC2626; background: #FEE2E2; border: 1px solid #FCA5A5; padding: 2px 6px; border-radius: 4px; display: inline-block;">
+                        ⚠️ ${assignedTime} (Bentrok)
+                      </div>
+                    `;
+                  } else if (tent && tent.length > 0 && talent.outreachStatus !== 'WA Sent') {
+                    const holder = tent[0];
+                    return `
+                      <div style="display: inline-flex; flex-direction: column; gap: 4px;">
+                        <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #92400E; background: #FEF3C7; border: 1px solid #FCD34D; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                          ⏳ ${assignedTime} (Menunggu Konfirmasi)
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-xs" onclick="openTentativeConflictModal('${talent.id}', '${holder.id}')" style="font-size: 10.5px; padding: 2px 6px; color: #B45309; border-color: #FCD34D; background: #FFFBEB; border-radius: 4px; cursor: pointer;">
+                          ℹ️ Detail &amp; Kelola Slot
+                        </button>
+                      </div>
+                    `;
+                  } else if (talent.outreachStatus === 'WA Sent') {
+                    return `
+                      <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #D97706;">
+                        💬 ${assignedTime}
+                      </div>
+                    `;
+                  } else {
+                    return `
+                      <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'};">
+                        ${isRescheduled ? '🔄 ' : ''}${assignedTime}
+                      </div>
+                    `;
+                  }
+                })()}
+                <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'};">${displayDate}</div>
+              </td>
+              <td style="text-align: right;">
+                ${phone ? `
+                  <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                    <select class="outreach-status-pill status-${(talent.outreachStatus || 'Pending').toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${talent.id}', this.value)">
+                      <option value="Pending" ${(talent.outreachStatus || 'Pending') === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
+                      <option value="WA Sent" ${talent.outreachStatus === 'WA Sent' ? 'selected' : ''}>💬 WA Sent</option>
+                      <option value="Confirmed" ${talent.outreachStatus === 'Confirmed' ? 'selected' : ''}>✅ Confirmed</option>
+                      <option value="Tidak Hadir" ${talent.outreachStatus === 'Tidak Hadir' ? 'selected' : ''}>❌ Tidak Hadir</option>
+                      <option value="Cant Attend" ${talent.outreachStatus === 'Cant Attend' ? 'selected' : ''}>❌ Can't Attend</option>
+                      <option value="Reschedule" ${talent.outreachStatus === 'Reschedule' ? 'selected' : ''}>🔄 Reschedule</option>
+                    </select>
+                    <button type="button" class="btn btn-wa btn-sm" onclick="sendBroadcastSingle('${talent.id}')">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                      Send to WA ↗
+                    </button>
+                  </div>
+                ` : '<span style="font-size: 11px; color: var(--text-muted);">Cannot send</span>'}
+              </td>
+            </tr>`;
+        }).join('');
+      } catch (err) {
+        console.error('Error rendering broadcast table:', err);
+        el.bcTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: #DC2626;">Terjadi kesalahan saat memuat antrean kandidat. Silakan klik tombol <strong>Recalculate Slots</strong> di atas.</td></tr>`;
+      }
     }
 
     function updateBroadcastPreview() {
