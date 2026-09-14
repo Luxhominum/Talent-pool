@@ -1827,6 +1827,8 @@
       background: #FFFFFF !important;
     }
 
+      .cognitive-viz-grid { display: grid; grid-template-columns: 190px 1fr; gap: 20px; align-items: center; }
+    @media (max-width: 768px) { .cognitive-viz-grid { grid-template-columns: 1fr !important; gap: 14px; } }
   </style>
 </head>
 <body>
@@ -1955,9 +1957,9 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>Jadwal Interview</span>
             </button>
-            <button type="button" class="sidebar-nav-item" id="btnAssessmentPortal" onclick="openAssessmentLauncherModal(); toggleAppSidebar(false);" style="background: #F5F3FF; color: #4F46E5; border-color: #E0E7FF;">
-              <span style="font-size: 14px; line-height: 1;">🧠</span>
-              <span style="font-weight: 600;">Asesmen On-Site</span>
+            <button type="button" class="sidebar-nav-item" id="btnAssessmentPortal" onclick="window.open('assessment-portal.html', '_blank'); toggleAppSidebar(false);" style="background: #F5F3FF; color: #4F46E5; border-color: #E0E7FF;" title="Buka Portal Pelaksanaan Asesmen On-Site">
+              <span style="font-size: 14px; line-height: 1;">💻</span>
+              <span style="font-weight: 600;">Portal Asesmen On-Site ↗</span>
             </button>
           </div>
 
@@ -2000,6 +2002,26 @@
 
       <!-- Main Viewport for Workspace & Candidate Content -->
       <main class="app-main-viewport" id="appMainViewport">
+      <!-- Appwrite Paused / Connection Notification Banner -->
+      <div id="appwritePausedAlert" style="display: none; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 22px; line-height: 1;">⚠️</span>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 2px;">
+              Appwrite Cloud Project Dijeda (Paused Due to Inactivity)
+            </div>
+            <div style="font-size: 12px; color: #B45309; line-height: 1.5;">
+              Appwrite Cloud menjeda project otomatis karena beberapa hari tidak ada aktivitas. Web app saat ini <strong>berjalan normal menggunakan cadangan Firebase</strong>. Untuk mengaktifkan kembali Appwrite, klik tombol di sebelah kanan.
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+          <a href="https://cloud.appwrite.io/console/project-6a9131260006737c5919" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #D97706; color: white; border: none; font-weight: 600; font-size: 12px; padding: 7px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+            <span>Pulihkan di Appwrite Console ↗</span>
+          </a>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('appwritePausedAlert').style.display='none'" style="border: 1px solid #FCD34D; background: #FEF9C3; color: #92400E; font-size: 12px; padding: 5px 9px;" title="Tutup pemberitahuan">✕</button>
+        </div>
+      </div>
 
     <!-- ============================================== -->
     <!-- VIEW A: JOB VACANCY HUB & PORTAL (LANDING)     -->
@@ -2335,7 +2357,12 @@
         <span id="drawerId" class="talent-id"></span>
         <h2 id="drawerTitle" style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Candidate Profile</h2>
       </div>
-      <button type="button" class="btn btn-secondary btn-icon" onclick="closeDrawer()">✕</button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnDrawerShowcase" onclick="switchToProfileModalFromDrawer()" style="font-size: 11.5px; padding: 5px 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="Buka modal showcase profil lengkap & hasil asesmen">
+          <span>👁️ Profil &amp; Hasil Asesmen ↗</span>
+        </button>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeDrawer()">✕</button>
+      </div>
     </div>
 
     <div class="drawer-body" id="drawerBody"></div>
@@ -4188,6 +4215,90 @@
     /* ---------------------------------------------------- */
     /* APPWRITE DATABASE LOAD & REALTIME                    */
     /* ---------------------------------------------------- */
+    // Automatic fallback to Firebase Realtime Database when Appwrite is paused or unavailable
+    async function loadFirebaseTalentsFallback() {
+      if (!state.currentUser) return;
+      console.log('Loading candidates from Firebase Realtime Database fallback...');
+
+      const snapshot = await rtdb.ref('/talents').once('value');
+      const data = snapshot.val() || {};
+      const keys = Object.keys(data);
+
+      if (keys.length === 0) {
+        console.warn('No talents found in Firebase RTDB fallback.');
+        return;
+      }
+
+      const items = keys.map(k => {
+        const item = data[k] || {};
+        let skills = [];
+        let portfolioItems = [];
+
+        if (Array.isArray(item.skills)) {
+          skills = item.skills;
+        } else if (item.skills && typeof item.skills === 'object') {
+          skills = [
+            { name: 'Foto Produk', rating: item.skills.foto || 4 },
+            { name: 'Video Produk', rating: item.skills.video || 4 },
+            { name: 'Video Editing', rating: item.skills.editing || 4 },
+            { name: 'Content Sense', rating: item.skills.sense || 4 }
+          ];
+        } else if (item.skillsJson) {
+          try { skills = JSON.parse(item.skillsJson); } catch (e) {}
+        }
+
+        if (Array.isArray(item.portfolioItems)) {
+          portfolioItems = item.portfolioItems;
+        } else if (item.portfolioItemsJson) {
+          try { portfolioItems = JSON.parse(item.portfolioItemsJson); } catch (e) {}
+        } else if (item.portfolioUrl) {
+          portfolioItems = [{ name: 'Portfolio', type: 'document', url: item.portfolioUrl }];
+        }
+
+        const parsedNotes = typeof extractOutreachStatus === 'function'
+          ? extractOutreachStatus(item.notes || '')
+          : { text: item.notes || '', status: 'Pending' };
+
+        return {
+          $id: item.appwriteId || item.$id || (item.id || k).toLowerCase().replace(/[^a-z0-9_-]/g, '_'),
+          id: item.id || k,
+          name: toTitleCase(item.name || ''),
+          role: item.role || 'Freelance Content Creator',
+          phone: formatToInternationalPhone(item.phone || ''),
+          email: cleanEmail(item.email || ''),
+          experienceLevel: item.experienceLevel || 'Junior',
+          overallRating: Number(item.overallRating) || 4,
+          stage: item.stage || (parsedNotes.status === 'Reschedule' ? 'Interviewed' : (parsedNotes.status === 'Tidak Hadir' ? 'Archived' : 'Prospect')),
+          expectedSalary: item.expectedSalary || 'Standard Uang Saku',
+          domisili: toTitleCase(item.domisili || ''),
+          education: cleanEducation(item.education || ''),
+          cvUrl: item.cvUrl || '',
+          portfolioUrl: item.portfolioUrl || '',
+          portfolioItems: portfolioItems,
+          skills: skills,
+          notes: parsedNotes.text || item.notes || '',
+          outreachStatus: item.outreachStatus || parsedNotes.status || 'Pending'
+        };
+      });
+
+      // Sort: Newest Candidates First
+      items.sort((a, b) => {
+        const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
+        const numB = parseInt((b.id || '').replace(/\D/g, ''), 10) || 0;
+        return numB - numA;
+      });
+
+      state.talents = items;
+      correctCandidateScheduleSequence(state.talents);
+      selectVacancy(state.activeVacancy);
+      updateMetrics();
+
+      console.log(`Successfully loaded ${items.length} candidates from Firebase RTDB.`);
+    }
+    window.loadFirebaseTalentsFallback = loadFirebaseTalentsFallback;
+
+    let appwriteRetryInterval = null;
+
     async function loadAppwriteTalents(isSilent = false) {
       if (!state.currentUser) return;
 
@@ -4204,6 +4315,10 @@
           APPWRITE_CONFIG.collectionId,
           [Appwrite.Query.limit(100)]
         );
+
+        // Hide paused alert if Appwrite has resumed
+        const alertEl = document.getElementById('appwritePausedAlert');
+        if (alertEl) alertEl.style.display = 'none';
 
         const items = (response.documents || []).map(doc => {
           let skills = [];
@@ -4252,16 +4367,55 @@
           el.syncStatus.style.background = 'var(--pastel-green-bg)';
           el.syncStatus.style.color = 'var(--pastel-green-text)';
           el.syncStatus.style.borderColor = 'var(--pastel-green-border)';
+          el.syncStatus.title = 'Terhubung langsung ke Appwrite Cloud Database';
+        }
+
+        // Cancel retry interval if back online
+        if (appwriteRetryInterval) {
+          clearInterval(appwriteRetryInterval);
+          appwriteRetryInterval = null;
         }
       } catch (err) {
         console.error('Appwrite load error:', err);
-        if (el.syncStatus) {
-          el.syncStatus.textContent = 'Appwrite Error';
-          el.syncStatus.style.background = 'var(--pastel-red-bg)';
-          el.syncStatus.style.color = 'var(--pastel-red-text)';
+
+        const isPaused = err && (err.type === 'project_paused' || err.code === 403 || (err.message && err.message.toLowerCase().includes('paused')));
+
+        const alertEl = document.getElementById('appwritePausedAlert');
+        if (alertEl && isPaused) {
+          alertEl.style.display = 'flex';
+        }
+
+        // Automatic seamless fallback to Firebase Realtime Database
+        try {
+          await loadFirebaseTalentsFallback();
+          if (el.syncStatus) {
+            const activeCount = state.talents.filter(t => t.stage !== 'Archived').length;
+            el.syncStatus.innerHTML = `⚠️ Firebase Fallback (${activeCount} Active)`;
+            el.syncStatus.style.background = '#FEF3C7';
+            el.syncStatus.style.color = '#B45309';
+            el.syncStatus.style.borderColor = '#FDE68A';
+            el.syncStatus.title = isPaused
+              ? 'Appwrite Cloud dijeda karena tidak ada aktivitas. Klik banner untuk memulihkan di Appwrite Console.'
+              : 'Gagal menghubungi Appwrite Cloud. Berjalan di cadangan Firebase RTDB.';
+          }
+        } catch (fbErr) {
+          console.error('Firebase fallback load error:', fbErr);
+          if (el.syncStatus) {
+            el.syncStatus.textContent = isPaused ? '⚠️ Appwrite Paused' : 'Connection Error';
+            el.syncStatus.style.background = 'var(--pastel-red-bg)';
+            el.syncStatus.style.color = 'var(--pastel-red-text)';
+          }
+        }
+
+        // Setup auto-retry every 20 seconds to detect when admin restores Appwrite project
+        if (!appwriteRetryInterval) {
+          appwriteRetryInterval = setInterval(() => {
+            loadAppwriteTalents(true);
+          }, 20000);
         }
       }
     }
+    window.loadAppwriteTalents = loadAppwriteTalents;
 
     let realtimeDebounceTimer = null;
     function subscribeAppwriteRealtime() {
@@ -4889,7 +5043,14 @@
                 ${discussLink}
               </div>
               <div style="display: flex; gap: 6px;">
-                <button type="button" class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); ${isSuperAdmin() ? `openTalentDetail('${talent.id}')` : `openCandidateProfileModal('${talent.id}')`}" title="${isSuperAdmin() ? 'Edit candidate' : 'View full profile'}">
+                <button type="button" class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); openCandidateProfileModal('${talent.id}')" title="Lihat Profil & Hasil Asesmen">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+                ${isSuperAdmin() ? `
+                  <button type="button" class="btn btn-secondary btn-icon" onclick="event.stopPropagation(); openTalentDetail('${talent.id}')" title="Edit Data Kandidat">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                ` : ''}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </button>
                 ${isSuperAdmin() ? `
@@ -5553,11 +5714,7 @@
     let currentProfileTalentId = null;
 
     function handleCandidateCardClick(id) {
-      if (isSuperAdmin()) {
-        openTalentDetail(id);
-      } else {
-        openCandidateProfileModal(id);
-      }
+      openCandidateProfileModal(id);
     }
 
     function openCandidateDiscussion(id) {
@@ -5733,6 +5890,687 @@
       }
     }
 
+    
+    /* ---------------------------------------------------- */
+    /* CANDIDATE ASSESSMENT VISUAL DASHBOARD GENERATORS     */
+    /* 1. Pentagon Matrix (IPIP Big Five)                   */
+    /* 2. Line Graph (DISC Elements D-I-S-C)                */
+    /* 3. Aspect Bars (Logika, Kognitif & Bisnis Praktis)   */
+    /* ---------------------------------------------------- */
+
+    
+    function printCandidateDossier(talentId) {
+      const talent = (typeof state !== 'undefined' && state.talents) ? state.talents.find(t => (t.id === talentId || t.talentId === talentId || t.appwriteId === talentId)) : null;
+      if (!talent) return;
+      const assessment = (typeof state !== 'undefined' && state.assessments) ? (state.assessments[talent.id] || talent.assessment) : talent.assessment;
+      if (!assessment) {
+        alert('Kandidat ini belum memiliki data asesmen untuk dicetak.');
+        return;
+      }
+
+      const b5 = assessment.dimensions || assessment.scores;
+      const dateStr = assessment.completedAt 
+        ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) 
+        : '-';
+
+      const printWindow = window.open('', '_blank', 'width=980,height=800');
+      if (!printWindow) {
+        alert('Browser memblokir jendela pop-up cetak. Harap izinkan pop-up untuk mencetak dossier.');
+        return;
+      }
+
+      const dossierHtml = `
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Dossier Evaluasi Kandidat - ${talent.id} ${escapeHtml(talent.name)}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;700&display=swap" rel="stylesheet">
+          <style>
+            @page {
+              size: A4;
+              margin: 12mm 15mm;
+            }
+            body {
+              font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+              color: #0F172A;
+              background: #FFFFFF;
+              margin: 0;
+              padding: 20px;
+              font-size: 11.5px;
+              line-height: 1.45;
+            }
+            .header {
+              border-bottom: 2px solid #0F172A;
+              padding-bottom: 12px;
+              margin-bottom: 16px;
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+            }
+            .brand {
+              font-size: 18px;
+              font-weight: 800;
+              color: #0F172A;
+              letter-spacing: -0.02em;
+            }
+            .sub {
+              font-size: 10px;
+              color: #64748B;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            .dossier-tag {
+              font-family: 'Geist Mono', monospace;
+              font-size: 9px;
+              font-weight: 700;
+              background: #F1F5F9;
+              padding: 4px 8px;
+              border-radius: 4px;
+              color: #334155;
+            }
+            .bio-grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 8px;
+              background: #F8FAFC;
+              border: 1px solid #E2E8F0;
+              border-radius: 8px;
+              padding: 12px 14px;
+              margin-bottom: 16px;
+            }
+            .bio-label {
+              font-size: 9.5px;
+              color: #64748B;
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+            .bio-val {
+              font-size: 12px;
+              font-weight: 700;
+              color: #0F172A;
+              margin-top: 1px;
+            }
+            .two-col {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 14px;
+              margin-bottom: 16px;
+            }
+            .box {
+              border: 1px solid #E2E8F0;
+              border-radius: 8px;
+              padding: 12px 14px;
+              background: #FFFFFF;
+            }
+            .box-title {
+              font-size: 11.5px;
+              font-weight: 700;
+              color: #0F172A;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              margin-bottom: 8px;
+              padding-bottom: 6px;
+              border-bottom: 1px solid #F1F5F9;
+            }
+            .notes-box {
+              border: 1px dashed #94A3B8;
+              border-radius: 8px;
+              padding: 10px 14px;
+              min-height: 80px;
+              background: #FAFAFA;
+            }
+            .no-print-bar {
+              background: #0F172A;
+              color: #FFFFFF;
+              padding: 10px 20px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+              border-radius: 8px;
+            }
+            @media print {
+              .no-print-bar { display: none !important; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print-bar">
+            <span>📄 Dokumen Dossier Evaluasi Asesmen Kandidat (Siap Cetak / Save as PDF)</span>
+            <button onclick="window.print()" style="background:#3B82F6; color:#FFF; border:none; padding:6px 14px; border-radius:6px; font-weight:700; cursor:pointer;">
+              🖨️ Cetak / Simpan PDF
+            </button>
+          </div>
+
+          <div class="header">
+            <div>
+              <div class="brand">PGE TALENT POOL</div>
+              <div class="sub">Laporan Resmi Evaluasi Psikometrik &amp; Kognitif On-Site</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="dossier-tag">CONFIDENTIAL • FOR INTERNAL USE ONLY</span>
+              <div style="font-size: 10px; color: #64748B; margin-top: 4px;">Selesai: ${dateStr}</div>
+            </div>
+          </div>
+
+          <div class="bio-grid">
+            <div>
+              <div class="bio-label">Nama Kandidat</div>
+              <div class="bio-val">${escapeHtml(talent.name)}</div>
+            </div>
+            <div>
+              <div class="bio-label">ID Kandidat &amp; Posisi</div>
+              <div class="bio-val">${talent.id} • ${escapeHtml(talent.role || 'Content Creator')}</div>
+            </div>
+            <div>
+              <div class="bio-label">Domisili / Kota</div>
+              <div class="bio-val">${escapeHtml(talent.domisili || '-')}</div>
+            </div>
+            <div>
+              <div class="bio-label">Pendidikan / Tahapan</div>
+              <div class="bio-val">${escapeHtml(talent.pendidikan || '-')} (${talent.stage || 'Screening'})</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <!-- 1. Pentagon Matrix -->
+            <div class="box">
+              <div class="box-title">
+                <span>🧠</span> <span>Pentagon Matrix: IPIP Big Five Personality</span>
+              </div>
+              ${b5 ? renderPentagonMatrixSvg(b5) : '<p>Tidak ada data Big Five</p>'}
+              <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 10px;">
+                ${b5 ? Object.entries(b5).map(([k, d]) => `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 4px 6px; border-radius: 4px;">
+                    <span style="color:#64748B;">${k}:</span> <strong style="color:#1E40AF;">${d.percentage}% (${d.level})</strong>
+                  </div>
+                `).join('') : ''}
+              </div>
+            </div>
+
+            <!-- 2. DISC Curve -->
+            <div class="box">
+              <div class="box-title">
+                <span>🧩</span> <span>DISC Behavioral Element Line Graph</span>
+              </div>
+              ${assessment.disc ? renderDiscLineGraphSvg(assessment.disc) : '<p>Tidak ada data DISC</p>'}
+              ${assessment.disc ? `
+                <div style="margin-top: 8px; padding: 8px; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 6px;">
+                  <div style="font-weight: 700; color: #7C3AED; font-size: 11px;">
+                    Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})
+                  </div>
+                  <div style="font-size: 10.5px; color: #5B21B6; margin-top: 2px; line-height: 1.35;">
+                    ${escapeHtml(assessment.disc.desc || '')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- 3. Cognitive Aspects -->
+          <div class="box" style="margin-bottom: 16px;">
+            <div class="box-title" style="justify-content: space-between;">
+              <span>📊 Aspek Logika, Penalaran Kognitif &amp; Analisis Bisnis</span>
+              <strong style="font-family: 'Geist Mono', monospace; color: #059669;">
+                Skor Akhir: ${assessment.cognitive ? assessment.cognitive.score : 0} / ${assessment.cognitive ? assessment.cognitive.total : 15} (${assessment.cognitive ? assessment.cognitive.percentage : 0}%)
+              </strong>
+            </div>
+            ${assessment.cognitive ? renderCognitiveAspectsBarsHtml(assessment.cognitive) : '<p>Tidak ada data Kognitif</p>'}
+          </div>
+
+          <!-- 4. Interviewer Notes & Recommendation -->
+          <div class="box">
+            <div class="box-title" style="justify-content: space-between;">
+              <span>📝 Catatan Evaluasi &amp; Rekomendasi Interviewer</span>
+              <div style="font-size: 10px; color: #64748B;">
+                [ &nbsp; ] Disarankan &nbsp;&nbsp;&nbsp; [ &nbsp; ] Dipertimbangkan &nbsp;&nbsp;&nbsp; [ &nbsp; ] Tidak Disarankan
+              </div>
+            </div>
+            <div class="notes-box">
+              <div style="font-size: 10px; color: #94A3B8; font-style: italic;">
+                Tuliskan catatan observasi karakter kerja kandidat selama wawancara berlangsung...
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 24px; gap: 40px; font-size: 10px;">
+              <div style="text-align: center;">
+                <div style="border-bottom: 1px solid #000; width: 140px; margin-bottom: 4px; height: 35px;"></div>
+                <div>Tanda Tangan Interviewer</div>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(dossierHtml);
+      printWindow.document.close();
+    }
+
+function renderPentagonMatrixSvg(dimensions) {
+      const W = 520;
+      const H = 320;
+      const cx = 260;
+      const cy = 155;
+      const R = 85;
+
+      const dims = [
+        { key: 'extraversion', label: 'Extraversion', icon: '⚡' },
+        { key: 'agreeableness', label: 'Agreeableness', icon: '🤝' },
+        { key: 'conscientiousness', label: 'Conscientiousness', icon: '🎯' },
+        { key: 'emotionalStability', label: 'Emotional Stability', icon: '🧘' },
+        { key: 'intellect', label: 'Intellect / Openness', icon: '💡' }
+      ];
+
+      const angles = [0, 1, 2, 3, 4].map(i => -Math.PI / 2 + (i * 2 * Math.PI / 5));
+
+      // Concentric pentagon rings
+      const rings = [0.2, 0.4, 0.6, 0.8, 1.0];
+      let ringsSvg = '';
+      rings.forEach((scale, idx) => {
+        const pts = angles.map(a => (cx + Math.cos(a) * R * scale).toFixed(1) + ',' + (cy + Math.sin(a) * R * scale).toFixed(1)).join(' ');
+        const isOuter = (idx === rings.length - 1);
+        ringsSvg += '<polygon points="' + pts + '" fill="' + (idx % 2 === 0 ? '#F8FAFC' : '#FFFFFF') + '" stroke="' + (isOuter ? '#94A3B8' : '#E2E8F0') + '" stroke-width="' + (isOuter ? '1.5' : '1') + '" />';
+      });
+
+      // Spokes from center
+      let spokesSvg = '';
+      angles.forEach(a => {
+        const x2 = (cx + Math.cos(a) * R).toFixed(1);
+        const y2 = (cy + Math.sin(a) * R).toFixed(1);
+        spokesSvg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="2 2" />';
+      });
+
+      // Data polygon
+      const dataPoints = dims.map((d, i) => {
+        const dataObj = dimensions ? dimensions[d.key] : null;
+        const pct = dataObj ? Math.max(10, Math.min(100, dataObj.percentage || 50)) : 50;
+        const r = (pct / 100) * R;
+        const x = cx + Math.cos(angles[i]) * r;
+        const y = cy + Math.sin(angles[i]) * r;
+        return { x, y, pct, label: d.label, level: dataObj ? dataObj.level : 'Sedang' };
+      });
+
+      const polyPoints = dataPoints.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+
+      // Vertices dots
+      let dotsSvg = '';
+      dataPoints.forEach(p => {
+        dotsSvg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="5.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="2" />' +
+                   '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2" fill="#FFFFFF" />';
+      });
+
+      // Axis Labels with safe bounds
+      const labelOffsets = [
+        { x: 0, y: -16, align: 'middle' },
+        { x: 10, y: -2, align: 'start' },
+        { x: 8, y: 14, align: 'start' },
+        { x: -8, y: 14, align: 'end' },
+        { x: -10, y: -2, align: 'end' }
+      ];
+
+      let labelsSvg = '';
+      dims.forEach((d, i) => {
+        const outerX = cx + Math.cos(angles[i]) * (R + 10);
+        const outerY = cy + Math.sin(angles[i]) * (R + 10);
+        const offset = labelOffsets[i];
+        const dataObj = dimensions ? dimensions[d.key] : null;
+        const pct = dataObj ? dataObj.percentage : 50;
+        const level = dataObj ? dataObj.level : 'Sedang';
+
+        labelsSvg += '<g transform="translate(' + (outerX + offset.x) + ', ' + (outerY + offset.y) + ')">' +
+          '<text text-anchor="' + offset.align + '" font-family="var(--font-sans, system-ui, sans-serif)" font-size="11" font-weight="700" fill="#0F172A">' +
+            d.icon + ' ' + d.label +
+          '</text>' +
+          '<text text-anchor="' + offset.align + '" y="14" font-family="var(--font-mono, monospace)" font-size="10" font-weight="600" fill="#2563EB">' +
+            pct + '% (' + level + ')' +
+          '</text>' +
+        '</g>';
+      });
+
+      return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; overflow: visible;" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+          '<linearGradient id="pentagonGradient" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '<stop offset="0%" stop-color="#3B82F6" stop-opacity="0.5" />' +
+            '<stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.2" />' +
+          '</linearGradient>' +
+        '</defs>' +
+        ringsSvg +
+        spokesSvg +
+        '<polygon points="' + polyPoints + '" fill="url(#pentagonGradient)" stroke="#2563EB" stroke-width="2.5" stroke-linejoin="round" />' +
+        dotsSvg +
+        labelsSvg +
+      '</svg>';
+    }
+
+        function renderDiscLineGraphSvg(discData) {
+      const W = 360;
+      const H = 220;
+      const padLeft = 45;
+      const padRight = 35;
+      const padTop = 35;
+      const padBottom = 40;
+
+      const graphW = W - padLeft - padRight;
+      const graphH = H - padTop - padBottom;
+      const midY = padTop + graphH / 2;
+
+      const elements = [
+        { key: 'D', name: 'Dominance', color: '#DC2626', x: padLeft + graphW * 0.12 },
+        { key: 'I', name: 'Influence', color: '#D97706', x: padLeft + graphW * 0.38 },
+        { key: 'S', name: 'Steadiness', color: '#059669', x: padLeft + graphW * 0.64 },
+        { key: 'C', name: 'Compliance', color: '#2563EB', x: padLeft + graphW * 0.90 }
+      ];
+
+      const changeScores = (discData && discData.tally && discData.tally.change) ? discData.tally.change : { D: 0, I: 0, S: 0, C: 0 };
+      const maxAmp = 18;
+      const scaleY = (graphH / 2 - 8) / maxAmp;
+
+      const points = elements.map(el => {
+        const val = changeScores[el.key] || 0;
+        const clamped = Math.max(-maxAmp, Math.min(maxAmp, val));
+        const y = midY - (clamped * scaleY);
+        return { ...el, val, y };
+      });
+
+      const linePath = points.map((p, idx) => (idx === 0 ? `M ${p.x.toFixed(1)} ${p.y.toFixed(1)}` : `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)).join(' ');
+
+      return `
+        <svg viewBox="0 0 ${W} ${H}" style="width: 100%; max-width: 380px; height: auto; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+          <rect x="${padLeft}" y="${padTop}" width="${graphW}" height="${graphH/2}" fill="#F0FDF4" fill-opacity="0.5" />
+          <rect x="${padLeft}" y="${midY}" width="${graphW}" height="${graphH/2}" fill="#F8FAFC" fill-opacity="0.8" />
+          <rect x="${padLeft}" y="${padTop}" width="${graphW}" height="${graphH}" fill="none" stroke="#E2E8F0" stroke-width="1" rx="4" />
+
+          <text x="${padLeft - 6}" y="${padTop + 14}" text-anchor="end" font-family="var(--font-mono)" font-size="9" fill="#059669" font-weight="600">+HIGH</text>
+          <text x="${padLeft - 6}" y="${midY + 3}" text-anchor="end" font-family="var(--font-mono)" font-size="9" fill="#64748B" font-weight="600">0</text>
+          <text x="${padLeft - 6}" y="${padTop + graphH - 6}" text-anchor="end" font-family="var(--font-mono)" font-size="9" fill="#DC2626" font-weight="600">-LOW</text>
+
+          <line x1="${padLeft}" y1="${midY}" x2="${padLeft + graphW}" y2="${midY}" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="4 3" />
+
+          ${points.map(p => `
+            <line x1="${p.x.toFixed(1)}" y1="${padTop}" x2="${p.x.toFixed(1)}" y2="${padTop + graphH}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2 2" />
+          `).join('')}
+
+          <path d="${linePath}" fill="none" stroke="#7C3AED" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+          ${points.map(p => `
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="7" fill="${p.color}" fill-opacity="0.2" />
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${p.color}" stroke="#FFFFFF" stroke-width="2" />
+            <g transform="translate(${p.x.toFixed(1)}, ${p.val >= 0 ? (p.y - 12).toFixed(1) : (p.y + 16).toFixed(1)})">
+              <text text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" font-weight="700" fill="${p.color}">
+                ${p.val > 0 ? '+' + p.val : p.val}
+              </text>
+            </g>
+            <g transform="translate(${p.x.toFixed(1)}, ${padTop + graphH + 16})">
+              <text text-anchor="middle" font-family="var(--font-mono)" font-size="12" font-weight="700" fill="${p.color}">
+                ${p.key}
+              </text>
+              <text text-anchor="middle" y="11" font-family="var(--font-sans)" font-size="9" fill="#64748B">
+                ${p.name}
+              </text>
+            </g>
+          `).join('')}
+        </svg>
+      `;
+    }
+
+    function renderCognitiveAspectsBarsHtml(cogData) {
+      const score = cogData ? (cogData.score || 0) : 0;
+      const total = cogData ? (cogData.total || 15) : 15;
+      const pct = cogData ? (cogData.percentage || 0) : 0;
+
+      let level = 'Perlu Evaluasi';
+      let levelColor = '#DC2626';
+      let levelBg = '#FEF2F2';
+      let levelBorder = '#FECACA';
+      let ringColor = '#DC2626';
+
+      if (pct >= 80) {
+        level = 'Sangat Baik';
+        levelColor = '#059669';
+        levelBg = '#ECFDF5';
+        levelBorder = '#A7F3D0';
+        ringColor = '#059669';
+      } else if (pct >= 60) {
+        level = 'Kompeten / Cukup';
+        levelColor = '#2563EB';
+        levelBg = '#EFF6FF';
+        levelBorder = '#BFDBFE';
+        ringColor = '#2563EB';
+      } else if (pct >= 40) {
+        level = 'Cukup';
+        levelColor = '#D97706';
+        levelBg = '#FFFBEB';
+        levelBorder = '#FDE68A';
+        ringColor = '#D97706';
+      }
+
+      // Consolidate categories to avoid fragmented 1-question bars
+      const rawCats = (cogData && cogData.categories) ? cogData.categories : {};
+      const aspects = [
+        { name: 'Deret Angka & Pola', icon: '🔢', correct: rawCats['Deret Angka'] ? rawCats['Deret Angka'].correct : 0, total: rawCats['Deret Angka'] ? rawCats['Deret Angka'].total : 3 },
+        { name: 'Aritmatika Bisnis', icon: '➕', correct: rawCats['Aritmatika Dasar'] ? rawCats['Aritmatika Dasar'].correct : 0, total: rawCats['Aritmatika Dasar'] ? rawCats['Aritmatika Dasar'].total : 3 },
+        { name: 'Logika Komersial', icon: '💼', correct: rawCats['Logika Komersial'] ? rawCats['Logika Komersial'].correct : 0, total: rawCats['Logika Komersial'] ? rawCats['Logika Komersial'].total : 4 },
+        { name: 'Analisis Data', icon: '📈', correct: rawCats['Analisis Data'] ? rawCats['Analisis Data'].correct : 0, total: rawCats['Analisis Data'] ? rawCats['Analisis Data'].total : 3 },
+        { name: 'Penalaran & Silogisme', icon: '🧩', correct: (rawCats['Penalaran Kritis'] ? rawCats['Penalaran Kritis'].correct : 0) + (rawCats['Silogisme'] ? rawCats['Silogisme'].correct : 0), total: (rawCats['Penalaran Kritis'] ? rawCats['Penalaran Kritis'].total : 1) + (rawCats['Silogisme'] ? rawCats['Silogisme'].total : 1) }
+      ];
+
+      // Gauge math
+      const r = 46;
+      const circ = 2 * Math.PI * r; // ~289.0
+      const strokeOffset = circ - (pct / 100) * circ;
+
+      // SVG Bar Chart geometry
+      const w = 530;
+      const h = 180;
+      const padLeft = 175;
+      const barW = 265;
+      const rowH = 30;
+      const startY = 32;
+
+      let ticksSvg = '';
+      [0, 25, 50, 75, 100].forEach(tick => {
+        const x = padLeft + (tick / 100) * barW;
+        ticksSvg += `
+          <line x1="${x.toFixed(1)}" y1="18" x2="${x.toFixed(1)}" y2="${startY + aspects.length * rowH}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2 2" />
+          <text x="${x.toFixed(1)}" y="13" text-anchor="middle" font-family="'Geist Mono', monospace" font-size="9" fill="#94A3B8" font-weight="600">${tick}%</text>
+        `;
+      });
+
+      let barsSvg = '';
+      aspects.forEach((asp, i) => {
+        const y = startY + i * rowH;
+        const aPct = asp.total > 0 ? Math.round((asp.correct / asp.total) * 100) : 0;
+        const fillWidth = Math.max(6, (aPct / 100) * barW);
+
+        let barFill = '#059669';
+        let valColor = '#065F46';
+        if (aPct < 50) {
+          barFill = '#DC2626';
+          valColor = '#991B1B';
+        } else if (aPct < 75) {
+          barFill = '#D97706';
+          valColor = '#92400E';
+        }
+
+        barsSvg += `
+          <!-- Label -->
+          <text x="${padLeft - 10}" y="${y + 11}" text-anchor="end" font-family="'Geist', sans-serif" font-size="11" font-weight="600" fill="#1E293B">
+            ${asp.icon} ${escapeHtml(asp.name)}
+          </text>
+
+          <!-- Track -->
+          <rect x="${padLeft}" y="${y}" width="${barW}" height="13" rx="6.5" fill="#F1F5F9" />
+
+          <!-- Fill -->
+          <rect x="${padLeft}" y="${y}" width="${fillWidth.toFixed(1)}" height="13" rx="6.5" fill="${barFill}" />
+
+          <!-- Score Value -->
+          <text x="${padLeft + barW + 8}" y="${y + 11}" font-family="'Geist Mono', monospace" font-size="10.5" font-weight="700" fill="${valColor}">
+            ${asp.correct}/${asp.total} (${aPct}%)
+          </text>
+        `;
+      });
+
+      return `
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+          <div class="cognitive-viz-grid">
+            
+            <!-- Left: Donut Gauge Score Card -->
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+              <div style="position: relative; width: 110px; height: 110px;">
+                <svg viewBox="0 0 110 110" width="110" height="110" style="transform: rotate(-90deg); display: block;">
+                  <circle cx="55" cy="55" r="${r}" fill="none" stroke="#E2E8F0" stroke-width="10" />
+                  <circle cx="55" cy="55" r="${r}" fill="none" stroke="${ringColor}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}" style="transition: stroke-dashoffset 0.6s ease;" />
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                  <span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 800; color: #0F172A; line-height: 1;">${pct}%</span>
+                  <span style="font-size: 10.5px; font-weight: 600; color: #64748B; margin-top: 3px;">${score} / ${total} Benar</span>
+                </div>
+              </div>
+              <div style="margin-top: 10px; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; background: ${levelBg}; color: ${levelColor}; border: 1px solid ${levelBorder};">
+                ${level}
+              </div>
+              <div style="font-size: 10px; color: #64748B; margin-top: 4px; font-weight: 500;">
+                Akurasi Logika &amp; Bisnis
+              </div>
+            </div>
+
+            <!-- Right: SVG Aspect Horizontal Bar Chart -->
+            <div style="overflow-x: auto;">
+              <svg viewBox="0 0 ${w} ${h}" width="100%" style="display: block; max-width: 580px; margin: 0 auto;">
+                ${ticksSvg}
+                ${barsSvg}
+              </svg>
+            </div>
+
+          </div>
+
+          ${renderCognitiveItemsAuditHtml(cogData)}
+        </div>
+      `;
+    }
+
+    function renderAssessmentReportDashboardHtml(talent, assessment) {
+      if (!assessment || assessment.status !== 'completed') {
+        return `
+          <div style="background: #FFFFFF; border: 1px dashed #CBD5E1; border-radius: 12px; padding: 48px 20px; text-align: center;">
+            <div style="font-size: 38px; margin-bottom: 12px;">⏳</div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 6px;">Belum Ada Hasil Asesmen</h3>
+            <p style="font-size: 13px; color: #64748B; max-width: 420px; margin: 0 auto 20px; line-height: 1.5;">
+              Kandidat <strong>${escapeHtml(talent.name)}</strong> belum mengerjakan asesmen Big Five, DISC, ataupun Logika Bisnis.
+            </p>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary" onclick="launchOnSiteAssessment('${talent.id}')" style="font-size: 12px; padding: 8px 16px;">
+                🚀 Mulai Asesmen On-Site di Laptop Ini ↗
+              </button>
+              <a href="assessment-portal.html" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 8px 16px; text-decoration: none;">
+                💻 Buka Portal Asesmen Khusus Kiosk ↗
+              </a>
+            </div>
+          </div>
+        `;
+      }
+
+      const dateStr = assessment.completedAt ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : 'Tersimpan';
+
+      return `
+        <div style="display: flex; flex-direction: column; gap: 18px;">
+          <!-- Top Info Bar -->
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #15803D; display: flex; align-items: center; gap: 6px;">
+                <span>✓</span> Asesmen Lengkap Berhasil Diselesaikan
+              </div>
+              <div style="font-size: 11px; color: #166534; margin-top: 2px;">
+                Waktu Penyelesaian: ${dateStr} • Total Soal Terjawab: ${assessment.totalQuestions || 89}
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="printCandidateDossier('${talent.id}')" style="font-size: 11px; padding: 4px 10px; font-weight: 700; color: #1E40AF; border-color: #BFDBFE; background: #EFF6FF;" title="Cetak laporan resmi 1 lembar atau Simpan PDF">
+                🖨️ Cetak Dossier
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="launchOnSiteAssessment('${talent.id}')" style="font-size: 11px; padding: 4px 10px;" title="Buka lembar pengerjaan">
+                Buka Lembar Tes ↗
+              </button>
+              ${isSuperAdmin() ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="resetCandidateAssessment('${talent.id}')" style="font-size: 11px; padding: 4px 8px; color: #DC2626; border-color: #FECACA;" title="Reset seluruh skor agar kandidat dapat mengulang">
+                  🔄 Reset
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- Visual Matrix Grid (Pentagon Matrix & DISC Line Graph) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+            <!-- 1. IPIP Big Five Pentagon Matrix -->
+            ${(assessment.dimensions || assessment.scores) ? `
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div style="font-size: 13px; font-weight: 700; color: #1E40AF; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F1F5F9; padding-bottom: 8px;">
+                  <span style="display: flex; align-items: center; gap: 6px;"><span>🧠</span> Pentagon Matrix: Big Five</span>
+                  <span style="font-family: var(--font-mono); font-size: 10.5px; background: #EFF6FF; color: #1E40AF; padding: 2px 6px; border-radius: 4px;">5 Dimensi</span>
+                </div>
+                ${renderPentagonMatrixSvg(assessment.dimensions || assessment.scores)}
+                <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
+                  ${Object.entries(assessment.dimensions || assessment.scores).map(([k, d]) => `
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 6px 8px; border-radius: 6px;">
+                      <div style="color: #64748B; font-size: 10px;">${k}</div>
+                      <div style="font-weight: 700; color: #1E40AF;">${d.percentage}% (${d.level})</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- 2. DISC Line Graph -->
+            ${assessment.disc ? `
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                <div style="font-size: 13px; font-weight: 700; color: #7C3AED; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F1F5F9; padding-bottom: 8px;">
+                  <span style="display: flex; align-items: center; gap: 6px;"><span>🧩</span> DISC Element Line Graph</span>
+                  <span style="font-family: var(--font-mono); font-size: 10.5px; background: #F5F3FF; color: #7C3AED; padding: 2px 6px; border-radius: 4px;">D-I-S-C Profile</span>
+                </div>
+                ${renderDiscLineGraphSvg(assessment.disc)}
+                <div style="margin-top: 10px; padding: 10px; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #7C3AED;">
+                      Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})
+                    </span>
+                    <span style="font-size: 11px; font-weight: 600; color: #6D28D9; font-family: var(--font-mono);">
+                      D:${assessment.disc.tally.change.D} I:${assessment.disc.tally.change.I} S:${assessment.disc.tally.change.S} C:${assessment.disc.tally.change.C}
+                    </span>
+                  </div>
+                  <div style="font-size: 11.5px; color: #5B21B6; line-height: 1.45;">
+                    ${escapeHtml(assessment.disc.desc || '')}
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- 3. Cognitive & Commercial Logic Aspect Bars -->
+          ${assessment.cognitive ? `
+            <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #F1F5F9; padding-bottom: 8px;">
+                <div style="font-size: 13px; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 6px;">
+                  <span>📊</span> Aspek Logika, Kognitif &amp; Bisnis Praktis
+                </div>
+                <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #059669;">
+                  Skor Total: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
+                </span>
+              </div>
+              ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
     function openCandidateProfileModal(id, defaultTab = 'portfolio') {
       const talent = state.talents.find(t => t.id === id || t.$id === id);
       if (!talent) return;
@@ -5750,6 +6588,9 @@
       const adminEditBtn = document.getElementById('profModalAdminEditBtn');
       const leftCol = document.getElementById('profModalLeftCol');
       const rightCol = document.getElementById('profModalRightCol');
+
+      const assessment = (state.candidateAssessments && state.candidateAssessments[talent.id]) || talent.assessment;
+      const isCompletedAssessment = Boolean(assessment && assessment.status === 'completed');
 
       if (!modal || !leftCol || !rightCol) return;
 
@@ -6006,6 +6847,11 @@
           </div>
         </div>
 
+        <!-- Tab 2: Candidate Assessment Result Dashboard Content -->
+        <div id="profTabAssessContent" style="display: ${state.activeProfileTab === 'assessment' ? 'flex' : 'none'}; flex-direction: column; gap: 16px;">
+          ${renderAssessmentReportDashboardHtml(talent, assessment)}
+        </div>
+
         <!-- Tab 2: Candidate Discussion & Team Evaluation Content -->
         <div id="profTabDiscussContent" class="discussion-container" style="display: ${state.activeProfileTab === 'discussion' ? 'flex' : 'none'};">
           <!-- Preset Quick Decision Pills Bar -->
@@ -6042,6 +6888,23 @@
 
       if (state.activeProfileTab === 'discussion') {
         renderCandidateDiscussionMessages(talent.id);
+      }
+    }
+
+    
+    function switchToProfileModalFromDrawer() {
+      const talentId = state.selectedTalent ? state.selectedTalent.id : null;
+      closeDrawer();
+      if (talentId) {
+        setTimeout(() => openCandidateProfileModal(talentId), 50);
+      }
+    }
+
+    function switchToEditDrawer() {
+      const talentId = state.activeProfileTalentId;
+      closeCandidateProfileModal();
+      if (talentId) {
+        setTimeout(() => openTalentDetail(talentId), 50);
       }
     }
 
@@ -7273,27 +8136,7 @@
     }
 
     function openAssessmentLauncherModal() {
-      const modal = document.getElementById('assessmentLauncherModalBackdrop');
-      const vacSelect = document.getElementById('launcherVacancySelect');
-      if (!modal || !vacSelect) return;
-
-      const vacancies = getUniqueVacancies();
-      let vacHtml = `<option value="ALL">🌐 Semua Posisi (${state.talents.length})</option>`;
-      vacancies.forEach(v => {
-        const isSel = (state.activeVacancy === v.name);
-        vacHtml += `<option value="${escapeHtml(v.name)}" ${isSel ? 'selected' : ''}>${getVacancyIcon(v.name)} ${escapeHtml(v.name)} (${v.total})</option>`;
-      });
-      vacSelect.innerHTML = vacHtml;
-
-      const stageSelect = document.getElementById('launcherStageSelect');
-      if (stageSelect) stageSelect.value = 'Screening';
-
-      const searchInput = document.getElementById('launcherSearchInput');
-      if (searchInput) searchInput.value = '';
-
-      expandedAssessmentScoreTalentId = null;
-      renderAssessmentLauncherCandidates();
-      modal.classList.add('open');
+      window.open('assessment-portal.html', '_blank');
     }
 
     function closeAssessmentLauncherModal() {
@@ -7464,7 +8307,7 @@
               ⏳ Belum Tes
             </span>
             <button type="button" class="btn btn-primary btn-sm" onclick="launchOnSiteAssessment('${talent.id}')" style="font-size: 11px; padding: 5px 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
-              <span>🚀 Mulai Tes di Laptop Ini ↗</span>
+              <span>🚀 Mulai Test ↗</span>
             </button>
           `;
         }
