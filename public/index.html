@@ -2271,8 +2271,25 @@
                   <input type="time" id="bcTimeInput" class="form-input" value="09:00" onchange="renderBroadcastTable()">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Interval (mins) per candidate:</label>
-                  <input type="number" id="bcIntervalInput" class="form-input" value="30" min="5" oninput="renderBroadcastTable()">
+                  <label class="form-label">Default Interval (mins):</label>
+                  <input type="number" id="bcIntervalInput" class="form-input" value="60" min="5" oninput="renderBroadcastTable()">
+                </div>
+              </div>
+
+              <!-- Vacancy-Specific Durations -->
+              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 8px;">
+                  ⏱️ Durasi Wawancara Per Posisi (Quantized Block):
+                </div>
+                <div class="form-row-2" style="gap: 10px;">
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 11px;">Content Creator (mins):</label>
+                    <input type="number" id="bcDurationCC" class="form-input" value="60" min="15" step="15" oninput="renderBroadcastTable()" placeholder="60 (40m + 20m buffer)">
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 11px;">Marketplace Specialist (mins):</label>
+                    <input type="number" id="bcDurationMS" class="form-input" value="120" min="30" step="30" oninput="renderBroadcastTable()" placeholder="120 (2 jam)">
+                  </div>
                 </div>
               </div>
 
@@ -3243,6 +3260,8 @@
         date: el.bcDateInput ? el.bcDateInput.value : '',
         time: el.bcTimeInput ? el.bcTimeInput.value : '',
         interval: el.bcIntervalInput ? el.bcIntervalInput.value : '',
+        durationCC: document.getElementById('bcDurationCC') ? document.getElementById('bcDurationCC').value : '60',
+        durationMS: document.getElementById('bcDurationMS') ? document.getElementById('bcDurationMS').value : '120',
         location: el.bcLocationInput ? el.bcLocationInput.value : '',
         template: el.bcTemplateSelect ? el.bcTemplateSelect.value : '',
         customMsg: el.bcCustomMessage ? el.bcCustomMessage.value : '',
@@ -3267,6 +3286,8 @@
           if (el.bcDateInput && saved.date) el.bcDateInput.value = saved.date;
           if (el.bcTimeInput && saved.time) el.bcTimeInput.value = saved.time;
           if (el.bcIntervalInput && saved.interval) el.bcIntervalInput.value = saved.interval;
+          if (document.getElementById('bcDurationCC') && saved.durationCC) document.getElementById('bcDurationCC').value = saved.durationCC;
+          if (document.getElementById('bcDurationMS') && saved.durationMS) document.getElementById('bcDurationMS').value = saved.durationMS;
           if (el.bcLocationInput && saved.location) el.bcLocationInput.value = saved.location;
           if (el.bcTemplateSelect && saved.template) el.bcTemplateSelect.value = saved.template;
           if (el.bcCustomMessage && typeof saved.customMsg === 'string' && saved.customMsg.length > 0) {
@@ -3284,56 +3305,66 @@
     }
 
     
+    function buildOccupiedTimeRanges(excludeTalentId = null) {
+      const occupiedRanges = {};
+      (state.talents || []).forEach(other => {
+        if (excludeTalentId && other.id === excludeTalentId) return;
+        const s = getTalentAssignedSchedule(other);
+        if (s.assignedTime && s.assignedTime !== '-') {
+          const isHeld = ['Confirmed', 'Reschedule', 'WA Sent'].includes(other.outreachStatus) || (state.smartScheduleMap && state.smartScheduleMap[other.id]);
+          if (isHeld) {
+            const dateKey = s.displayDate;
+            const startMins = timeToMinutes(s.assignedTime);
+            if (startMins !== null) {
+              const dur = getTalentInterviewDuration(other);
+              if (!occupiedRanges[dateKey]) occupiedRanges[dateKey] = [];
+              occupiedRanges[dateKey].push({
+                talentId: other.id,
+                name: other.name,
+                role: other.role,
+                start: startMins,
+                end: startMins + dur,
+                assignedTime: s.assignedTime,
+                displayDate: dateKey
+              });
+            }
+          }
+        }
+      });
+      return occupiedRanges;
+    }
+
     function planSingleCandidateSlot(talentId, notify = true) {
       const talent = state.talents.find(t => t.id === talentId || t.$id === talentId);
       if (!talent) return '-';
 
       if (!state.smartScheduleMap) state.smartScheduleMap = {};
       if (!state.smartScheduleDates) state.smartScheduleDates = {};
-      if (!state.smartScheduleSlotIndex) state.smartScheduleSlotIndex = {};
 
       const baseIsoDate = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
       const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
-      const intervalMins = document.getElementById('bcIntervalInput') ? document.getElementById('bcIntervalInput').value : '120';
 
-      const occupiedSlots = new Set();
-      (state.talents || []).forEach(other => {
-        if (other.id === talentId) return;
-        const s = getTalentAssignedSchedule(other);
-        if (s.assignedTime && s.assignedTime !== '-') {
-          if (['Confirmed', 'Reschedule', 'WA Sent'].includes(other.outreachStatus) || state.smartScheduleMap[other.id]) {
-            occupiedSlots.add(s.displayDate + '__' + s.assignedTime);
-          }
-        }
-      });
-
-      let slotIdx = 0;
-      let slot = getSmartSlot(slotIdx, baseIsoDate, baseTimeStr, intervalMins);
-      while (occupiedSlots.has(slot.displayDate + '__' + slot.assignedTime)) {
-        slotIdx++;
-        slot = getSmartSlot(slotIdx, baseIsoDate, baseTimeStr, intervalMins);
-      }
+      const occupiedRanges = buildOccupiedTimeRanges(talentId);
+      const slot = allocateNextVariableSlot(talent, occupiedRanges, baseIsoDate, baseTimeStr);
 
       state.smartScheduleMap[talent.id] = slot.assignedTime;
       state.smartScheduleDates[talent.id] = slot.displayDate;
-      state.smartScheduleSlotIndex[talent.id] = slotIdx;
 
       try {
         localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
         localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
-        localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
       } catch(e) {}
 
       if (notify) {
         renderBroadcastTable();
-        showToast('✅ Jadwal ' + slot.displayDate + ' @ ' + slot.assignedTime + ' berhasil direncanakan untuk ' + talent.name);
+        showToast('✅ Jadwal ' + slot.displayDate + ' @ ' + slot.assignedTime + ' (' + slot.duration + 'm) berhasil direncanakan untuk ' + talent.name);
       }
       return slot.assignedTime;
     }
     window.planSingleCandidateSlot = planSingleCandidateSlot;
 
     function recalculateBroadcastSlots(notify = true) {
-      const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
+      const filterStage = (el.bcStageFilter && el.bcStageFilter.value) ? el.bcStageFilter.value : 'ALL';
       const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
       const targetTalents = baseTalents.filter(t => {
         if (t.stage === 'Archived') return false;
@@ -3344,23 +3375,34 @@
 
       if (!state.smartScheduleMap) state.smartScheduleMap = {};
       if (!state.smartScheduleDates) state.smartScheduleDates = {};
-      if (!state.smartScheduleSlotIndex) state.smartScheduleSlotIndex = {};
 
       const baseIsoDate = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
       const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
-      const intervalMins = document.getElementById('bcIntervalInput') ? document.getElementById('bcIntervalInput').value : '120';
 
-      // Gather all hard-locked and tentative slots from ALL candidates across ALL vacancies
-      const occupiedSlots = new Set();
+      // Build occupied ranges from ALL candidates across ALL vacancies who already hold a confirmed or sent slot
+      const occupiedRanges = {};
       (state.talents || []).forEach(other => {
         const s = getTalentAssignedSchedule(other);
         if (s.assignedTime && s.assignedTime !== '-') {
           if (['Confirmed', 'Reschedule', 'WA Sent'].includes(other.outreachStatus)) {
-            const key = s.displayDate + '__' + s.assignedTime;
-            occupiedSlots.add(key);
-            // Preserve in state
-            state.smartScheduleMap[other.id] = s.assignedTime;
-            state.smartScheduleDates[other.id] = s.displayDate;
+            const dateKey = s.displayDate;
+            const startMins = timeToMinutes(s.assignedTime);
+            if (startMins !== null) {
+              const dur = getTalentInterviewDuration(other);
+              if (!occupiedRanges[dateKey]) occupiedRanges[dateKey] = [];
+              occupiedRanges[dateKey].push({
+                talentId: other.id,
+                name: other.name,
+                role: other.role,
+                start: startMins,
+                end: startMins + dur,
+                assignedTime: s.assignedTime,
+                displayDate: dateKey
+              });
+              // Preserve in state
+              state.smartScheduleMap[other.id] = s.assignedTime;
+              state.smartScheduleDates[other.id] = s.displayDate;
+            }
           }
         }
       });
@@ -3379,7 +3421,6 @@
         return numA - numB;
       });
 
-      let slotIdx = 0;
       sortedQueue.forEach(t => {
         // If candidate already has locked slot (WA Sent / Confirmed / Reschedule), keep it!
         if (['Confirmed', 'Reschedule', 'WA Sent'].includes(t.outreachStatus)) {
@@ -3387,37 +3428,24 @@
           if (s.assignedTime && s.assignedTime !== '-') {
             state.smartScheduleMap[t.id] = s.assignedTime;
             state.smartScheduleDates[t.id] = s.displayDate;
-            occupiedSlots.add(s.displayDate + '__' + s.assignedTime);
             return;
           }
         }
 
-        // Allocate next free multi-day slot (max 15:00 WIB, Minggu skip to Senin)
-        while (true) {
-          const slot = getSmartSlot(slotIdx, baseIsoDate, baseTimeStr, intervalMins);
-          const key = slot.displayDate + '__' + slot.assignedTime;
-          if (!occupiedSlots.has(key)) {
-            state.smartScheduleSlotIndex[t.id] = slotIdx;
-            state.smartScheduleMap[t.id] = slot.assignedTime;
-            state.smartScheduleDates[t.id] = slot.displayDate;
-            occupiedSlots.add(key);
-            slotIdx++;
-            break;
-          } else {
-            slotIdx++;
-          }
-        }
+        // Allocate next free variable-duration interval slot (max 15:00 WIB, Minggu skip to Senin)
+        const slot = allocateNextVariableSlot(t, occupiedRanges, baseIsoDate, baseTimeStr);
+        state.smartScheduleMap[t.id] = slot.assignedTime;
+        state.smartScheduleDates[t.id] = slot.displayDate;
       });
 
       try {
         localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
         localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
-        localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
       } catch(e) {}
 
       renderBroadcastTable();
       if (notify) {
-        showToast('🔄 Jadwal cerdas dihitung berurutan (Maks 15:00 WIB, Minggu dilewati ke Senin)!');
+        showToast('🔄 Jadwal cerdas (posisi fleksibel, maks 15:00 WIB, Minggu libur) berhasil dihitung!');
       }
     }
     window.recalculateBroadcastSlots = recalculateBroadcastSlots;
@@ -3503,10 +3531,11 @@
 
       loadBcSettings();
 
-      ['bcStageFilter', 'bcDateInput', 'bcTimeInput', 'bcIntervalInput', 'bcLocationInput', 'bcTemplateSelect', 'bcCustomMessage', 'bcAutoUpdateStage'].forEach(id => {
-        if (el[id]) {
-          el[id].addEventListener('input', saveBcSettings);
-          el[id].addEventListener('change', saveBcSettings);
+      ['bcStageFilter', 'bcDateInput', 'bcTimeInput', 'bcIntervalInput', 'bcLocationInput', 'bcTemplateSelect', 'bcCustomMessage', 'bcAutoUpdateStage', 'bcDurationCC', 'bcDurationMS'].forEach(id => {
+        const elem = el[id] || document.getElementById(id);
+        if (elem) {
+          elem.addEventListener('input', saveBcSettings);
+          elem.addEventListener('change', saveBcSettings);
         }
       });
 
@@ -5442,7 +5471,9 @@
     function formatDisplayDate(dateStr) {
       if (!dateStr) return 'Besok';
       try {
-        const d = new Date(dateStr);
+        const iso = dateStr.includes('T') ? dateStr : (dateStr + 'T00:00:00');
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return dateStr;
         return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       } catch (e) {
         return dateStr;
@@ -5452,52 +5483,70 @@
     
     
     function detectScheduleConflicts() {
-      const timeCounts = {};
+      const daySchedules = {};
+      const allSlotHolders = {};
+
       (state.talents || []).forEach(t => {
         const sched = getTalentAssignedSchedule(t);
         if (sched.displayDate && sched.displayDate !== '-' && sched.assignedTime && sched.assignedTime !== '-') {
-          const key = sched.displayDate + '__' + sched.assignedTime;
-          if (!timeCounts[key]) timeCounts[key] = [];
-          timeCounts[key].push({ 
-            id: t.id, 
-            name: t.name, 
-            role: t.role || 'Freelance Content Creator', 
-            status: t.outreachStatus, 
-            isRescheduled: sched.isRescheduled,
-            displayDate: sched.displayDate,
-            assignedTime: sched.assignedTime
-          });
+          const startMins = timeToMinutes(sched.assignedTime);
+          if (startMins !== null) {
+            const dur = getTalentInterviewDuration(t);
+            const item = {
+              id: t.id,
+              name: t.name,
+              role: t.role || 'Freelance Content Creator',
+              status: t.outreachStatus,
+              isRescheduled: sched.isRescheduled,
+              displayDate: sched.displayDate,
+              assignedTime: sched.assignedTime,
+              start: startMins,
+              end: startMins + dur,
+              duration: dur
+            };
+
+            if (!daySchedules[sched.displayDate]) daySchedules[sched.displayDate] = [];
+            daySchedules[sched.displayDate].push(item);
+
+            const key = sched.displayDate + '__' + sched.assignedTime;
+            if (!allSlotHolders[key]) allSlotHolders[key] = [];
+            allSlotHolders[key].push(item);
+          }
         }
       });
 
       const conflicts = {};
       const tentativeConflicts = {};
-      const allSlotHolders = timeCounts;
 
-      Object.entries(timeCounts).forEach(([key, list]) => {
-        // Hard collision: 2 or more candidates confirmed or agreed reschedule
-        const confirmedAttendees = list.filter(item => item.status === 'Confirmed' || item.status === 'Reschedule');
-        if (confirmedAttendees.length > 1) {
-          confirmedAttendees.forEach(item => {
-            conflicts[item.id] = confirmedAttendees.filter(other => other.id !== item.id);
-          });
-        }
+      // Check interval overlaps for all candidates on each date
+      Object.entries(daySchedules).forEach(([date, list]) => {
+        for (let i = 0; i < list.length; i++) {
+          for (let j = i + 1; j < list.length; j++) {
+            const a = list[i];
+            const b = list[j];
+            if (isIntervalOverlap(a.start, a.end, b.start, b.end)) {
+              const aIsHard = ['Confirmed', 'Reschedule'].includes(a.status);
+              const bIsHard = ['Confirmed', 'Reschedule'].includes(b.status);
 
-        // Tentative collision: any candidate sharing slot with a candidate who has WA Sent
-        const waSentAttendees = list.filter(item => item.status === 'WA Sent');
-        if (waSentAttendees.length > 0 && list.length > 1) {
-          list.forEach(item => {
-            const othersWithWa = waSentAttendees.filter(other => other.id !== item.id);
-            if (othersWithWa.length > 0) {
-              tentativeConflicts[item.id] = othersWithWa;
+              if (aIsHard && bIsHard) {
+                if (!conflicts[a.id]) conflicts[a.id] = [];
+                if (!conflicts[b.id]) conflicts[b.id] = [];
+                conflicts[a.id].push(b);
+                conflicts[b.id].push(a);
+              } else if (a.status === 'WA Sent' || b.status === 'WA Sent') {
+                if (!tentativeConflicts[a.id]) tentativeConflicts[a.id] = [];
+                if (!tentativeConflicts[b.id]) tentativeConflicts[b.id] = [];
+                tentativeConflicts[a.id].push(b);
+                tentativeConflicts[b.id].push(a);
+              }
             }
-          });
+          }
         }
       });
 
-      conflicts.hardConflicts = conflicts;
-      conflicts.tentativeConflicts = tentativeConflicts;
-      conflicts.allSlotHolders = allSlotHolders;
+      Object.defineProperty(conflicts, 'hardConflicts', { value: conflicts, enumerable: false, configurable: true });
+      Object.defineProperty(conflicts, 'tentativeConflicts', { value: tentativeConflicts, enumerable: false, configurable: true });
+      Object.defineProperty(conflicts, 'allSlotHolders', { value: allSlotHolders, enumerable: false, configurable: true });
       return conflicts;
     }
 
@@ -5597,6 +5646,101 @@
     };
     
     
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return null;
+      const clean = timeStr.replace(/WIB/i, '').trim();
+      const [h, m] = clean.split(':').map(Number);
+      if (isNaN(h)) return null;
+      return (h * 60) + (isNaN(m) ? 0 : m);
+    }
+    window.timeToMinutes = timeToMinutes;
+
+    function minutesToTime(mins) {
+      const h = Math.floor(mins / 60) % 24;
+      const m = mins % 60;
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' WIB';
+    }
+    window.minutesToTime = minutesToTime;
+
+    function getTalentInterviewDuration(talent) {
+      if (!talent) return 60;
+      const roleStr = (talent.role || '').toLowerCase().trim();
+      const valCC = document.getElementById('bcDurationCC') ? parseInt(document.getElementById('bcDurationCC').value, 10) : 60;
+      const valMS = document.getElementById('bcDurationMS') ? parseInt(document.getElementById('bcDurationMS').value, 10) : 120;
+      const defVal = document.getElementById('bcIntervalInput') ? parseInt(document.getElementById('bcIntervalInput').value, 10) : 60;
+
+      if (roleStr.includes('marketplace')) {
+        return !isNaN(valMS) && valMS > 0 ? valMS : 120;
+      }
+      if (roleStr.includes('content creator') || roleStr.includes('creator')) {
+        return !isNaN(valCC) && valCC > 0 ? valCC : 60;
+      }
+      return !isNaN(defVal) && defVal > 0 ? defVal : 60;
+    }
+    window.getTalentInterviewDuration = getTalentInterviewDuration;
+
+    function isIntervalOverlap(startA, endA, startB, endB) {
+      return !(endA <= startB || startA >= endB);
+    }
+    window.isIntervalOverlap = isIntervalOverlap;
+
+    function allocateNextVariableSlot(talent, occupiedRanges, baseIsoDate, baseTimeStr) {
+      const duration = getTalentInterviewDuration(talent);
+      let [bHours, bMinutes] = (baseTimeStr || '09:00').split(':').map(Number);
+      if (isNaN(bHours)) bHours = 9;
+      if (isNaN(bMinutes)) bMinutes = 0;
+      const startMins = (bHours * 60) + bMinutes;
+      const cutoffMins = 15 * 60; // 15:00 WIB batas jam wawancara terakhir dalam 1 hari
+
+      const rawBaseIso = (baseIsoDate || '2026-09-16');
+      let curDate = new Date(rawBaseIso + 'T00:00:00');
+      if (isNaN(curDate.getTime())) curDate = new Date();
+      if (curDate.getDay() === 0) curDate.setDate(curDate.getDate() + 1); // Skip Sunday
+
+      while (true) {
+        const y = curDate.getFullYear();
+        const m = String(curDate.getMonth() + 1).padStart(2, '0');
+        const d = String(curDate.getDate()).padStart(2, '0');
+        const isoDate = `${y}-${m}-${d}`;
+        const displayDate = formatDisplayDate(isoDate);
+
+        if (!occupiedRanges[displayDate]) {
+          occupiedRanges[displayDate] = [];
+        }
+        const dayRanges = occupiedRanges[displayDate];
+
+        // Base date starts from user-selected time, rollover days start from morning 09:00 WIB
+        const isBaseDate = (isoDate === rawBaseIso);
+        let testStart = isBaseDate ? startMins : (9 * 60);
+        while (testStart <= cutoffMins) {
+          const testEnd = testStart + duration;
+          const hasConflict = dayRanges.some(r => isIntervalOverlap(testStart, testEnd, r.start, r.end));
+          if (!hasConflict) {
+            const assignedTime = minutesToTime(testStart);
+            dayRanges.push({
+              talentId: talent.id,
+              name: talent.name,
+              role: talent.role,
+              start: testStart,
+              end: testEnd,
+              assignedTime,
+              displayDate
+            });
+            dayRanges.sort((a, b) => a.start - b.start);
+            return { assignedTime, displayDate, isoDate, duration };
+          }
+          testStart += 30; // 30-min quantization tick
+        }
+
+        // Advance to next day
+        curDate.setDate(curDate.getDate() + 1);
+        if (curDate.getDay() === 0) {
+          curDate.setDate(curDate.getDate() + 1); // Skip Sunday to Monday
+        }
+      }
+    }
+    window.allocateNextVariableSlot = allocateNextVariableSlot;
+
     function getSmartSlot(slotIndex, baseIsoDate, baseTimeStr, intervalMins) {
       let [bHours, bMinutes] = (baseTimeStr || '09:00').split(':').map(Number);
       if (isNaN(bHours)) bHours = 9;
@@ -5625,7 +5769,6 @@
       let targetDate = new Date((baseIsoDate || '2026-09-16') + 'T00:00:00');
       if (isNaN(targetDate.getTime())) targetDate = new Date();
 
-      // Skip Sunday if base date is Sunday
       if (targetDate.getDay() === 0) {
         targetDate.setDate(targetDate.getDate() + 1);
       }
@@ -5633,7 +5776,6 @@
       let daysAdded = 0;
       while (daysAdded < dayOffset) {
         targetDate.setDate(targetDate.getDate() + 1);
-        // Sabtu (6) boleh, Minggu (0) libur/skip ke Senin
         if (targetDate.getDay() !== 0) {
           daysAdded++;
         }
@@ -5840,6 +5982,7 @@
           const s = getTalentAssignedSchedule(t);
           if (s.assignedTime && s.assignedTime !== '-') {
             state.smartScheduleMap[t.id] = s.assignedTime;
+            state.smartScheduleDates[t.id] = s.displayDate;
           }
           return;
         }
@@ -5847,6 +5990,7 @@
         const recorded = getTalentAssignedSchedule(t);
         if (recorded.assignedTime && recorded.assignedTime !== '-') {
           state.smartScheduleMap[t.id] = recorded.assignedTime;
+          state.smartScheduleDates[t.id] = recorded.displayDate;
           occupiedTimes.add(recorded.assignedTime);
           return;
         }
@@ -5854,19 +5998,21 @@
         // Ensure Ghayu Rivanda specifically keeps 09:00 WIB
         if (t.id === 'PGE-052' && t.name && t.name.includes('Ghayu')) {
           state.smartScheduleMap[t.id] = '09:00 WIB';
+          state.smartScheduleDates[t.id] = 'Rabu, 16 September 2026';
           occupiedTimes.add('09:00 WIB');
           return;
         }
 
-        // If candidate was Sri Purwanti or an unplanned pending candidate, clear any stale 09:00 slot
+        // If candidate was Sri Purwanti with a stale 09:00 slot, normalize to 13:00 WIB
         if (t.id === 'PGE-057' && state.smartScheduleMap[t.id] === '09:00 WIB') {
-          delete state.smartScheduleMap[t.id];
+          state.smartScheduleMap[t.id] = '13:00 WIB';
+          state.smartScheduleDates[t.id] = 'Rabu, 16 September 2026';
         }
       });
 
       try {
         localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
-        localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
+        localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
       } catch(e) {}
 
       if (targetTalents.length === 0) {
@@ -5887,29 +6033,10 @@
       el.bcTableBody.innerHTML = targetTalents.map(talent => {
         const isSelected = state.broadcastSelectedIds.has(talent.id);
         const phone = formatToInternationalPhone(talent.phone);
-        let assignedTime = state.smartScheduleMap[talent.id] || '-';
-        let displayDate = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
-        let isRescheduled = false;
-
-        if (talent.outreachStatus === 'Reschedule' && talent.notes) {
-          // Check for the most recent Reschedule remark
-          const matches = [...talent.notes.matchAll(/\[Rescheduled to: (.*?)\]/g)];
-          if (matches.length > 0) {
-            const lastMatch = matches[matches.length - 1][1];
-            const parts = lastMatch.split(' ');
-            if (parts.length >= 3) {
-              const tTimeWIB = parts.pop();
-              const tTimeNum = parts.pop();
-              assignedTime = tTimeNum + ' ' + tTimeWIB;
-              displayDate = parts.join(' ');
-              isRescheduled = true;
-            } else {
-              displayDate = lastMatch;
-              assignedTime = 'Rescheduled';
-              isRescheduled = true;
-            }
-          }
-        }
+        const sched = getTalentAssignedSchedule(talent);
+        let assignedTime = sched.assignedTime;
+        let displayDate = sched.displayDate;
+        let isRescheduled = sched.isRescheduled;
 
         const resolvedMsg = resolveCandidateMessage(talent, assignedTime);
         const sentTime = state.broadcastSentHistory[talent.id];
@@ -6088,38 +6215,22 @@
       const target = state.talents.find(t => t.id === targetTalentId || t.$id === targetTalentId);
       if (!target) return;
 
-      const occupiedTimes = new Set();
-      (state.talents || []).forEach(other => {
-        if (other.id === targetTalentId) return;
-        const s = getTalentAssignedSchedule(other);
-        const oDate = s.displayDate || slotDate;
-        if (oDate === slotDate && s.assignedTime && s.assignedTime !== '-') {
-          if (['Confirmed', 'Reschedule', 'WA Sent'].includes(other.outreachStatus)) {
-            occupiedTimes.add(s.assignedTime);
-          }
-        }
-      });
+      const baseIsoDate = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
+      const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
+      const occupiedRanges = buildOccupiedTimeRanges(targetTalentId);
+      const slot = allocateNextVariableSlot(target, occupiedRanges, baseIsoDate, baseTimeStr);
 
-      let nextSlot = 0;
-      let newTime = calculateSmartTime(nextSlot);
-      while (occupiedTimes.has(newTime)) {
-        nextSlot++;
-        newTime = calculateSmartTime(nextSlot);
-      }
-
-      state.smartScheduleMap[targetTalentId] = newTime;
-      if (state.smartScheduleSlotIndex) state.smartScheduleSlotIndex[targetTalentId] = nextSlot;
+      state.smartScheduleMap[targetTalentId] = slot.assignedTime;
+      state.smartScheduleDates[targetTalentId] = slot.displayDate;
 
       try {
         localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
-        if (state.smartScheduleSlotIndex) {
-          localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
-        }
+        localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
       } catch (e) {}
 
       closeTentativeConflictModal();
       renderBroadcastTable();
-      showToast('✅ Jam untuk ' + target.name + ' digeser ke slot bebas berikutnya: ' + newTime);
+      showToast('✅ Jam untuk ' + target.name + ' digeser ke slot bebas berikutnya: ' + slot.displayDate + ' @ ' + slot.assignedTime);
     }
     window.actionTentativeShift = actionTentativeShift;
 
@@ -6218,7 +6329,7 @@
 
       const autoUpdate = el.bcAutoUpdateStage && el.bcAutoUpdateStage.checked;
       if (autoUpdate) {
-        const dateVal = formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
+        const dateVal = assignedDate || formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
         const timeVal = assignedTime || 'TBD';
         const locVal = el.bcLocationInput ? el.bcLocationInput.value.trim() : 'Online Meet';
         
