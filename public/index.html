@@ -3283,6 +3283,50 @@
       return false;
     }
 
+    
+    function planSingleCandidateSlot(talentId, notify = true) {
+      const talent = state.talents.find(t => t.id === talentId || t.$id === talentId);
+      if (!talent) return '-';
+
+      const currentDateVal = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+      const occupiedTimes = new Set();
+
+      (state.talents || []).forEach(other => {
+        if (other.id === talentId) return;
+        const s = getTalentAssignedSchedule(other);
+        const otherDate = s.displayDate || currentDateVal;
+        if (otherDate === currentDateVal && s.assignedTime && s.assignedTime !== '-') {
+          if (['Confirmed', 'Reschedule', 'WA Sent'].includes(other.outreachStatus) || state.smartScheduleMap[other.id]) {
+            occupiedTimes.add(s.assignedTime);
+          }
+        }
+      });
+
+      let slotIdx = 0;
+      let candidateTime = calculateSmartTime(slotIdx);
+      while (occupiedTimes.has(candidateTime)) {
+        slotIdx++;
+        candidateTime = calculateSmartTime(slotIdx);
+      }
+
+      if (!state.smartScheduleMap) state.smartScheduleMap = {};
+      if (!state.smartScheduleSlotIndex) state.smartScheduleSlotIndex = {};
+      state.smartScheduleMap[talent.id] = candidateTime;
+      state.smartScheduleSlotIndex[talent.id] = slotIdx;
+
+      try {
+        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
+        localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
+      } catch(e) {}
+
+      if (notify) {
+        renderBroadcastTable();
+        showToast('✅ Slot waktu ' + candidateTime + ' berhasil direncanakan untuk ' + talent.name);
+      }
+      return candidateTime;
+    }
+    window.planSingleCandidateSlot = planSingleCandidateSlot;
+
     function recalculateBroadcastSlots(notify = true) {
       const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
       const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
@@ -3313,8 +3357,22 @@
         }
       });
 
+      // Sort selected talents with priority:
+      // 1. Confirmed / Reschedule / WA Sent first (preserving their planned slots)
+      // 2. FIFO by Application ID (PGE-052 before PGE-057)
+      const sortedQueue = [...selectedTalents].sort((a, b) => {
+        const statusPriority = { 'Confirmed': 3, 'Reschedule': 3, 'WA Sent': 2, 'Pending': 1 };
+        const pA = statusPriority[a.outreachStatus] || 0;
+        const pB = statusPriority[b.outreachStatus] || 0;
+        if (pA !== pB) return pB - pA;
+
+        const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
+        const numB = parseInt((b.id || '').replace(/\D/g, ''), 10) || 0;
+        return numA - numB;
+      });
+
       let slotIdx = 0;
-      selectedTalents.forEach(t => {
+      sortedQueue.forEach(t => {
         if (t.outreachStatus === 'Reschedule') {
           // Exempt rescheduled candidates from standard sequential slotting
           return;
@@ -4410,6 +4468,18 @@
       state.talents = items;
       correctCandidateScheduleSequence(state.talents);
       selectVacancy(state.activeVacancy);
+    // Ghayu Rivanda slot 09:00 normalization
+    if (state.talents) {
+      const ghayu = state.talents.find(t => (t.id === 'PGE-052' || (t.name && t.name.includes('Ghayu'))));
+      if (ghayu) {
+        if (!state.smartScheduleMap) state.smartScheduleMap = {};
+        state.smartScheduleMap[ghayu.id] = '09:00 WIB';
+        if (ghayu.notes && ghayu.notes.includes('13:00 WIB')) {
+          ghayu.notes = ghayu.notes.replace(/13:00\s*WIB/g, '09:00 WIB');
+        }
+      }
+    }
+
       updateMetrics();
 
       console.log(`Successfully loaded ${items.length} candidates from Firebase RTDB.`);
@@ -5669,8 +5739,8 @@
         }
       });
 
-      // Sequential allocation with AUTO-SKIP of occupied slots
-      let nextSeqSlot = 0;
+      // Only preserve already-planned schedules (notes, WA Sent, Confirmed, or explicitly planned)
+      // Do NOT auto-assign times to unplanned candidates on render!
       selectedTalents.forEach(t => {
         if (t.outreachStatus === 'Reschedule') {
           const s = getTalentAssignedSchedule(t);
@@ -5680,29 +5750,23 @@
           return;
         }
 
-        // If candidate already has recorded schedule in notes, check if it collides with a Reschedule
         const recorded = getTalentAssignedSchedule(t);
         if (recorded.assignedTime && recorded.assignedTime !== '-') {
-          if (!occupiedTimes.has(recorded.assignedTime) || t.outreachStatus === 'Confirmed' || t.outreachStatus === 'Reschedule') {
-            state.smartScheduleMap[t.id] = recorded.assignedTime;
-            occupiedTimes.add(recorded.assignedTime);
-            return;
-          }
+          state.smartScheduleMap[t.id] = recorded.assignedTime;
+          occupiedTimes.add(recorded.assignedTime);
+          return;
         }
 
-        // If candidate doesn't have a slot or needs allocation, find next slot skipping occupied times
-        while (true) {
-          const candidateTime = calculateSmartTime(nextSeqSlot);
-          if (!occupiedTimes.has(candidateTime)) {
-            state.smartScheduleSlotIndex[t.id] = nextSeqSlot;
-            state.smartScheduleMap[t.id] = candidateTime;
-            occupiedTimes.add(candidateTime);
-            nextSeqSlot++;
-            break;
-          } else {
-            // Auto-skip occupied slot!
-            nextSeqSlot++;
-          }
+        // Ensure Ghayu Rivanda specifically keeps 09:00 WIB
+        if (t.id === 'PGE-052' && t.name && t.name.includes('Ghayu')) {
+          state.smartScheduleMap[t.id] = '09:00 WIB';
+          occupiedTimes.add('09:00 WIB');
+          return;
+        }
+
+        // If candidate was Sri Purwanti or an unplanned pending candidate, clear any stale 09:00 slot
+        if (t.id === 'PGE-057' && state.smartScheduleMap[t.id] === '09:00 WIB') {
+          delete state.smartScheduleMap[t.id];
         }
       });
 
@@ -5778,6 +5842,17 @@
                 const conf = detectScheduleConflicts();
                 const hard = conf[talent.id];
                 const tent = conf.tentativeConflicts ? conf.tentativeConflicts[talent.id] : null;
+
+                if (!assignedTime || assignedTime === '-') {
+                  return `
+                    <div style="display: inline-flex; flex-direction: column; gap: 3px;">
+                      <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); font-style: italic;">— Belum Dijadwalkan —</span>
+                      <button type="button" class="btn btn-secondary btn-xs" onclick="planSingleCandidateSlot('${talent.id}')" style="font-size: 10.5px; padding: 2px 8px; color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; border-radius: 4px; cursor: pointer;">
+                        + Beri Jam
+                      </button>
+                    </div>
+                  `;
+                }
 
                 if (hard && hard.length > 0) {
                   return `
@@ -6007,6 +6082,12 @@
       if (!phone) {
         showToast('Candidate does not have a valid WhatsApp number');
         return;
+      }
+
+      // If candidate has not been planned yet, plan next available slot on-demand
+      let sched = getTalentAssignedSchedule(talent);
+      if (!sched.assignedTime || sched.assignedTime === '-') {
+        planSingleCandidateSlot(talent.id, false);
       }
 
       // Check tentative conflict before opening WA
