@@ -2207,7 +2207,10 @@
           <div class="table-container">
             <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
               <div>
-                <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Broadcast Outreach Queue</h3>
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                  Broadcast Outreach Queue
+                  <span id="bcActiveVacancyBadge" style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 2px 8px; border-radius: 6px;"></span>
+                </h3>
                 <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
                   Select candidates for the outreach sequence. Smart scheduling will assign times sequentially.
                 </div>
@@ -3038,6 +3041,8 @@
       globalUploads: [],
       comparedTalentIds: new Set(),
       broadcastSelectedIds: new Set(),
+      broadcastCurrentVacancy: null,
+      broadcastUserExplicitlyCleared: false,
       broadcastSentHistory: {},
       candidateDiscussions: {},
       candidateCommentCounts: {},
@@ -3195,7 +3200,8 @@
 
     function recalculateBroadcastSlots(notify = true) {
       const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
-      const targetTalents = state.talents.filter(t => {
+      const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
+      const targetTalents = baseTalents.filter(t => {
         if (t.stage === 'Archived') return false;
         if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
         return true;
@@ -4723,6 +4729,9 @@
 
     function selectVacancy(vacancyName) {
       state.activeVacancy = vacancyName;
+      state.broadcastCurrentVacancy = null;
+      state.broadcastSelectedIds.clear();
+      state.broadcastUserExplicitlyCleared = false;
       try {
         localStorage.setItem('pge_active_vacancy', vacancyName);
       } catch (e) {}
@@ -5457,17 +5466,39 @@
       if (!el.bcTableBody) return;
       const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
 
-      const targetTalents = state.talents.filter(t => {
+      const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
+      const targetTalents = baseTalents.filter(t => {
         if (t.stage === 'Archived') return false;
         if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
         return true;
       });
 
-      if (state.broadcastSelectedIds.size === 0) {
+      // Synchronize selection with active vacancy
+      if (state.broadcastCurrentVacancy !== state.activeVacancy) {
+        state.broadcastCurrentVacancy = state.activeVacancy;
+        state.broadcastSelectedIds.clear();
+        state.broadcastUserExplicitlyCleared = false;
+        targetTalents.forEach(t => state.broadcastSelectedIds.add(t.id));
+      } else if (state.broadcastSelectedIds.size === 0 && targetTalents.length > 0 && !state.broadcastUserExplicitlyCleared) {
         targetTalents.forEach(t => state.broadcastSelectedIds.add(t.id));
       }
 
-      if (el.bcQueueCount) el.bcQueueCount.textContent = targetTalents.length;
+      // Update active vacancy badge in Broadcast UI
+      const bcActiveBadge = document.getElementById('bcActiveVacancyBadge');
+      if (bcActiveBadge) {
+        const vName = (state.activeVacancy === 'ALL' || !state.activeVacancy || state.activeVacancy === 'HUB') ? 'Semua Lowongan' : state.activeVacancy;
+        bcActiveBadge.textContent = vName;
+      }
+
+      const selectedTalents = targetTalents.filter(t => state.broadcastSelectedIds.has(t.id));
+
+      if (el.bcQueueCount) el.bcQueueCount.textContent = selectedTalents.length;
+
+      const bcSelectAll = document.getElementById('bcSelectAll');
+      if (bcSelectAll) {
+        bcSelectAll.checked = targetTalents.length > 0 && selectedTalents.length === targetTalents.length;
+        bcSelectAll.indeterminate = selectedTalents.length > 0 && selectedTalents.length < targetTalents.length;
+      }
 
       
       // Calculate smart schedule assignments with LOCKED slots & notes priority
@@ -5485,8 +5516,6 @@
           state.smartScheduleSlotIndex = {};
         }
       }
-
-      const selectedTalents = targetTalents.filter(t => state.broadcastSelectedIds.has(t.id));
 
       // Gather all hard-locked occupied times (Tier 1: Rescheduled/Confirmed, Tier 2: Already Sent)
       const occupiedTimes = new Set();
@@ -5538,6 +5567,21 @@
         localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
         localStorage.setItem('pge_smart_slot_indices', JSON.stringify(state.smartScheduleSlotIndex));
       } catch(e) {}
+
+      if (targetTalents.length === 0) {
+        el.bcTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
+              <div style="font-size: 24px; margin-bottom: 8px;">📭</div>
+              <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">Tidak ada kandidat untuk lowongan ini</div>
+              <div style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">
+                Kandidat dengan posisi <strong>${escapeHtml(state.activeVacancy || 'Aktif')}</strong> dan filter <strong>${escapeHtml(filterStage)}</strong> tidak ditemukan.
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
       el.bcTableBody.innerHTML = targetTalents.map(talent => {
         const isSelected = state.broadcastSelectedIds.has(talent.id);
@@ -5632,20 +5676,25 @@
       } else {
         state.broadcastSelectedIds.add(id);
       }
+      state.broadcastUserExplicitlyCleared = (state.broadcastSelectedIds.size === 0);
+      renderBroadcastTable();
     }
 
     function toggleSelectAllBroadcast(isChecked) {
       const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
-      const targetTalents = state.talents.filter(t => {
+      const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
+      const targetTalents = baseTalents.filter(t => {
         if (t.stage === 'Archived') return false;
         if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
         return true;
       });
 
       if (isChecked) {
+        state.broadcastUserExplicitlyCleared = false;
         targetTalents.forEach(t => state.broadcastSelectedIds.add(t.id));
       } else {
-        state.broadcastSelectedIds.clear();
+        state.broadcastUserExplicitlyCleared = true;
+        targetTalents.forEach(t => state.broadcastSelectedIds.delete(t.id));
       }
       renderBroadcastTable();
     }
