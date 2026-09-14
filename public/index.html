@@ -2407,36 +2407,62 @@
         </div>
       </section>
 
-      <!-- Control Toolbar -->
-      <div class="table-container" style="margin-bottom: 20px; padding: 14px 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
-          <input type="text" id="schedSearchInput" class="form-input" placeholder="🔍 Cari nama / ID..." oninput="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; width: 170px;">
-          
-          <select id="schedDateFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; min-width: 150px;">
-            <option value="ALL">📅 Semua Tanggal</option>
-          </select>
+      <!-- Control Toolbar: Weekly Sprint Navigator & Master Filters -->
+      <div class="table-container" style="margin-bottom: 20px; padding: 16px 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 12px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <!-- Top Row: Search, Role, Attendance, and View Mode Toggle -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;">
+            <input type="text" id="schedSearchInput" class="form-input" placeholder="🔍 Cari nama / ID..." oninput="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; width: 170px;">
+            
+            <select id="schedRoleFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; min-width: 170px;">
+              <option value="ALL">💼 Semua Lowongan</option>
+            </select>
 
-          <select id="schedRoleFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; min-width: 170px;">
-            <option value="ALL">💼 Semua Lowongan</option>
-          </select>
+            <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; font-weight: 500; color: #166534; background: #F0FDF4; border-color: #BBF7D0;">
+              <option value="CONFIRMED_ONLY" selected>✅ Hanya Konfirmasi Hadir (Confirmed &amp; Reschedule)</option>
+              <option value="ALL">Semua Sesi Wawancara (Termasuk WA Sent)</option>
+              <option value="TIDAK_HADIR">❌ Tidak Hadir / Batal</option>
+            </select>
 
-          <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; font-weight: 500; color: #166534; background: #F0FDF4; border-color: #BBF7D0;">
-            <option value="CONFIRMED_ONLY" selected>✅ Hanya Konfirmasi Hadir (Confirmed &amp; Reschedule)</option>
-            <option value="ALL">Semua Sesi Wawancara (Termasuk WA Sent)</option>
-            <option value="TIDAK_HADIR">❌ Tidak Hadir / Batal</option>
-          </select>
+            <input type="hidden" id="schedDateFilter" value="ALL">
+          </div>
+
+          <!-- Mode Toggle: Agenda Run-Sheet vs Visual Slot Timeline -->
+          <div style="display: flex; gap: 4px; background: #F3F4F6; padding: 3px; border-radius: 8px; border: 1px solid var(--border-light);">
+            <button type="button" id="btnSchedModeAgenda" class="btn btn-sm active" onclick="switchSchedViewMode('agenda')" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; background: #FFFFFF; color: #2563EB; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border-light);">
+              📋 Agenda List
+            </button>
+            <button type="button" id="btnSchedModeTimeline" class="btn btn-sm" onclick="switchSchedViewMode('timeline')" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; font-weight: 500; cursor: pointer; color: var(--text-secondary); background: transparent; border: none;">
+              ⏱️ Visual Timeline
+            </button>
+          </div>
         </div>
 
-        <!-- Mode Toggle: Agenda Run-Sheet vs Visual Slot Timeline -->
-        <div style="display: flex; gap: 4px; background: #F3F4F6; padding: 3px; border-radius: 8px; border: 1px solid var(--border-light);">
-          <button type="button" id="btnSchedModeAgenda" class="btn btn-sm active" onclick="switchSchedViewMode('agenda')" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; background: #FFFFFF; color: #2563EB; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid var(--border-light);">
-            📋 Agenda List
-          </button>
-          <button type="button" id="btnSchedModeTimeline" class="btn btn-sm" onclick="switchSchedViewMode('timeline')" style="font-size: 12px; padding: 5px 12px; border-radius: 6px; font-weight: 500; cursor: pointer; color: var(--text-secondary); background: transparent; border: none;">
-            ⏱️ Visual Timeline
-          </button>
+        <!-- Bottom Row: Weekly Sprint Selector & Day Chips (Senin - Sabtu) -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 12px; border-top: 1px solid #F3F4F6;">
+          <!-- Week Navigator Bar -->
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); margin-right: 2px;">
+              🗓️ Siklus:
+            </span>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="navigateScheduleWeek(-1)" title="Minggu Sebelumnya" style="padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 6px;">
+              ◀
+            </button>
+            <select id="schedWeekFilter" class="form-select" onchange="handleSchedWeekChange(this.value)" style="font-size: 12px; padding: 6px 12px; font-weight: 600; color: #1E40AF; background: #EFF6FF; border-color: #BFDBFE; min-width: 230px; border-radius: 6px;">
+              <!-- Dynamically populated weeks -->
+            </select>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="navigateScheduleWeek(1)" title="Minggu Berikutnya" style="padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 6px;">
+              ▶
+            </button>
+          </div>
+
+          <!-- Interactive Day Chips Filter -->
+          <div id="schedDayChipsWrap" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <!-- Dynamically populated day chips [Semua Hari] [Senin 14] ... [Sabtu 19] -->
+          </div>
         </div>
       </div>
+
 
       <!-- Agenda Mode Container -->
       <div id="schedAgendaModeWrap">
@@ -3997,7 +4023,87 @@
       return { time, date, location, isRescheduled };
     }
 
+    /* ---------------------------------------------------- */
+    /* WEEK-BY-WEEK SPRINT ENGINE & SCHEDULE CONTROLLER    */
+    /* ---------------------------------------------------- */
+    const ID_MONTHS = {
+      januari: 0, februari: 1, maret: 2, april: 3, mei: 4, juni: 5,
+      juli: 6, agustus: 7, september: 8, oktober: 9, november: 10, desember: 11
+    };
+
+    function parseDateToDateObj(dateStr) {
+      if (!dateStr || dateStr === '-') return null;
+      if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        const d = new Date(dateStr.slice(0, 10) + 'T00:00:00');
+        return isNaN(d.getTime()) ? null : d;
+      }
+      const clean = dateStr.replace(/^[a-zA-Z]+,\s*/, '').trim().toLowerCase();
+      const parts = clean.split(/\s+/);
+      if (parts.length >= 3) {
+        const day = parseInt(parts[0], 10);
+        const month = ID_MONTHS[parts[1]];
+        const year = parseInt(parts[2], 10);
+        if (!isNaN(day) && month !== undefined && !isNaN(year)) {
+          return new Date(year, month, day, 0, 0, 0);
+        }
+      }
+      const fallback = new Date(dateStr);
+      return isNaN(fallback.getTime()) ? null : fallback;
+    }
+    window.parseDateToDateObj = parseDateToDateObj;
+
+    function getWeekMonday(d) {
+      const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const day = date.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
+      const diff = (day === 0 ? -6 : 1 - day);
+      date.setDate(date.getDate() + diff);
+      return date;
+    }
+    window.getWeekMonday = getWeekMonday;
+
+    function formatIsoDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    window.formatIsoDate = formatIsoDate;
+
+    function formatShortDateID(d) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return `${d.getDate()} ${months[d.getMonth()]}`;
+    }
+
+    function getWeekRangeLabel(mondayDate) {
+      const satDate = new Date(mondayDate);
+      satDate.setDate(satDate.getDate() + 5); // Monday + 5 = Saturday
+      return `${formatShortDateID(mondayDate)} - ${formatShortDateID(satDate)} ${satDate.getFullYear()}`;
+    }
+    window.getWeekRangeLabel = getWeekRangeLabel;
+
+    function getWeekDaysList(mondayDate) {
+      const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const days = [];
+      for (let i = 0; i < 6; i++) {
+        const cur = new Date(mondayDate);
+        cur.setDate(cur.getDate() + i);
+        const iso = formatIsoDate(cur);
+        const displayDate = cur.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        days.push({
+          dayName: dayNames[i],
+          dateNum: cur.getDate(),
+          iso,
+          displayDate,
+          shortLabel: `${dayNames[i]} ${cur.getDate()}`
+        });
+      }
+      return days;
+    }
+    window.getWeekDaysList = getWeekDaysList;
+
     let currentSchedViewMode = 'agenda';
+    let selectedScheduleWeekMonday = null; // ISO string e.g. '2026-09-14' or 'ALL_WEEKS'
+    let selectedScheduleDay = 'ALL';       // 'ALL' or specific displayDate
 
     function switchSchedViewMode(mode) {
       currentSchedViewMode = mode;
@@ -4048,6 +4154,52 @@
     }
     window.switchSchedViewMode = switchSchedViewMode;
 
+    function navigateScheduleWeek(delta) {
+      if (!selectedScheduleWeekMonday || selectedScheduleWeekMonday === 'ALL_WEEKS') {
+        selectedScheduleWeekMonday = '2026-09-14';
+      }
+      const cur = new Date(selectedScheduleWeekMonday + 'T00:00:00');
+      cur.setDate(cur.getDate() + (delta * 7));
+      selectedScheduleWeekMonday = formatIsoDate(cur);
+      selectedScheduleDay = 'ALL';
+
+      const select = document.getElementById('schedWeekFilter');
+      if (select) {
+        // If option exists in dropdown, select it; otherwise add it dynamically
+        let exists = false;
+        for (let i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === selectedScheduleWeekMonday) {
+            select.selectedIndex = i;
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          const opt = document.createElement('option');
+          opt.value = selectedScheduleWeekMonday;
+          opt.textContent = getWeekRangeLabel(cur);
+          select.insertBefore(opt, select.lastElementChild);
+          select.value = selectedScheduleWeekMonday;
+        }
+      }
+
+      renderFinalScheduleAgenda();
+    }
+    window.navigateScheduleWeek = navigateScheduleWeek;
+
+    function handleSchedWeekChange(val) {
+      selectedScheduleWeekMonday = val;
+      selectedScheduleDay = 'ALL';
+      renderFinalScheduleAgenda();
+    }
+    window.handleSchedWeekChange = handleSchedWeekChange;
+
+    function selectScheduleDayChip(dayVal) {
+      selectedScheduleDay = dayVal;
+      renderFinalScheduleAgenda();
+    }
+    window.selectScheduleDayChip = selectScheduleDayChip;
+
     function openScheduleView() {
       // Hide other main workspace views
       const hubView = document.getElementById('vacancyHubView');
@@ -4081,22 +4233,36 @@
         roleSelect.innerHTML = roleOptions;
       }
 
-      // Populate Date Filter dynamically
-      const dateSelect = document.getElementById('schedDateFilter');
-      if (dateSelect) {
-        const currentSelectedDate = dateSelect.value || 'ALL';
-        const dateSet = new Set();
-        (state.talents || []).forEach(t => {
-          const info = extractCandidateScheduleInfo(t);
-          if (info.date !== '-' && info.time !== '-') {
-            dateSet.add(info.date);
+      // Collect all available weeks with scheduled candidates
+      const weekSet = new Set();
+      (state.talents || []).forEach(t => {
+        const info = extractCandidateScheduleInfo(t);
+        if (info.date !== '-' && info.time !== '-') {
+          const d = parseDateToDateObj(info.date);
+          if (d) {
+            const mon = getWeekMonday(d);
+            weekSet.add(formatIsoDate(mon));
           }
+        }
+      });
+
+      const sortedWeeks = Array.from(weekSet).sort();
+      if (!selectedScheduleWeekMonday || (!sortedWeeks.includes(selectedScheduleWeekMonday) && selectedScheduleWeekMonday !== 'ALL_WEEKS')) {
+        selectedScheduleWeekMonday = sortedWeeks.length > 0 ? sortedWeeks[0] : '2026-09-14';
+      }
+
+      const weekSelect = document.getElementById('schedWeekFilter');
+      if (weekSelect) {
+        let weekOptions = '';
+        sortedWeeks.forEach(wIso => {
+          const monDate = new Date(wIso + 'T00:00:00');
+          const rangeLabel = getWeekRangeLabel(monDate);
+          const isSelected = (wIso === selectedScheduleWeekMonday);
+          weekOptions += `<option value="${wIso}" ${isSelected ? 'selected' : ''}>${escapeHtml(rangeLabel)}</option>`;
         });
-        let dateOptions = '<option value="ALL">📅 Semua Tanggal</option>';
-        dateSet.forEach(d => {
-          dateOptions += `<option value="${escapeHtml(d)}" ${d === currentSelectedDate ? 'selected' : ''}>${escapeHtml(d)}</option>`;
-        });
-        dateSelect.innerHTML = dateOptions;
+        weekOptions += `<option value="ALL_WEEKS" ${selectedScheduleWeekMonday === 'ALL_WEEKS' ? 'selected' : ''}>🌐 Semua Minggu (Universal)</option>`;
+        weekSelect.innerHTML = weekOptions;
+        weekSelect.value = selectedScheduleWeekMonday;
       }
 
       renderFinalScheduleAgenda();
@@ -4104,7 +4270,7 @@
     }
     window.openScheduleView = openScheduleView;
 
-    // Backward compatibility redirect
+    // Backward compatibility redirects
     function openFinalScheduleModal() {
       openScheduleView();
     }
@@ -4115,26 +4281,46 @@
     }
     window.closeFinalScheduleModal = closeFinalScheduleModal;
 
-    function renderVisualScheduleTimeline(groups, conflicts) {
+    function renderVisualScheduleTimeline(groups, conflicts, weekDaysList) {
       const container = document.getElementById('schedTimelineBody');
       if (!container) return;
 
-      const dates = Object.keys(groups);
-      if (dates.length === 0) {
+      // Determine days to render in order
+      let daysToRender = [];
+      if (selectedScheduleWeekMonday && selectedScheduleWeekMonday !== 'ALL_WEEKS' && selectedScheduleDay === 'ALL' && weekDaysList) {
+        daysToRender = weekDaysList.map(d => ({ dateLabel: d.displayDate, items: groups[d.displayDate] || [] }));
+      } else {
+        daysToRender = Object.keys(groups).map(date => ({ dateLabel: date, items: groups[date] || [] }));
+      }
+
+      const hasAnySessions = daysToRender.some(d => d.items.length > 0);
+      if (!hasAnySessions) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+          <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
             <div style="font-size: 32px; margin-bottom: 8px;">⏱️</div>
-            <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Tidak ada sesi wawancara untuk visual timeline.</div>
-            <div style="font-size: 12px; margin-top: 4px;">Pilih filter tanggal atau lowongan lain untuk melihat jadwal.</div>
+            <div style="font-size: 14.5px; font-weight: 600; color: var(--text-primary);">Tidak ada sesi wawancara untuk periode ini.</div>
+            <div style="font-size: 12px; margin-top: 4px;">Gunakan navigasi [◀] [▶] untuk melihat minggu lain atau pilih [Semua Hari].</div>
           </div>
         `;
         return;
       }
 
       let html = '';
-      dates.forEach(date => {
-        const items = groups[date];
-        if (!items || items.length === 0) return;
+      daysToRender.forEach(({ dateLabel, items }) => {
+        if (!items || items.length === 0) {
+          // Compact empty day indicator
+          html += `
+            <div style="margin-bottom: 12px; background: #FAFAFA; border: 1px dashed var(--border-light); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 12.5px;">
+                <span>📅</span>
+                <span style="font-weight: 600; color: var(--text-primary);">${escapeHtml(dateLabel)}</span>
+                <span style="font-size: 11.5px; color: var(--text-muted);">— 0 Sesi (Slot Bebas 09:00 - 15:00 WIB)</span>
+              </div>
+              <span style="font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); background: #F3F4F6; padding: 2px 7px; border-radius: 4px;">Slot Kosong</span>
+            </div>
+          `;
+          return;
+        }
 
         // Determine earliest start and latest end for this day
         let minStartMins = 9 * 60; // 09:00 WIB
@@ -4168,21 +4354,21 @@
         });
 
         html += `
-          <div style="margin-bottom: 28px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F3F4F6; flex-wrap: wrap; gap: 8px;">
+          <div style="margin-bottom: 24px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #F3F4F6; flex-wrap: wrap; gap: 8px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 16px;">📅</span>
-                <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">${escapeHtml(date)}</span>
+                <span style="font-size: 15px;">📅</span>
+                <span style="font-weight: 700; font-size: 13.5px; color: var(--text-primary);">${escapeHtml(dateLabel)}</span>
               </div>
               <div style="display: flex; gap: 6px; font-size: 11px; font-family: var(--font-mono);">
-                <span style="background: #EFF6FF; color: #1D4ED8; padding: 3px 8px; border-radius: 4px; font-weight: 600;">${items.length} Sesi Terjadwal</span>
-                <span style="background: #F3F4F6; color: #4B5563; padding: 3px 8px; border-radius: 4px;">${lanes.length} Jalur Waktu</span>
+                <span style="background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${items.length} Sesi Terjadwal</span>
+                <span style="background: #F3F4F6; color: #4B5563; padding: 2px 8px; border-radius: 4px;">${lanes.length} Jalur Waktu</span>
               </div>
             </div>
 
             <!-- Scrollable Timeline Grid -->
-            <div style="overflow-x: auto; padding-bottom: 8px;">
-              <div style="min-width: 750px; position: relative;">
+            <div style="overflow-x: auto; padding-bottom: 6px;">
+              <div style="min-width: 720px; position: relative;">
                 <!-- Hour Markers Header -->
                 <div style="display: flex; border-bottom: 1.5px solid var(--border-light); padding-bottom: 6px; margin-bottom: 8px;">
         `;
@@ -4269,29 +4455,31 @@
                 </div>
               </div>
             </div>
-
-            <!-- Mini Legend -->
-            <div style="display: flex; gap: 14px; align-items: center; font-size: 11px; color: var(--text-secondary); margin-top: 14px; padding-top: 10px; border-top: 1px solid #F3F4F6; flex-wrap: wrap;">
-              <span style="display: inline-flex; align-items: center; gap: 5px;">
-                <span style="width: 12px; height: 12px; background: #F0FDF4; border: 1.5px solid #34D399; border-radius: 3px; display: inline-block;"></span>
-                Content Creator (60m)
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 5px;">
-                <span style="width: 12px; height: 12px; background: #EEF2FF; border: 1.5px solid #818CF8; border-radius: 3px; display: inline-block;"></span>
-                Marketplace Specialist (120m)
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 5px;">
-                <span style="width: 12px; height: 12px; background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 3px; display: inline-block;"></span>
-                Rescheduled
-              </span>
-              <span style="display: inline-flex; align-items: center; gap: 5px;">
-                <span style="width: 12px; height: 12px; background: #FEE2E2; border: 1.5px solid #EF4444; border-radius: 3px; display: inline-block;"></span>
-                Bentrok / Overlap
-              </span>
-            </div>
           </div>
         `;
       });
+
+      // Mini Legend
+      html += `
+        <div style="display: flex; gap: 14px; align-items: center; font-size: 11px; color: var(--text-secondary); margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6; flex-wrap: wrap;">
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: #F0FDF4; border: 1.5px solid #34D399; border-radius: 3px; display: inline-block;"></span>
+            Content Creator (60m)
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: #EEF2FF; border: 1.5px solid #818CF8; border-radius: 3px; display: inline-block;"></span>
+            Marketplace Specialist (120m)
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 3px; display: inline-block;"></span>
+            Rescheduled
+          </span>
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: #FEE2E2; border: 1.5px solid #EF4444; border-radius: 3px; display: inline-block;"></span>
+            Bentrok / Overlap
+          </span>
+        </div>
+      `;
 
       container.innerHTML = html;
     }
@@ -4302,13 +4490,13 @@
       const container = document.getElementById('finalScheduleAgendaBody');
       const badgesContainer = document.getElementById('schedSummaryBadges');
       const footerSummary = document.getElementById('schedFooterSummary');
+      const dayChipsWrap = document.getElementById('schedDayChipsWrap');
 
-      const dateFilter = document.getElementById('schedDateFilter') ? document.getElementById('schedDateFilter').value : 'ALL';
       const roleFilter = document.getElementById('schedRoleFilter') ? document.getElementById('schedRoleFilter').value : 'ALL';
       const searchKeyword = (document.getElementById('schedSearchInput') ? document.getElementById('schedSearchInput').value : '').toLowerCase().trim();
       const attendanceFilter = document.getElementById('schedAttendanceFilter') ? document.getElementById('schedAttendanceFilter').value : 'CONFIRMED_ONLY';
 
-      // Gather candidate items that have scheduled times
+      // 1. Gather all candidates with scheduled times
       const candidatesWithSchedule = [];
       (state.talents || []).forEach(t => {
         if (attendanceFilter === 'CONFIRMED_ONLY') {
@@ -4330,6 +4518,10 @@
             ? `${startStr} - ${endStr} WIB (${dur}m)`
             : `${info.time} (${dur}m)`;
 
+          const dObj = parseDateToDateObj(info.date);
+          const weekMondayIso = dObj ? formatIsoDate(getWeekMonday(dObj)) : null;
+          const isoDate = dObj ? formatIsoDate(dObj) : null;
+
           candidatesWithSchedule.push({
             talent: t,
             ...info,
@@ -4338,15 +4530,80 @@
             duration: dur,
             startStr,
             endStr,
-            timeRangeStr
+            timeRangeStr,
+            dateObj: dObj,
+            weekMondayIso,
+            isoDate
           });
         }
       });
 
-      // Filter by Date, Role, and Search Keyword
-      const filtered = candidatesWithSchedule.filter(item => {
-        if (dateFilter !== 'ALL' && item.date !== dateFilter) return false;
+      // 2. Filter by Week & Compute Week Days
+      let weekDaysList = null;
+      let candidatesInActiveWeek = candidatesWithSchedule;
+
+      if (selectedScheduleWeekMonday && selectedScheduleWeekMonday !== 'ALL_WEEKS') {
+        const monDate = new Date(selectedScheduleWeekMonday + 'T00:00:00');
+        weekDaysList = getWeekDaysList(monDate);
+        candidatesInActiveWeek = candidatesWithSchedule.filter(item => item.weekMondayIso === selectedScheduleWeekMonday);
+      }
+
+      // 3. Render Day Chips Bar
+      if (dayChipsWrap) {
+        if (selectedScheduleWeekMonday && selectedScheduleWeekMonday !== 'ALL_WEEKS' && weekDaysList) {
+          const totalWeekCount = candidatesInActiveWeek.length;
+          let chipsHtml = `
+            <button type="button" class="btn btn-sm" onclick="selectScheduleDayChip('ALL')"
+                    style="font-size: 11.5px; padding: 4px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.1s; ${selectedScheduleDay === 'ALL' ? 'background: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; box-shadow: 0 1px 2px rgba(37,99,235,0.2);' : 'background: #FFFFFF; color: var(--text-primary); border: 1px solid var(--border-light);'}">
+              Semua Hari <span style="font-size: 10px; margin-left: 3px; padding: 1px 5px; border-radius: 4px; background: ${selectedScheduleDay === 'ALL' ? 'rgba(255,255,255,0.25)' : '#F3F4F6'}; color: ${selectedScheduleDay === 'ALL' ? '#FFFFFF' : '#374151'};">${totalWeekCount}</span>
+            </button>
+          `;
+
+          weekDaysList.forEach(day => {
+            const count = candidatesInActiveWeek.filter(item => item.date === day.displayDate || item.isoDate === day.iso || item.date.toLowerCase().includes(day.dayName.toLowerCase())).length;
+            const isChipActive = (selectedScheduleDay === day.displayDate || selectedScheduleDay === day.iso);
+
+            let chipStyle = 'background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-light);';
+            let pillStyle = 'background: #F3F4F6; color: #4B5563;';
+
+            if (isChipActive) {
+              chipStyle = 'background: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,0.2);';
+              pillStyle = 'background: rgba(255,255,255,0.25); color: #FFFFFF;';
+            } else if (count > 0) {
+              chipStyle = 'background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 600;';
+              pillStyle = 'background: #DBEAFE; color: #1E40AF;';
+            }
+
+            chipsHtml += `
+              <button type="button" class="btn btn-sm" onclick="selectScheduleDayChip('${escapeHtml(day.displayDate)}')"
+                      style="font-size: 11.5px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.1s; ${chipStyle}">
+                ${day.shortLabel} <span style="font-size: 10px; margin-left: 3px; padding: 1px 5px; border-radius: 4px; font-weight: 600; ${pillStyle}">${count}</span>
+              </button>
+            `;
+          });
+
+          dayChipsWrap.innerHTML = chipsHtml;
+        } else {
+          dayChipsWrap.innerHTML = `
+            <span style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); padding: 4px 8px; background: #F3F4F6; border-radius: 5px;">
+              🌐 Menampilkan Seluruh Siklus Mingguan
+            </span>
+          `;
+        }
+      }
+
+      // 4. Filter Candidates based on Week, Day Chip, Role, and Search
+      const filtered = candidatesInActiveWeek.filter(item => {
+        // Day Chip filter
+        if (selectedScheduleDay !== 'ALL') {
+          const matchDay = (item.date === selectedScheduleDay || item.isoDate === selectedScheduleDay || item.date.toLowerCase().includes(selectedScheduleDay.toLowerCase()));
+          if (!matchDay) return false;
+        }
+
+        // Role filter
         if (roleFilter !== 'ALL' && item.talent.role !== roleFilter) return false;
+
+        // Search keyword
         if (searchKeyword) {
           const name = (item.talent.name || '').toLowerCase();
           const id = (item.talent.id || '').toLowerCase();
@@ -4359,7 +4616,7 @@
         return true;
       });
 
-      // Compute statistics
+      // 5. Compute Statistics & Badges
       const totalCount = filtered.length;
       const confirmedCount = filtered.filter(x => x.talent.outreachStatus === 'Confirmed').length;
       const waSentCount = filtered.filter(x => x.talent.outreachStatus === 'WA Sent').length;
@@ -4380,7 +4637,7 @@
         footerSummary.textContent = `Menampilkan ${totalCount} sesi wawancara terdaftar`;
       }
 
-      // Group by Date
+      // 6. Group by Date
       const groups = {};
       filtered.forEach(item => {
         if (!groups[item.date]) groups[item.date] = [];
@@ -4392,23 +4649,23 @@
         groups[date].sort((a, b) => a.start - b.start);
       });
 
-      // If Timeline mode is selected, render visual timeline
+      // 7. If Timeline Mode is active, render visual timeline
       if (currentSchedViewMode === 'timeline') {
-        renderVisualScheduleTimeline(groups, conflicts);
+        renderVisualScheduleTimeline(groups, conflicts, weekDaysList);
         return;
       }
 
-      // Agenda Mode Rendering
+      // 8. Agenda Mode Rendering
       if (!container) return;
 
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 48px 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-muted);">
             <div style="font-size: 36px; margin-bottom: 10px;">📅</div>
-            <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Tidak ada jadwal interview yang sesuai filter.</div>
-            <div style="font-size: 13px; margin-top: 4px;">Pastikan kandidat telah dijadwalkan di Broadcast atau memiliki status Confirmed / Reschedule.</div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('schedSearchInput').value=''; document.getElementById('schedDateFilter').value='ALL'; document.getElementById('schedRoleFilter').value='ALL'; renderFinalScheduleAgenda();" style="margin-top: 14px; cursor: pointer;">
-              Reset Filter Pencarian
+            <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Tidak ada jadwal interview untuk minggu / hari yang dipilih.</div>
+            <div style="font-size: 13px; margin-top: 4px;">Gunakan navigasi [◀] [▶] untuk melihat minggu lain atau klik tombol reset di bawah.</div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="selectedScheduleDay='ALL'; document.getElementById('schedSearchInput').value=''; document.getElementById('schedRoleFilter').value='ALL'; renderFinalScheduleAgenda();" style="margin-top: 14px; cursor: pointer;">
+              Tampilkan Seluruh Hari Minggu Ini
             </button>
           </div>
         `;
@@ -4516,6 +4773,7 @@
       container.innerHTML = htmlContent;
     }
     window.renderFinalScheduleAgenda = renderFinalScheduleAgenda;
+
 
 
     window.copyScheduleAgendaText = function() {
