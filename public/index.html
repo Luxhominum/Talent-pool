@@ -759,6 +759,11 @@
     @media (max-width: 900px) {
       .broadcast-control-card { grid-template-columns: 1fr; }
     }
+    /* Broadcast Drawer responsive */
+    @media (max-width: 640px) {
+      #broadcastDrawer { width: 100% !important; }
+    }
+
     .variable-chip {
       display: inline-block;
       background: #F3F4F6;
@@ -1964,6 +1969,10 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>Jadwal Interview</span>
             </button>
+            <button type="button" class="sidebar-nav-item" id="navBtnBroadcast" onclick="toggleBroadcastDrawer(); toggleAppSidebar(false);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"></path></svg>
+              <span>WA Broadcast</span>
+            </button>
             <button type="button" class="sidebar-nav-item" id="btnAssessmentPortal" onclick="window.open('assessment-portal.html', '_blank'); toggleAppSidebar(false);" style="background: #F5F3FF; color: #4F46E5; border-color: #E0E7FF;" title="Buka Portal Pelaksanaan Asesmen On-Site">
               <span style="font-size: 14px; line-height: 1;">💻</span>
               <span style="font-weight: 600;">Portal Asesmen On-Site ↗</span>
@@ -2007,203 +2016,25 @@
       <!-- Sidebar Backdrop for Mobile -->
       <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleAppSidebar(false)"></div>
 
-      <!-- Main Viewport for Workspace & Candidate Content -->
-      <main class="app-main-viewport" id="appMainViewport">
-      <!-- Appwrite Paused / Connection Notification Banner -->
-      <div id="appwritePausedAlert" style="display: none; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 22px; line-height: 1;">⚠️</span>
-          <div>
-            <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 2px;">
-              Appwrite Cloud Project Dijeda (Paused Due to Inactivity)
+      <!-- ============================================== -->
+      <!-- BROADCAST RIGHT DRAWER                        -->
+      <!-- ============================================== -->
+      <aside id="broadcastDrawer" style="position: fixed; top: 0; right: 0; height: 100%; width: 580px; background: #FFFFFF; box-shadow: -4px 0 32px rgba(0,0,0,0.10); z-index: 1050; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; border-left: 1px solid var(--border-light);">
+        <!-- Drawer Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-light); background: #FFFFFF; flex-shrink: 0;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; background: #EFF6FF; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"></path></svg>
             </div>
-            <div style="font-size: 12px; color: #B45309; line-height: 1.5;">
-              Appwrite Cloud menjeda project otomatis karena beberapa hari tidak ada aktivitas. Web app saat ini <strong>berjalan normal menggunakan cadangan Firebase</strong>. Untuk mengaktifkan kembali Appwrite, klik tombol di sebelah kanan.
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">WA Broadcast</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Outreach queue &amp; scheduling</div>
             </div>
           </div>
+          <button type="button" onclick="toggleBroadcastDrawer(false)" style="background: none; border: 1px solid var(--border-light); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 16px; line-height: 1;" title="Close broadcast panel">✕</button>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
-          <a href="https://cloud.appwrite.io/console/project-6a9131260006737c5919" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #D97706; color: white; border: none; font-weight: 600; font-size: 12px; padding: 7px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
-            <span>Pulihkan di Appwrite Console ↗</span>
-          </a>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('appwritePausedAlert').style.display='none'" style="border: 1px solid #FCD34D; background: #FEF9C3; color: #92400E; font-size: 12px; padding: 5px 9px;" title="Tutup pemberitahuan">✕</button>
-        </div>
-      </div>
-
-    <!-- ============================================== -->
-    <!-- VIEW A: JOB VACANCY HUB & PORTAL (LANDING)     -->
-    <!-- ============================================== -->
-    <div id="vacancyHubView" class="vacancy-hub-section">
-      <section class="hero-section" style="margin-bottom: 24px;">
-        <div class="hero-meta">Recruitment Workspaces &amp; Job Vacancies</div>
-        <h1 class="hero-heading">Curated job openings &amp; <em>talent portals</em>.</h1>
-        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; max-width: 620px; line-height: 1.6;">
-          Pilih lowongan pekerjaan yang ingin Anda kurasi untuk melihat metrik, pipeline interview, dan portofolio kandidat khusus posisi tersebut.
-        </p>
-      </section>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-        <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600;">
-          Daftar Posisi Lowongan Aktif:
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="selectVacancy('ALL')">
-            🌐 Buka Semua Kandidat (Master Pool)
-          </button>
-          <button type="button" class="btn btn-primary btn-sm" onclick="openAddCandidateDrawer()">
-            + Buka Posisi Lowongan Baru
-          </button>
-        </div>
-      </div>
-
-      <!-- Vacancy Cards Grid -->
-      <div class="vacancy-grid" id="vacancyGridContainer"></div>
-    </div>
-
-    <!-- ============================================== -->
-    <!-- VIEW B: DEDICATED SCREENING ROOM (FILTERED)    -->
-    <!-- ============================================== -->
-    <div id="screeningRoomView" style="display: none;">
-      <!-- Breadcrumb Bar -->
-      <div class="vacancy-breadcrumb-bar">
-        <button type="button" class="btn-back-hub" onclick="selectVacancy('HUB')">
-          ← Kembali ke Semua Lowongan
-        </button>
-
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Ganti Lowongan:</span>
-          <select id="quickVacancySelector" class="form-select" style="font-size: 12px; padding: 5px 12px; font-weight: 600;" onchange="selectVacancy(this.value)">
-          </select>
-        </div>
-      </div>
-
-      <!-- Editorial Hero -->
-      <section class="hero-section">
-        <div class="hero-meta" id="selectedVacancyMeta">Candidate Screening Room</div>
-        <h1 class="hero-heading" id="selectedVacancyHeading">Curated talent index &amp; <em>skills repository</em>.</h1>
-      </section>
-
-      <!-- Metrics Grid -->
-      <section class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-label">Active Candidates</div>
-          <div class="metric-value" id="metricTotal">0</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">In Active Pipeline</div>
-          <div class="metric-value" id="metricPipeline">0</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Shortlisted</div>
-          <div class="metric-value" id="metricShortlisted">0</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Top Rated (5★)</div>
-          <div class="metric-value" id="metricTopRated">0</div>
-        </div>
-      </section>
-
-      <!-- Analytics Dashboard -->
-      <section class="analytics-dashboard" id="analyticsDashboard" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-          <div>
-            <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Executive Overview</span>
-            <h2 style="font-family: var(--font-serif); font-size: 20px; font-weight: 500; color: var(--text-primary);">Talent Pool Analytics Dashboard</h2>
-          </div>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAnalyticsDashboard()">Hide Analytics ✕</button>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
-          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
-            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Recruitment Pipeline Funnel</div>
-            <div id="analyticsFunnelContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
-          </div>
-
-          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
-            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Overall Star Rating Distribution</div>
-            <div id="analyticsRatingsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
-          </div>
-
-          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
-            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Skill Benchmark Averages</div>
-            <div id="analyticsSkillsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
-          </div>
-
-          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
-            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Top Candidate Domisili</div>
-            <div id="analyticsLocationContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
-          </div>
-        </div>
-      </section>
-
-    <!-- Controls Bar -->
-    <section class="controls-bar">
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="searchInput" placeholder="Search candidate by name, role, skill, or notes...">
-      </div>
-
-      <div class="filter-group">
-        <select class="select-filter" id="filterStage">
-          <option value="ALL">All Active Candidates</option>
-          <option value="Prospect">Prospect</option>
-          <option value="Screening">Screening</option>
-          <option value="Invited">Invited</option>
-          <option value="Interviewed">Interviewed</option>
-          <option value="Shortlisted">Shortlisted</option>
-          <option value="Offered">Offered</option>
-          <option value="Hired">Hired</option>
-          <option value="Archived">📁 Archived Candidates</option>
-        </select>
-
-        <select class="select-filter" id="filterRating">
-          <option value="0">All Ratings</option>
-          <option value="5">5.0 Stars (Top)</option>
-          <option value="4.5">4.5+ Stars</option>
-          <option value="4">4.0+ Stars</option>
-          <option value="3.5">3.5+ Stars</option>
-          <option value="3">3.0+ Stars</option>
-          <option value="2.5">2.5+ Stars</option>
-          <option value="2">2.0+ Stars</option>
-        </select>
-
-        <div class="view-switcher">
-          <button type="button" class="view-btn active" data-view="bento" onclick="switchView('bento')">Grid</button>
-          <button type="button" class="view-btn" data-view="table" onclick="switchView('table')">Table</button>
-          <button type="button" class="view-btn" data-view="kanban" onclick="switchView('kanban')">Pipeline</button>
-          <button type="button" class="view-btn" data-view="broadcast" onclick="switchView('broadcast')">📢 WA Broadcast</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Views Container -->
-    <main id="mainViewArea">
-      <!-- 1. Grid View -->
-      <div id="bentoContainer" class="bento-grid"></div>
-
-      <!-- 2. Table View -->
-      <div id="tableContainer" class="table-container" style="display: none;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th style="width: 36px;"></th>
-              <th>ID</th>
-              <th>Candidate</th>
-              <th>Stage</th>
-              <th>Level</th>
-              <th>Rating</th>
-              <th>Contact &amp; Documents</th>
-              <th style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-
-      <!-- 3. Pipeline Kanban View -->
-      <div id="kanbanContainer" class="kanban-board" style="display: none;"></div>
-
-      <!-- 4. WhatsApp Broadcast Center & Schedule Coordinator -->
+        <!-- Drawer Body (scrollable) -->
+        <div style="overflow-y: auto; flex: 1; padding: 0;">
       <div id="broadcastContainer" class="broadcast-container" style="display: none;">
         <!-- High-End Sub-Tabs Navigation -->
         <div style="border-bottom: 1px solid var(--border-light); margin-bottom: 24px; padding: 0 20px;">
@@ -2379,6 +2210,209 @@
           </div>
         </div>
       </div>
+        </div>
+      </aside>
+      <!-- Broadcast Drawer Backdrop -->
+      <div id="broadcastDrawerBackdrop" onclick="toggleBroadcastDrawer(false)" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.20); z-index: 1040; backdrop-filter: blur(1px);"></div>
+
+
+      <!-- Main Viewport for Workspace & Candidate Content -->
+      <main class="app-main-viewport" id="appMainViewport">
+      <!-- Appwrite Paused / Connection Notification Banner -->
+      <div id="appwritePausedAlert" style="display: none; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 22px; line-height: 1;">⚠️</span>
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 2px;">
+              Appwrite Cloud Project Dijeda (Paused Due to Inactivity)
+            </div>
+            <div style="font-size: 12px; color: #B45309; line-height: 1.5;">
+              Appwrite Cloud menjeda project otomatis karena beberapa hari tidak ada aktivitas. Web app saat ini <strong>berjalan normal menggunakan cadangan Firebase</strong>. Untuk mengaktifkan kembali Appwrite, klik tombol di sebelah kanan.
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+          <a href="https://cloud.appwrite.io/console/project-6a9131260006737c5919" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="background: #D97706; color: white; border: none; font-weight: 600; font-size: 12px; padding: 7px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+            <span>Pulihkan di Appwrite Console ↗</span>
+          </a>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('appwritePausedAlert').style.display='none'" style="border: 1px solid #FCD34D; background: #FEF9C3; color: #92400E; font-size: 12px; padding: 5px 9px;" title="Tutup pemberitahuan">✕</button>
+        </div>
+      </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW A: JOB VACANCY HUB & PORTAL (LANDING)     -->
+    <!-- ============================================== -->
+    <div id="vacancyHubView" class="vacancy-hub-section">
+      <section class="hero-section" style="margin-bottom: 24px;">
+        <div class="hero-meta">Recruitment Workspaces &amp; Job Vacancies</div>
+        <h1 class="hero-heading">Curated job openings &amp; <em>talent portals</em>.</h1>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px; max-width: 620px; line-height: 1.6;">
+          Pilih lowongan pekerjaan yang ingin Anda kurasi untuk melihat metrik, pipeline interview, dan portofolio kandidat khusus posisi tersebut.
+        </p>
+      </section>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 600;">
+          Daftar Posisi Lowongan Aktif:
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="selectVacancy('ALL')">
+            🌐 Buka Semua Kandidat (Master Pool)
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddCandidateDrawer()">
+            + Buka Posisi Lowongan Baru
+          </button>
+        </div>
+      </div>
+
+      <!-- Vacancy Cards Grid -->
+      <div class="vacancy-grid" id="vacancyGridContainer"></div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW B: DEDICATED SCREENING ROOM (FILTERED)    -->
+    <!-- ============================================== -->
+    <div id="screeningRoomView" style="display: none;">
+      <!-- Breadcrumb Bar -->
+      <div class="vacancy-breadcrumb-bar">
+        <button type="button" class="btn-back-hub" onclick="selectVacancy('HUB')">
+          ← Kembali ke Semua Lowongan
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">Ganti Lowongan:</span>
+          <select id="quickVacancySelector" class="form-select" style="font-size: 12px; padding: 5px 12px; font-weight: 600;" onchange="selectVacancy(this.value)">
+          </select>
+        </div>
+      </div>
+
+      <!-- Editorial Hero -->
+      <section class="hero-section">
+        <div class="hero-meta" id="selectedVacancyMeta">Candidate Screening Room</div>
+        <h1 class="hero-heading" id="selectedVacancyHeading">Curated talent index &amp; <em>skills repository</em>.</h1>
+      </section>
+
+      <!-- Metrics Grid -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Active Candidates</div>
+          <div class="metric-value" id="metricTotal">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">In Active Pipeline</div>
+          <div class="metric-value" id="metricPipeline">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Shortlisted</div>
+          <div class="metric-value" id="metricShortlisted">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Top Rated (5★)</div>
+          <div class="metric-value" id="metricTopRated">0</div>
+        </div>
+      </section>
+
+      <!-- Analytics Dashboard -->
+      <section class="analytics-dashboard" id="analyticsDashboard" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted);">Executive Overview</span>
+            <h2 style="font-family: var(--font-serif); font-size: 20px; font-weight: 500; color: var(--text-primary);">Talent Pool Analytics Dashboard</h2>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAnalyticsDashboard()">Hide Analytics ✕</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Recruitment Pipeline Funnel</div>
+            <div id="analyticsFunnelContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Overall Star Rating Distribution</div>
+            <div id="analyticsRatingsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Skill Benchmark Averages</div>
+            <div id="analyticsSkillsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <div style="background: #F9FAFB; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);">
+            <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 12px;">Top Candidate Domisili</div>
+            <div id="analyticsLocationContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
+          </div>
+        </div>
+      </section>
+
+    <!-- Controls Bar -->
+    <section class="controls-bar">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Search candidate by name, role, skill, or notes...">
+      </div>
+
+      <div class="filter-group">
+        <select class="select-filter" id="filterStage">
+          <option value="ALL">All Active Candidates</option>
+          <option value="Prospect">Prospect</option>
+          <option value="Screening">Screening</option>
+          <option value="Invited">Invited</option>
+          <option value="Interviewed">Interviewed</option>
+          <option value="Shortlisted">Shortlisted</option>
+          <option value="Offered">Offered</option>
+          <option value="Hired">Hired</option>
+          <option value="Archived">📁 Archived Candidates</option>
+        </select>
+
+        <select class="select-filter" id="filterRating">
+          <option value="0">All Ratings</option>
+          <option value="5">5.0 Stars (Top)</option>
+          <option value="4.5">4.5+ Stars</option>
+          <option value="4">4.0+ Stars</option>
+          <option value="3.5">3.5+ Stars</option>
+          <option value="3">3.0+ Stars</option>
+          <option value="2.5">2.5+ Stars</option>
+          <option value="2">2.0+ Stars</option>
+        </select>
+
+        <div class="view-switcher">
+          <button type="button" class="view-btn active" data-view="bento" onclick="switchView('bento')">Grid</button>
+          <button type="button" class="view-btn" data-view="table" onclick="switchView('table')">Table</button>
+          <button type="button" class="view-btn" data-view="kanban" onclick="switchView('kanban')">Pipeline</button>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Views Container -->
+    <main id="mainViewArea">
+      <!-- 1. Grid View -->
+      <div id="bentoContainer" class="bento-grid"></div>
+
+      <!-- 2. Table View -->
+      <div id="tableContainer" class="table-container" style="display: none;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 36px;"></th>
+              <th>ID</th>
+              <th>Candidate</th>
+              <th>Stage</th>
+              <th>Level</th>
+              <th>Rating</th>
+              <th>Contact &amp; Documents</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- 3. Pipeline Kanban View -->
+      <div id="kanbanContainer" class="kanban-board" style="display: none;"></div>
+
+      <!-- 4. WhatsApp Broadcast Center & Schedule Coordinator -->
 <div id="emptyState" class="empty-state" style="display: none;">
         <p style="font-size: 15px; font-weight: 500; margin-bottom: 6px; color: var(--text-primary);">No candidates match your filter.</p>
         <button type="button" class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset Filters</button>
@@ -6158,7 +6192,6 @@
       if (el.bentoContainer) el.bentoContainer.style.display = state.currentView === 'bento' ? 'grid' : 'none';
       if (el.tableContainer) el.tableContainer.style.display = state.currentView === 'table' ? 'block' : 'none';
       if (el.kanbanContainer) el.kanbanContainer.style.display = state.currentView === 'kanban' ? 'grid' : 'none';
-      if (el.broadcastContainer) el.broadcastContainer.style.display = state.currentView === 'broadcast' ? 'flex' : 'none';
 
       const hasData = state.filteredTalents.length > 0;
       if (el.emptyState) el.emptyState.style.display = hasData ? 'none' : 'block';
@@ -6166,7 +6199,6 @@
       if (state.currentView === 'bento') renderBentoGrid();
       else if (state.currentView === 'table') renderTableView();
       else if (state.currentView === 'kanban') renderKanbanBoard();
-      else if (state.currentView === 'broadcast') renderBroadcastTable();
     }
 
     /* ---------------------------------------------------- */
@@ -11576,6 +11608,31 @@ function renderPentagonMatrixSvg(dimensions) {
       }
     }
     window.toggleAppSidebar = toggleAppSidebar;
+
+    function toggleBroadcastDrawer(forceOpen) {
+      const drawer = document.getElementById('broadcastDrawer');
+      const backdrop = document.getElementById('broadcastDrawerBackdrop');
+      const navBtn = document.getElementById('navBtnBroadcast');
+      if (!drawer) return;
+
+      const isOpen = drawer.style.transform === 'translateX(0px)' || drawer.style.transform === 'translateX(0)';
+      const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
+
+      drawer.style.transform = willOpen ? 'translateX(0)' : 'translateX(100%)';
+      if (backdrop) backdrop.style.display = willOpen ? 'block' : 'none';
+      if (navBtn) navBtn.classList.toggle('active', willOpen);
+
+      // Make sure broadcastContainer is visible inside the drawer
+      const bc = document.getElementById('broadcastContainer');
+      if (bc) bc.style.display = willOpen ? 'flex' : 'none';
+
+      // Trigger renders when opening
+      if (willOpen) {
+        if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+        if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
+      }
+    }
+    window.toggleBroadcastDrawer = toggleBroadcastDrawer;
 
 </script>
 </body>
