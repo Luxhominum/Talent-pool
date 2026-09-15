@@ -2271,7 +2271,7 @@
               <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #16A34A; margin-bottom: 12px;">
                 ⚙️ Smart Scheduling Parameters
               </div>
-              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Atur jam mulai dan interval. Sesi terakhir dalam 1 hari dibatasi hingga <strong>15:00 WIB</strong> (sesi setelahnya otomatis bergulir ke hari kerja berikutnya, Minggu libur).</p>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Atur jam mulai dan interval. Sesi terakhir dalam 1 hari dibatasi hingga <strong>15:00 WIB</strong> (sesi setelahnya otomatis bergulir ke hari kerja berikutnya; <strong>Minggu libur &amp; Senin tidak ada interview</strong>. Default otomatis <strong>H+2</strong> untuk jeda persiapan kandidat).</p>
 
               <div class="form-group">
                 <label class="form-label">Interview Date:</label>
@@ -3450,6 +3450,23 @@
       }
     }
 
+    function isInterviewDay(date) {
+      if (!date || isNaN(date.getTime())) return false;
+      const d = date.getDay();
+      return d !== 0 && d !== 1; // 0 = Minggu (libur), 1 = Senin (tidak ada interview)
+    }
+    window.isInterviewDay = isInterviewDay;
+
+    function getEarliestInterviewDate(baseDate = new Date()) {
+      const target = new Date(baseDate);
+      target.setDate(target.getDate() + 2); // Jeda persiapan kandidat: Today + 2 (Selasa -> Kamis)
+      while (!isInterviewDay(target)) {
+        target.setDate(target.getDate() + 1);
+      }
+      return target;
+    }
+    window.getEarliestInterviewDate = getEarliestInterviewDate;
+
     function loadBcSettings() {
       try {
         const raw = localStorage.getItem('pge_bc_settings');
@@ -3459,11 +3476,31 @@
           el.bcCustomMessage.value = dedicatedMsg;
         }
 
-        if (!raw) return !!dedicatedMsg;
+        const earliest = getEarliestInterviewDate();
+        const earliestIso = formatIsoDate(earliest);
+        if (el.bcDateInput) {
+          el.bcDateInput.min = earliestIso;
+        }
+
+        if (!raw) {
+          if (el.bcDateInput) el.bcDateInput.value = earliestIso;
+          return !!dedicatedMsg;
+        }
         const saved = JSON.parse(raw);
         if (saved) {
           if (el.bcStageFilter && saved.filter) el.bcStageFilter.value = saved.filter;
-          if (el.bcDateInput && saved.date) el.bcDateInput.value = saved.date;
+          if (el.bcDateInput) {
+            if (saved.date && saved.date >= earliestIso) {
+              const checkD = new Date(saved.date + 'T00:00:00');
+              if (isInterviewDay(checkD)) {
+                el.bcDateInput.value = saved.date;
+              } else {
+                el.bcDateInput.value = earliestIso;
+              }
+            } else {
+              el.bcDateInput.value = earliestIso;
+            }
+          }
           if (el.bcTimeInput && saved.time) el.bcTimeInput.value = saved.time;
           if (el.bcIntervalInput && saved.interval) el.bcIntervalInput.value = saved.interval;
           if (document.getElementById('bcDurationCC') && saved.durationCC) document.getElementById('bcDurationCC').value = saved.durationCC;
@@ -3478,8 +3515,10 @@
           }
           return true;
         }
+        if (el.bcDateInput) el.bcDateInput.value = earliestIso;
       } catch (e) {
         console.warn('Error reading saved broadcast settings:', e);
+        if (el.bcDateInput) el.bcDateInput.value = formatIsoDate(getEarliestInterviewDate());
       }
       return false;
     }
@@ -3521,7 +3560,9 @@
       if (!state.smartScheduleMap) state.smartScheduleMap = {};
       if (!state.smartScheduleDates) state.smartScheduleDates = {};
 
-      const baseIsoDate = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
+      const baseIsoDate = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
+        ? document.getElementById('bcDateInput').value 
+        : formatIsoDate(getEarliestInterviewDate());
       const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
 
       const occupiedRanges = buildOccupiedTimeRanges(talentId);
@@ -3556,7 +3597,9 @@
       if (!state.smartScheduleMap) state.smartScheduleMap = {};
       if (!state.smartScheduleDates) state.smartScheduleDates = {};
 
-      const baseIsoDate = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
+      const baseIsoDate = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
+        ? document.getElementById('bcDateInput').value 
+        : formatIsoDate(getEarliestInterviewDate());
       const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
 
       // Build occupied ranges from ALL candidates across ALL vacancies who already hold a confirmed or sent slot
@@ -3724,10 +3767,34 @@
         }
       });
 
-      if (el.bcDateInput && !el.bcDateInput.value) {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        el.bcDateInput.value = tomorrow.toISOString().slice(0, 10);
+      if (el.bcDateInput) {
+        const earliest = getEarliestInterviewDate();
+        const earliestIso = formatIsoDate(earliest);
+        el.bcDateInput.min = earliestIso;
+
+        if (!el.bcDateInput.value || el.bcDateInput.value < earliestIso) {
+          el.bcDateInput.value = earliestIso;
+        } else {
+          const checkD = new Date(el.bcDateInput.value + 'T00:00:00');
+          if (!isInterviewDay(checkD)) {
+            el.bcDateInput.value = earliestIso;
+          }
+        }
+
+        el.bcDateInput.addEventListener('change', () => {
+          if (el.bcDateInput.value) {
+            const chosen = new Date(el.bcDateInput.value + 'T00:00:00');
+            if (chosen.getDay() === 0) {
+              showToast('⚠️ Hari Minggu libur wawancara. Dialihkan ke Selasa.');
+              chosen.setDate(chosen.getDate() + 2); // Minggu -> Selasa
+              el.bcDateInput.value = formatIsoDate(chosen);
+            } else if (chosen.getDay() === 1) {
+              showToast('⚠️ Tidak ada jadwal interview di hari Senin. Dialihkan ke Selasa.');
+              chosen.setDate(chosen.getDate() + 1); // Senin -> Selasa
+              el.bcDateInput.value = formatIsoDate(chosen);
+            }
+          }
+        });
       }
     }
 
@@ -6400,7 +6467,10 @@
 
     function getTalentAssignedSchedule(talent) {
       let assignedTime = (state.smartScheduleMap && state.smartScheduleMap[talent.id]) ? state.smartScheduleMap[talent.id] : '-';
-      let displayDate = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+      const baseIso = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
+        ? document.getElementById('bcDateInput').value 
+        : formatIsoDate(getEarliestInterviewDate());
+      let displayDate = formatDisplayDate(baseIso);
       let isRescheduled = false;
 
       // Priority 1: Check for Reschedule in notes
@@ -6540,10 +6610,12 @@
       const startMins = (bHours * 60) + bMinutes;
       const cutoffMins = 15 * 60; // 15:00 WIB batas jam wawancara terakhir dalam 1 hari
 
-      const rawBaseIso = (baseIsoDate || '2026-09-16');
+      const rawBaseIso = (baseIsoDate || formatIsoDate(getEarliestInterviewDate()));
       let curDate = new Date(rawBaseIso + 'T00:00:00');
-      if (isNaN(curDate.getTime())) curDate = new Date();
-      if (curDate.getDay() === 0) curDate.setDate(curDate.getDate() + 1); // Skip Sunday
+      if (isNaN(curDate.getTime())) curDate = getEarliestInterviewDate();
+      while (!isInterviewDay(curDate)) {
+        curDate.setDate(curDate.getDate() + 1); // Skip Sunday & Monday
+      }
 
       while (true) {
         const y = curDate.getFullYear();
@@ -6580,10 +6652,10 @@
           testStart += 30; // 30-min quantization tick
         }
 
-        // Advance to next day
+        // Advance to next valid interview day
         curDate.setDate(curDate.getDate() + 1);
-        if (curDate.getDay() === 0) {
-          curDate.setDate(curDate.getDate() + 1); // Skip Sunday to Monday
+        while (!isInterviewDay(curDate)) {
+          curDate.setDate(curDate.getDate() + 1); // Skip Sunday & Monday
         }
       }
     }
@@ -6614,17 +6686,17 @@
       const slotInDay = slotIndex % slotsPerDay;
       const assignedTime = dailySlots[slotInDay];
 
-      let targetDate = new Date((baseIsoDate || '2026-09-16') + 'T00:00:00');
-      if (isNaN(targetDate.getTime())) targetDate = new Date();
+      let targetDate = new Date((baseIsoDate || formatIsoDate(getEarliestInterviewDate())) + 'T00:00:00');
+      if (isNaN(targetDate.getTime())) targetDate = getEarliestInterviewDate();
 
-      if (targetDate.getDay() === 0) {
+      while (!isInterviewDay(targetDate)) {
         targetDate.setDate(targetDate.getDate() + 1);
       }
 
       let daysAdded = 0;
       while (daysAdded < dayOffset) {
         targetDate.setDate(targetDate.getDate() + 1);
-        if (targetDate.getDay() !== 0) {
+        if (isInterviewDay(targetDate)) {
           daysAdded++;
         }
       }
@@ -6642,7 +6714,9 @@
     function calculateSmartTime(index) {
       const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
       const intervalStr = document.getElementById('bcIntervalInput') ? document.getElementById('bcIntervalInput').value : '30';
-      const baseDateStr = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
+      const baseDateStr = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
+        ? document.getElementById('bcDateInput').value 
+        : formatIsoDate(getEarliestInterviewDate());
       const slot = getSmartSlot(index, baseDateStr, baseTimeStr, intervalStr);
       return slot.assignedTime;
     }
@@ -6816,7 +6890,10 @@
       }
 
       // Gather all occupied times across ALL vacancies for the selected interview date
-      const currentDateVal = formatDisplayDate(document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '');
+      const activeIso = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
+        ? document.getElementById('bcDateInput').value 
+        : formatIsoDate(getEarliestInterviewDate());
+      const currentDateVal = formatDisplayDate(activeIso);
       const occupiedTimes = new Set();
 
       (state.talents || []).forEach(other => {
@@ -6842,6 +6919,26 @@
             state.smartScheduleDates[t.id] = s.displayDate;
           }
           return;
+        }
+
+        // Keep WA Sent / Confirmed locked
+        if (['Confirmed', 'WA Sent'].includes(t.outreachStatus)) {
+          const recorded = getTalentAssignedSchedule(t);
+          if (recorded.assignedTime && recorded.assignedTime !== '-') {
+            state.smartScheduleMap[t.id] = recorded.assignedTime;
+            state.smartScheduleDates[t.id] = recorded.displayDate;
+            occupiedTimes.add(recorded.assignedTime);
+            return;
+          }
+        }
+
+        // For pending/unplanned candidates, clean up any stale past date (e.g. Wednesday 16 Sep) or Sunday/Monday
+        if (state.smartScheduleDates && state.smartScheduleDates[t.id]) {
+          const oldD = state.smartScheduleDates[t.id];
+          if (oldD.includes('Rabu, 16 September 2026') || oldD.includes('Senin') || oldD.includes('Minggu')) {
+            delete state.smartScheduleDates[t.id];
+            delete state.smartScheduleMap[t.id];
+          }
         }
 
         const recorded = getTalentAssignedSchedule(t);
@@ -7077,7 +7174,9 @@
       const target = state.talents.find(t => t.id === targetTalentId || t.$id === targetTalentId);
       if (!target) return;
 
-      const baseIsoDate = document.getElementById('bcDateInput') ? document.getElementById('bcDateInput').value : '2026-09-16';
+      const baseIsoDate = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
+        ? document.getElementById('bcDateInput').value 
+        : formatIsoDate(getEarliestInterviewDate());
       const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
       const occupiedRanges = buildOccupiedTimeRanges(targetTalentId);
       const slot = allocateNextVariableSlot(target, occupiedRanges, baseIsoDate, baseTimeStr);
