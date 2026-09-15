@@ -759,10 +759,6 @@
     @media (max-width: 900px) {
       .broadcast-control-card { grid-template-columns: 1fr; }
     }
-    /* Broadcast Drawer responsive */
-    @media (max-width: 640px) {
-      #broadcastDrawer { width: 100% !important; }
-    }
 
     .variable-chip {
       display: inline-block;
@@ -1969,7 +1965,7 @@
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>Jadwal Interview</span>
             </button>
-            <button type="button" class="sidebar-nav-item" id="navBtnBroadcast" onclick="toggleBroadcastDrawer(); toggleAppSidebar(false);">
+            <button type="button" class="sidebar-nav-item" id="navBtnBroadcast" onclick="openBroadcastView(); toggleAppSidebar(false);">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"></path></svg>
               <span>WA Broadcast</span>
             </button>
@@ -2019,201 +2015,6 @@
       <!-- ============================================== -->
       <!-- BROADCAST RIGHT DRAWER                        -->
       <!-- ============================================== -->
-      <aside id="broadcastDrawer" style="position: fixed; top: 0; right: 0; height: 100%; width: 580px; background: #FFFFFF; box-shadow: -4px 0 32px rgba(0,0,0,0.10); z-index: 1050; transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1); display: flex; flex-direction: column; border-left: 1px solid var(--border-light);">
-        <!-- Drawer Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-light); background: #FFFFFF; flex-shrink: 0;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 32px; height: 32px; background: #EFF6FF; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"></path></svg>
-            </div>
-            <div>
-              <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">WA Broadcast</div>
-              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Outreach queue &amp; scheduling</div>
-            </div>
-          </div>
-          <button type="button" onclick="toggleBroadcastDrawer(false)" style="background: none; border: 1px solid var(--border-light); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 16px; line-height: 1;" title="Close broadcast panel">✕</button>
-        </div>
-        <!-- Drawer Body (scrollable) -->
-        <div style="overflow-y: auto; flex: 1; padding: 0;">
-      <div id="broadcastContainer" class="broadcast-container" style="display: none;">
-        <!-- High-End Sub-Tabs Navigation -->
-        <div style="border-bottom: 1px solid var(--border-light); margin-bottom: 24px; padding: 0 20px;">
-          <div style="display: flex; gap: 24px;">
-            <button type="button" class="bc-tab-btn active" onclick="switchBcTab('queue')" id="bcNavQueue" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: #2563EB; border-bottom: 2px solid #2563EB;">1. Candidate Queue</button>
-            <button type="button" class="bc-tab-btn" onclick="switchBcTab('automation')" id="bcNavAutomation" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">2. Smart Scheduling</button>
-            <button type="button" class="bc-tab-btn" onclick="switchBcTab('template')" id="bcNavTemplate" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">3. Message Template</button>
-          </div>
-        </div>
-
-        <!-- TAB 1: QUEUE -->
-        <div id="bcTabQueue" style="display: block;">
-          <div class="table-container">
-            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
-              <div>
-                <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                  Broadcast Outreach Queue
-                  <span id="bcActiveVacancyBadge" style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 2px 8px; border-radius: 6px;"></span>
-                </h3>
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
-                  Select candidates for the outreach sequence. Smart scheduling will assign times sequentially.
-                </div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <select id="bcStageFilter" class="form-select" onchange="renderBroadcastTable()" style="font-size: 12px; padding: 6px 10px;">
-                  <option value="ALL">All Active Candidates</option>
-                  <option value="Screening" selected>Screening Candidates Only</option>
-                  <option value="Invited">Invited Candidates</option>
-                  <option value="Prospect">Prospect Candidates</option>
-                  <option value="Interviewed">Interviewed Candidates</option>
-                  <option value="Shortlisted">Shortlisted Candidates</option>
-                  <option value="Hired">Hired Candidates</option>
-                </select>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="recalculateBroadcastSlots(true)" title="Hitung ulang jam interview berurutan dari jam awal" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; font-weight: 500; cursor: pointer;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                  Recalculate Slots
-                </button>
-                <div style="font-family: var(--font-mono); font-size: 12px;">
-                  Queue: <span id="bcQueueCount" style="font-weight: 600; color: #16A34A;">0</span> selected
-                </div>
-              </div>
-            </div>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th style="width: 40px; text-align: center;">
-                    <input type="checkbox" id="bcSelectAll" checked onchange="toggleSelectAllBroadcast(this.checked)">
-                  </th>
-                  <th>Candidate Profile</th>
-                  <th>Stage</th>
-                  <th>WhatsApp Number</th>
-                  <th>Assigned Schedule</th>
-                  <th style="text-align: right;">Action</th>
-                </tr>
-              </thead>
-              <tbody id="bcTableBody"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- TAB 2: AUTOMATION SETTINGS -->
-        <div id="bcTabAutomation" style="display: none; padding: 0 20px;">
-          <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 600px;">
-            <div>
-              <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #16A34A; margin-bottom: 12px;">
-                ⚙️ Smart Scheduling Parameters
-              </div>
-              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Atur jam mulai dan interval. Sesi terakhir dalam 1 hari dibatasi hingga <strong>15:00 WIB</strong> (sesi setelahnya otomatis bergulir ke hari kerja berikutnya; <strong>Minggu libur &amp; Senin tidak ada interview</strong>. Default otomatis <strong>H+2</strong> untuk jeda persiapan kandidat).</p>
-
-              <div class="form-group">
-                <label class="form-label">Interview Date:</label>
-                <input type="date" id="bcDateInput" class="form-input" onchange="renderBroadcastTable()">
-              </div>
-              
-              <div class="form-row-2">
-                <div class="form-group">
-                  <label class="form-label">Base Start Time:</label>
-                  <input type="time" id="bcTimeInput" class="form-input" value="09:00" onchange="renderBroadcastTable()">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Default Interval (mins):</label>
-                  <input type="number" id="bcIntervalInput" class="form-input" value="60" min="5" oninput="renderBroadcastTable()">
-                </div>
-              </div>
-
-              <!-- Vacancy-Specific Durations (Dynamic from Real Data) -->
-              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <div>
-                    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1E293B;">
-                      ⏱️ Durasi Wawancara Per Posisi (Quantized Slot Block)
-                    </div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
-                      Disesuaikan otomatis untuk setiap posisi aktif tanpa peran dummy.
-                    </div>
-                  </div>
-                  <span style="font-size: 10px; font-family: var(--font-mono); background: #E2E8F0; color: #475569; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Otomatis</span>
-                </div>
-                <div id="bcVacancyDurationsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                  <!-- Dynamically rendered by renderVacancyDurationControls() -->
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Interview Location (Onsite):</label>
-                <input type="text" id="bcLocationInput" class="form-input" value="s.id/lokasipge" placeholder="e.g. s.id/lokasipge" oninput="renderBroadcastTable()">
-              </div>
-
-              <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px;">
-                <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; color: #166534;">
-                  <input type="checkbox" id="bcAutoUpdateStage" checked style="margin-top: 2px;">
-                  <span><strong>Auto-Sync ke Appwrite:</strong> Otomatis simpan catatan jadwal &amp; ubah status kandidat ke <em>Invited</em> saat pesan dikirim.</span>
-                </label>
-              </div>
-              <div style="display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
-                <button type="button" class="btn btn-primary" id="btnSaveScheduleSettings" onclick="handleSaveScheduleSettings()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; background: #16A34A; border-color: #16A34A; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 8px 16px; cursor: pointer;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  Simpan Pengaturan Jadwal
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 3: MESSAGE TEMPLATE -->
-        <div id="bcTabTemplate" style="display: none; padding: 0 20px;">
-          <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 800px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF; display: flex; align-items: center; gap: 8px;">
-                  <span>📝 Custom Message Box</span>
-                  <span id="templateSyncBadge" style="font-size: 10px; font-weight: 600; text-transform: none; color: #15803D; background: #DCFCE7; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">☁️ Cloud Synced</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <select id="bcTemplateSelect" class="form-select" style="width: auto; padding: 4px 8px; font-size: 11px;" onchange="handleBroadcastTemplateChange()">
-                    <option value="interview">Template: Undangan Interview</option>
-                    <option value="screening">Template: Follow-up Screening</option>
-                    <option value="offering">Template: Pemberitahuan Shortlist</option>
-                    <option value="custom">Template: Pesan Kustom Bebas</option>
-                  </select>
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="resetCurrentTemplateToDefault()" style="font-size: 11px; padding: 4px 8px;" title="Kembalikan template ini ke teks bawaan sistem">
-                    ↺ Reset Default
-                  </button>
-                </div>
-              </div>
-
-              <div style="margin-bottom: 8px;">
-                <span style="font-size: 11px; color: var(--text-muted); margin-right: 6px;">Insert Variable:</span>
-                <div style="display: inline-flex; gap: 4px; flex-wrap: wrap;">
-                  <span class="variable-chip" onclick="insertVariableIntoMessage('{name}')">{name}</span>
-                  <span class="variable-chip" onclick="insertVariableIntoMessage('{role}')">{role}</span>
-                  <span class="variable-chip" onclick="insertVariableIntoMessage('{date}')">{date}</span>
-                  <span class="variable-chip" onclick="insertVariableIntoMessage('{time}')">{time}</span>
-                  <span class="variable-chip" onclick="insertVariableIntoMessage('{location}')">{location}</span>
-                </div>
-              </div>
-
-              <textarea id="bcCustomMessage" class="form-textarea" rows="10" style="font-family: var(--font-sans); font-size: 13px; line-height: 1.6;"></textarea>
-
-              <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic;">
-                💡 Variabel di atas otomatis diganti sesuai data kandidat dan slot waktu mereka.
-              </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
-                <span style="font-size: 12px; color: var(--text-muted);">
-                  Format template pesan akan disimpan dan digunakan saat klik &ldquo;Send to WA&rdquo;.
-                </span>
-                <button type="button" class="btn btn-primary" id="btnSaveTemplateSettings" onclick="handleSaveTemplateSettings()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; background: #2563EB; border-color: #2563EB; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 8px 16px; cursor: pointer;">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                  Simpan Template Pesan
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-        </div>
-      </aside>
-      <!-- Broadcast Drawer Backdrop -->
-      <div id="broadcastDrawerBackdrop" onclick="toggleBroadcastDrawer(false)" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.20); z-index: 1040; backdrop-filter: blur(1px);"></div>
 
 
       <!-- Main Viewport for Workspace & Candidate Content -->
@@ -2537,6 +2338,213 @@
       <!-- Footer Summary -->
       <div style="margin-top: 20px; font-size: 12px; color: var(--text-secondary); text-align: center;" id="schedFooterSummary">
         Menampilkan seluruh sesi wawancara
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW D: WA BROADCAST PAGE                      -->
+    <!-- ============================================== -->
+    <div id="broadcastPageView" style="display: none; padding-bottom: 60px;">
+      <!-- Breadcrumb & Back Button -->
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="selectVacancy(state.activeVacancy || 'ALL')" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Kembali ke Screening Room
+        </button>
+      </div>
+
+      <!-- Page Hero Header -->
+      <section style="margin-bottom: 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 12px; padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div style="color: #2563EB; font-weight: 600; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">
+              📢 Operations — Outreach
+            </div>
+            <h1 style="font-size: 24px; font-weight: 700; color: var(--text-primary); margin: 0;">
+              WA Broadcast <em>&amp; Smart Scheduling</em>
+            </h1>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px; max-width: 680px; line-height: 1.6;">
+              Kelola antrian outreach kandidat, atur slot jadwal otomatis, dan kirim pesan WhatsApp terpersonalisasi ke semua kandidat terpilih.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Broadcast Content -->
+      <div id="broadcastContainer" class="broadcast-container" style="display: none;">
+        <!-- High-End Sub-Tabs Navigation -->
+        <div style="border-bottom: 1px solid var(--border-light); margin-bottom: 24px; padding: 0 20px;">
+          <div style="display: flex; gap: 24px;">
+            <button type="button" class="bc-tab-btn active" onclick="switchBcTab('queue')" id="bcNavQueue" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: #2563EB; border-bottom: 2px solid #2563EB;">1. Candidate Queue</button>
+            <button type="button" class="bc-tab-btn" onclick="switchBcTab('automation')" id="bcNavAutomation" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">2. Smart Scheduling</button>
+            <button type="button" class="bc-tab-btn" onclick="switchBcTab('template')" id="bcNavTemplate" style="background: none; border: none; padding: 12px 0; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">3. Message Template</button>
+          </div>
+        </div>
+
+        <!-- TAB 1: QUEUE -->
+        <div id="bcTabQueue" style="display: block;">
+          <div class="table-container">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: #FFFFFF;">
+              <div>
+                <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                  Broadcast Outreach Queue
+                  <span id="bcActiveVacancyBadge" style="font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 2px 8px; border-radius: 6px;"></span>
+                </h3>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                  Select candidates for the outreach sequence. Smart scheduling will assign times sequentially.
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="bcStageFilter" class="form-select" onchange="renderBroadcastTable()" style="font-size: 12px; padding: 6px 10px;">
+                  <option value="ALL">All Active Candidates</option>
+                  <option value="Screening" selected>Screening Candidates Only</option>
+                  <option value="Invited">Invited Candidates</option>
+                  <option value="Prospect">Prospect Candidates</option>
+                  <option value="Interviewed">Interviewed Candidates</option>
+                  <option value="Shortlisted">Shortlisted Candidates</option>
+                  <option value="Hired">Hired Candidates</option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="recalculateBroadcastSlots(true)" title="Hitung ulang jam interview berurutan dari jam awal" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; font-weight: 500; cursor: pointer;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                  Recalculate Slots
+                </button>
+                <div style="font-family: var(--font-mono); font-size: 12px;">
+                  Queue: <span id="bcQueueCount" style="font-weight: 600; color: #16A34A;">0</span> selected
+                </div>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;">
+                    <input type="checkbox" id="bcSelectAll" checked onchange="toggleSelectAllBroadcast(this.checked)">
+                  </th>
+                  <th>Candidate Profile</th>
+                  <th>Stage</th>
+                  <th>WhatsApp Number</th>
+                  <th>Assigned Schedule</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="bcTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: AUTOMATION SETTINGS -->
+        <div id="bcTabAutomation" style="display: none; padding: 0 20px;">
+          <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 600px;">
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #16A34A; margin-bottom: 12px;">
+                ⚙️ Smart Scheduling Parameters
+              </div>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Atur jam mulai dan interval. Sesi terakhir dalam 1 hari dibatasi hingga <strong>15:00 WIB</strong> (sesi setelahnya otomatis bergulir ke hari kerja berikutnya; <strong>Minggu libur &amp; Senin tidak ada interview</strong>. Default otomatis <strong>H+2</strong> untuk jeda persiapan kandidat).</p>
+
+              <div class="form-group">
+                <label class="form-label">Interview Date:</label>
+                <input type="date" id="bcDateInput" class="form-input" onchange="renderBroadcastTable()">
+              </div>
+              
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Base Start Time:</label>
+                  <input type="time" id="bcTimeInput" class="form-input" value="09:00" onchange="renderBroadcastTable()">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Default Interval (mins):</label>
+                  <input type="number" id="bcIntervalInput" class="form-input" value="60" min="5" oninput="renderBroadcastTable()">
+                </div>
+              </div>
+
+              <!-- Vacancy-Specific Durations (Dynamic from Real Data) -->
+              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div>
+                    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1E293B;">
+                      ⏱️ Durasi Wawancara Per Posisi (Quantized Slot Block)
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                      Disesuaikan otomatis untuk setiap posisi aktif tanpa peran dummy.
+                    </div>
+                  </div>
+                  <span style="font-size: 10px; font-family: var(--font-mono); background: #E2E8F0; color: #475569; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Otomatis</span>
+                </div>
+                <div id="bcVacancyDurationsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamically rendered by renderVacancyDurationControls() -->
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Interview Location (Onsite):</label>
+                <input type="text" id="bcLocationInput" class="form-input" value="s.id/lokasipge" placeholder="e.g. s.id/lokasipge" oninput="renderBroadcastTable()">
+              </div>
+
+              <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px;">
+                <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; color: #166534;">
+                  <input type="checkbox" id="bcAutoUpdateStage" checked style="margin-top: 2px;">
+                  <span><strong>Auto-Sync ke Appwrite:</strong> Otomatis simpan catatan jadwal &amp; ubah status kandidat ke <em>Invited</em> saat pesan dikirim.</span>
+                </label>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+                <button type="button" class="btn btn-primary" id="btnSaveScheduleSettings" onclick="handleSaveScheduleSettings()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; background: #16A34A; border-color: #16A34A; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 8px 16px; cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  Simpan Pengaturan Jadwal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: MESSAGE TEMPLATE -->
+        <div id="bcTabTemplate" style="display: none; padding: 0 20px;">
+          <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 800px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF; display: flex; align-items: center; gap: 8px;">
+                  <span>📝 Custom Message Box</span>
+                  <span id="templateSyncBadge" style="font-size: 10px; font-weight: 600; text-transform: none; color: #15803D; background: #DCFCE7; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">☁️ Cloud Synced</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <select id="bcTemplateSelect" class="form-select" style="width: auto; padding: 4px 8px; font-size: 11px;" onchange="handleBroadcastTemplateChange()">
+                    <option value="interview">Template: Undangan Interview</option>
+                    <option value="screening">Template: Follow-up Screening</option>
+                    <option value="offering">Template: Pemberitahuan Shortlist</option>
+                    <option value="custom">Template: Pesan Kustom Bebas</option>
+                  </select>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="resetCurrentTemplateToDefault()" style="font-size: 11px; padding: 4px 8px;" title="Kembalikan template ini ke teks bawaan sistem">
+                    ↺ Reset Default
+                  </button>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--text-muted); margin-right: 6px;">Insert Variable:</span>
+                <div style="display: inline-flex; gap: 4px; flex-wrap: wrap;">
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{name}')">{name}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{role}')">{role}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{date}')">{date}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{time}')">{time}</span>
+                  <span class="variable-chip" onclick="insertVariableIntoMessage('{location}')">{location}</span>
+                </div>
+              </div>
+
+              <textarea id="bcCustomMessage" class="form-textarea" rows="10" style="font-family: var(--font-sans); font-size: 13px; line-height: 1.6;"></textarea>
+
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; font-style: italic;">
+                💡 Variabel di atas otomatis diganti sesuai data kandidat dan slot waktu mereka.
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
+                <span style="font-size: 12px; color: var(--text-muted);">
+                  Format template pesan akan disimpan dan digunakan saat klik &ldquo;Send to WA&rdquo;.
+                </span>
+                <button type="button" class="btn btn-primary" id="btnSaveTemplateSettings" onclick="handleSaveTemplateSettings()" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; background: #2563EB; border-color: #2563EB; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 8px 16px; cursor: pointer;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  Simpan Template Pesan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
       </main> <!-- /.app-main-viewport -->
@@ -4505,9 +4513,11 @@
       const hubView = document.getElementById('vacancyHubView');
       const roomView = document.getElementById('screeningRoomView');
       const scheduleView = document.getElementById('interviewScheduleView');
+      const broadcastView = document.getElementById('broadcastPageView');
 
       if (hubView) hubView.style.display = 'none';
       if (roomView) roomView.style.display = 'none';
+      if (broadcastView) broadcastView.style.display = 'none';
       if (scheduleView) scheduleView.style.display = 'block';
 
       // Update sidebar navigation buttons
@@ -4576,6 +4586,39 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     window.openScheduleView = openScheduleView;
+
+    function openBroadcastView() {
+      // Hide other main workspace views
+      const hubView = document.getElementById('vacancyHubView');
+      const roomView = document.getElementById('screeningRoomView');
+      const scheduleView = document.getElementById('interviewScheduleView');
+      const broadcastView = document.getElementById('broadcastPageView');
+
+      if (hubView) hubView.style.display = 'none';
+      if (roomView) roomView.style.display = 'none';
+      if (scheduleView) scheduleView.style.display = 'none';
+      if (broadcastView) broadcastView.style.display = 'block';
+
+      // Update sidebar navigation active states
+      const navHub = document.getElementById('navBtnHub');
+      const navScreening = document.getElementById('navBtnScreening');
+      const navSchedule = document.getElementById('navBtnSchedule');
+      const navBroadcast = document.getElementById('navBtnBroadcast');
+      if (navHub) navHub.classList.remove('active');
+      if (navScreening) navScreening.classList.remove('active');
+      if (navSchedule) navSchedule.classList.remove('active');
+      if (navBroadcast) navBroadcast.classList.add('active');
+
+      // Make broadcastContainer visible and render
+      const bc = document.getElementById('broadcastContainer');
+      if (bc) bc.style.display = 'flex';
+
+      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+      if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.openBroadcastView = openBroadcastView;
 
     // Backward compatibility redirects
     function openFinalScheduleModal() {
@@ -5970,7 +6013,9 @@
       const navHub = document.getElementById('navBtnHub');
       const navScreening = document.getElementById('navBtnScreening');
       const navSchedule = document.getElementById('navBtnSchedule');
+      const navBroadcastBtn = document.getElementById('navBtnBroadcast');
       if (navSchedule) navSchedule.classList.remove('active');
+      if (navBroadcastBtn) navBroadcastBtn.classList.remove('active');
 
       if (navHub && navScreening) {
         if (vacancyName === 'HUB') {
@@ -5985,7 +6030,9 @@
       const hubView = document.getElementById('vacancyHubView');
       const roomView = document.getElementById('screeningRoomView');
       const scheduleView = document.getElementById('interviewScheduleView');
+      const broadcastView = document.getElementById('broadcastPageView');
       if (scheduleView) scheduleView.style.display = 'none';
+      if (broadcastView) broadcastView.style.display = 'none';
 
       const heading = document.getElementById('selectedVacancyHeading');
       const meta = document.getElementById('selectedVacancyMeta');
@@ -11608,32 +11655,6 @@ function renderPentagonMatrixSvg(dimensions) {
       }
     }
     window.toggleAppSidebar = toggleAppSidebar;
-
-    function toggleBroadcastDrawer(forceOpen) {
-      const drawer = document.getElementById('broadcastDrawer');
-      const backdrop = document.getElementById('broadcastDrawerBackdrop');
-      const navBtn = document.getElementById('navBtnBroadcast');
-      if (!drawer) return;
-
-      const isOpen = drawer.style.transform === 'translateX(0px)' || drawer.style.transform === 'translateX(0)';
-      const willOpen = typeof forceOpen === 'boolean' ? forceOpen : !isOpen;
-
-      drawer.style.transform = willOpen ? 'translateX(0)' : 'translateX(100%)';
-      if (backdrop) backdrop.style.display = willOpen ? 'block' : 'none';
-      if (navBtn) navBtn.classList.toggle('active', willOpen);
-
-      // Make sure broadcastContainer is visible inside the drawer
-      const bc = document.getElementById('broadcastContainer');
-      if (bc) bc.style.display = willOpen ? 'flex' : 'none';
-
-      // Trigger renders when opening
-      if (willOpen) {
-        if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
-        if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
-      }
-    }
-    window.toggleBroadcastDrawer = toggleBroadcastDrawer;
-
 </script>
 </body>
 </html>
