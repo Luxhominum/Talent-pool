@@ -1,0 +1,3647 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PGE Talent Pool | Portal Pelaksanaan Asesmen On-Site</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon-screening.svg">
+  <link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%233730A3'/%3E%3Cstop offset='100%25' stop-color='%234F46E5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='21.5' font-family='sans-serif' font-weight='800' font-size='14' fill='%23FFFFFF' text-anchor='middle' letter-spacing='-0.5'%3EST%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+
+  <!-- Appwrite Web SDK v14 -->
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14"></script>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="js/assessment-features.js"></script>
+
+  <style>
+    :root {
+      --bg-canvas: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --bg-surface-secondary: #F1F5F9;
+      --border-light: rgba(0, 0, 0, 0.08);
+      --border-focus: #0F172A;
+
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-muted: #64748B;
+
+      --accent-primary: #0F172A;
+      --accent-emerald: #059669;
+      --accent-emerald-light: #ECFDF5;
+      --accent-purple: #7C3AED;
+      --accent-purple-light: #F5F3FF;
+      --accent-blue: #1E40AF;
+      --accent-blue-light: #EFF6FF;
+
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Geist Mono', monospace;
+      --font-serif: 'Newsreader', Georgia, serif;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* Top Navigation Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #0F172A;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.2);
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1px solid #A7F3D0;
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+      animation: pulseAnim 2s infinite;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      border: 1px solid transparent;
+    }
+
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--text-primary);
+      border-color: #CBD5E1;
+    }
+
+    .btn-secondary:hover {
+      background: #F8FAFC;
+      border-color: #94A3B8;
+    }
+
+    .btn-primary {
+      background: #0F172A;
+      color: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      background: #1E293B;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-launch {
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 8px;
+    }
+
+    .btn-launch:hover {
+      background: #1E293B;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+    }
+
+    /* Layout Container */
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    /* Hero Banner */
+    .station-hero {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-title-area h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .stats-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: var(--bg-surface-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+    }
+
+    /* Module Selector Section */
+    .module-selector-box {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .module-selector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .module-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #334155;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preset-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .preset-btn:hover {
+      background: #F1F5F9;
+      border-color: #94A3B8;
+      color: #0F172A;
+    }
+
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .module-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .module-card {
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .module-card:hover {
+      border-color: #94A3B8;
+      background: #FAFAFA;
+    }
+
+    .module-card.active {
+      border-color: #0F172A;
+      background: #FFFFFF;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.05);
+    }
+
+    .module-card input[type="checkbox"] {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: #0F172A;
+      cursor: pointer;
+    }
+
+    .module-info {
+      flex: 1;
+    }
+
+    .module-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .module-desc {
+      font-size: 11.5px;
+      color: #64748B;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .module-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 10.5px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* Active Summary Banner */
+    .active-summary-banner {
+      margin-top: 12px;
+      padding: 8px 14px;
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #1E40AF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Filter Toolbar */
+    .filter-toolbar {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .filter-row-top {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 820px) {
+      .filter-row-top {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94A3B8;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      padding: 9px 12px 9px 36px;
+      border: 1px solid #CBD5E1;
+      border-radius: var(--radius-sm);
+      background: #FFFFFF;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input:focus {
+      border-color: #0F172A;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
+    }
+
+    .filter-select {
+      width: 100%;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      padding: 9px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: var(--radius-sm);
+      background: #FFFFFF;
+      color: var(--text-primary);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .filter-select:focus {
+      border-color: #0F172A;
+    }
+
+    .status-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid #F1F5F9;
+      padding-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .status-tab:hover {
+      background: #F1F5F9;
+      color: #0F172A;
+    }
+
+    .status-tab.active {
+      background: #0F172A;
+      color: #FFFFFF;
+    }
+
+    /* Candidate Cards Grid */
+    .candidates-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .candidate-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .candidate-card:hover {
+      border-color: #94A3B8;
+      box-shadow: var(--shadow-md);
+    }
+
+    .candidate-main-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .candidate-profile-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .candidate-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #0F172A;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .candidate-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .candidate-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .candidate-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .candidate-id-badge {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 1px 7px;
+      background: #F1F5F9;
+      color: #475569;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+    }
+
+    .stage-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .stage-screening { background: #FEF3C7; color: #92400E; }
+    .stage-interview { background: #E0E7FF; color: #3730A3; }
+    .stage-prospect { background: #F3F4F6; color: #374151; }
+    .stage-offered { background: #DCFCE7; color: #15803D; }
+
+    .candidate-meta {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .candidate-actions-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Score Details Panel */
+    .score-details-panel {
+      margin-top: 4px;
+      padding: 14px 16px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .score-details-panel.open {
+      display: block;
+      animation: fadeIn 0.15s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Badges */
+    .status-badge-incomplete {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      background: #F3F4F6;
+      border: 1px solid #E5E7EB;
+      color: #4B5563;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge-complete {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      background: #ECFDF5;
+      border: 1px solid #A7F3D0;
+      color: #065F46;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Empty state */
+    .empty-card {
+      background: #FFFFFF;
+      border: 1px dashed #CBD5E1;
+      border-radius: var(--radius-md);
+      padding: 48px 24px;
+      text-align: center;
+      color: #64748B;
+    }
+
+    /* Toast Notification */
+    .toast-popup {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+
+    .toast-popup.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  
+    /* Mode Switcher Segmented Control */
+    .mode-switcher-wrap {
+      display: flex;
+      align-items: center;
+      background: #F1F5F9;
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid #E2E8F0;
+      gap: 4px;
+    }
+
+    .mode-switch-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 7px 16px;
+      border-radius: 7px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .mode-switch-btn:hover {
+      color: #0F172A;
+    }
+
+    .mode-switch-btn.active {
+      background: #FFFFFF;
+      color: #0F172A;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: 1px solid #CBD5E1;
+    }
+
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      border-radius: 12px;
+      background: #EFF6FF;
+      color: #1E40AF;
+    }
+
+    .mode-switch-btn.active .mode-badge {
+      background: #1E40AF;
+      color: #FFFFFF;
+    }
+
+    /* KPI Summary Cards for Results Mode */
+    .results-hero {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .results-hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform 0.15s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .kpi-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: #64748B;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .kpi-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      color: #94A3B8;
+      margin-top: 1px;
+    }
+
+    /* Results Dossier Card */
+    .dossier-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dossier-card:hover {
+      border-color: #94A3B8;
+      box-shadow: var(--shadow-md);
+    }
+
+    .dossier-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+
+    .dossier-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dossier-visual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 960px) {
+      .dossier-visual-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dossier-subcard {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dossier-subcard-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #F8FAFC;
+    }
+
+    .results-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+      .cognitive-viz-grid { display: grid; grid-template-columns: 190px 1fr; gap: 20px; align-items: center; }
+    @media (max-width: 768px) { .cognitive-viz-grid { grid-template-columns: 1fr !important; gap: 14px; } }
+  
+    /* Executive Leaderboard Table Styles (Option 1) */
+    .results-view-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .layout-toggle-wrap {
+      display: inline-flex;
+      background: #F1F5F9;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+      gap: 2px;
+    }
+
+    .layout-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748B;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .layout-btn:hover {
+      color: #0F172A;
+    }
+
+    .layout-btn.active {
+      background: #FFFFFF;
+      color: #0F172A;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      border: 1px solid #CBD5E1;
+    }
+
+    .leaderboard-table-wrap {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      min-width: 860px;
+    }
+
+    .leaderboard-table th {
+      background: #F8FAFC;
+      padding: 12px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .leaderboard-row {
+      border-bottom: 1px solid #F1F5F9;
+      transition: background-color 0.15s ease;
+      cursor: pointer;
+    }
+
+    .leaderboard-row:hover {
+      background-color: #F8FAFC;
+    }
+
+    .leaderboard-row.expanded {
+      background-color: #F0FDF4;
+      border-bottom: none;
+    }
+
+    .leaderboard-cell {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #0F172A;
+      vertical-align: middle;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+      background: #F1F5F9;
+      color: #475569;
+      border: 1px solid #E2E8F0;
+    }
+
+    .rank-badge.rank-1 {
+      background: #FEF3C7;
+      color: #92400E;
+      border-color: #FDE68A;
+      box-shadow: 0 1px 3px rgba(217, 119, 6, 0.2);
+    }
+
+    .rank-badge.rank-2 {
+      background: #F1F5F9;
+      color: #334155;
+      border-color: #CBD5E1;
+    }
+
+    .rank-badge.rank-3 {
+      background: #FFEDD5;
+      color: #9A3412;
+      border-color: #FED7AA;
+    }
+
+    .leaderboard-drawer-row td {
+      padding: 0;
+      background: #F8FAFC;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    .leaderboard-drawer-content {
+      padding: 18px 20px;
+      animation: fadeIn 0.2s ease;
+    }
+
+
+    /* Assessment Extensions Styles */
+    .candidate-compare-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #2563EB;
+      cursor: pointer;
+    }
+
+    .comparison-floating-bar {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #FFFFFF;
+      border: 1.5px solid #2563EB;
+      box-shadow: 0 12px 30px -5px rgba(37, 99, 235, 0.28), 0 8px 12px -6px rgba(0, 0, 0, 0.12);
+      border-radius: 12px;
+      padding: 10px 18px;
+      z-index: 9999;
+      display: none;
+      animation: slideUpFloat 0.25s ease-out;
+    }
+
+    .comparison-bar-content {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    @keyframes slideUpFloat {
+      from { transform: translate(-50%, 20px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    .stage-action-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .stage-badge-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid #CBD5E1;
+      background: #F8FAFC;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .stage-badge-btn:hover {
+      background: #E2E8F0;
+    }
+
+    .stage-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 4px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      padding: 4px;
+      z-index: 1000;
+      min-width: 170px;
+    }
+
+    .stage-menu.open {
+      display: block;
+    }
+
+    .stage-menu-item {
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #334155;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stage-menu-item:hover {
+      background: #F1F5F9;
+      color: #0F172A;
+    }
+
+    .ext-toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      z-index: 99999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .ext-toast-notification.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fit-score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-badge">P</div>
+      <div>
+        <div class="brand-title">
+          <span>PGE Talent Pool</span>
+          <span class="brand-tag"><span class="pulse-dot"></span> On-Site Testing Station</span>
+        </div>
+      </div>
+    </div>
+    <!-- Segmented Mode Switcher -->
+    <div class="mode-switcher-wrap">
+      <button type="button" class="mode-switch-btn active" id="btnModeLauncher" onclick="switchPortalMode('launcher')" title="Mode penyiapan & pelaksanaan tes bagi kandidat di laptop">
+        <span>🚀</span> Peluncur Tes On-Site
+      </button>
+      <button type="button" class="mode-switch-btn" id="btnModeResults" onclick="switchPortalMode('results')" title="Mode evaluasi hasil asesmen & visualisasi metrik psikometrik">
+        <span>📊</span> Dashboard Hasil &amp; Analitik
+        <span class="mode-badge" id="modeResultsCountBadge">0</span>
+      </button>
+    </div>
+
+    <div class="topbar-actions">
+      <a href="index.html" class="btn btn-secondary" title="Kembali ke dashboard rekrutmen utama">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Dashboard Utama</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Mode 1: Station Configuration Hero (Visible when portalMode === 'launcher') -->
+    <section class="station-hero" id="stationHeroLauncher">
+      <div class="hero-header">
+        <div class="hero-title-area">
+          <h1>
+            <span>💻</span> Portal Pelaksanaan Asesmen On-Site
+          </h1>
+          <p class="hero-subtitle">
+            Pilih modul tes yang ingin diujikan, cari kandidat yang hadir, dan klik <strong>Mulai Test</strong> untuk membuka lembar pengerjaan.
+          </p>
+        </div>
+        <div class="stats-strip">
+          <span class="stat-badge" id="statTotal">Total: 0</span>
+          <span class="stat-badge" style="background:#FEF3C7; color:#92400E; border-color:#FDE68A;" id="statPending">Belum Tes: 0</span>
+          <span class="stat-badge" style="background:#ECFDF5; color:#065F46; border-color:#A7F3D0;" id="statCompleted">Selesai: 0</span>
+        </div>
+      </div>
+
+      <!-- Module Selector Box -->
+      <div class="module-selector-box">
+        <div class="module-selector-header">
+          <div class="module-label">
+            <span>⚙️</span> 1. Pilih Modul Tes yang Diberikan ke Kandidat:
+          </div>
+          <div class="preset-btns">
+            <span style="font-size: 11px; color: #64748B; margin-right: 4px;">Preset Cepat:</span>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('all')">Pilih Semua (3)</button>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('personality_disc')">Big Five + DISC</button>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('disc_cog')">DISC + Logika</button>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('cog_only')">Logika Saja</button>
+          </div>
+        </div>
+
+        <div class="module-grid">
+          <!-- Big Five Card -->
+          <label class="module-card active" id="cardModuleBigFive">
+            <input type="checkbox" id="chkModuleBigFive" checked onchange="updateSelectedModules()">
+            <div class="module-info">
+              <div class="module-title">
+                <span>🧠</span> IPIP Big Five (50 Soal)
+              </div>
+              <div class="module-desc">
+                Mengukur 5 dimensi kepribadian kerja: Extraversion, Agreeableness, Conscientiousness, Emotional Stability, dan Intellect.
+              </div>
+              <span class="module-badge" style="background: #EFF6FF; color: #1E40AF; border: 1px solid #DBEAFE;">50 Pernyataan Likert (1–5)</span>
+            </div>
+          </label>
+
+          <!-- DISC Card -->
+          <label class="module-card active" id="cardModuleDisc">
+            <input type="checkbox" id="chkModuleDisc" checked onchange="updateSelectedModules()">
+            <div class="module-info">
+              <div class="module-title">
+                <span>🧩</span> Tes Gaya Kerja DISC (24 Soal)
+              </div>
+              <div class="module-desc">
+                Dominance, Influence, Steadiness, Conscientiousness. Mengidentifikasi gaya komunikasi dan adaptasi kerja kandidat.
+              </div>
+              <span class="module-badge" style="background: #F5F3FF; color: #7C3AED; border: 1px solid #EDE9FE;">24 Soal Most &amp; Least</span>
+            </div>
+          </label>
+
+          <!-- Cognitive & Business Logic Card -->
+          <label class="module-card active" id="cardModuleCognitive">
+            <input type="checkbox" id="chkModuleCognitive" checked onchange="updateSelectedModules()">
+            <div class="module-info">
+              <div class="module-title">
+                <span>📊</span> Logika &amp; Bisnis Praktis (15 Soal)
+              </div>
+              <div class="module-desc">
+                Deret Angka, Aritmatika Bisnis, Studi Kasus Komersial &amp; Penalaran Analitis untuk problem solving di dunia kerja nyata.
+              </div>
+              <span class="module-badge" style="background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5;">15 Pilihan Ganda (A–E)</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="active-summary-banner" id="activeSummaryBanner">
+          <span>💡</span> <span id="activeSummaryText">Saat ini 3 modul aktif (Total 89 Soal). Kandidat yang diluncurkan akan mengerjakan modul-modul ini.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Search Toolbar -->
+    <section class="filter-toolbar">
+      <div class="filter-row-top">
+        <div class="search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Cari nama kandidat atau ID (e.g. Deviana, PGE-003)..." oninput="handleFilterChange()">
+        </div>
+
+        <div>
+          <select class="filter-select" id="roleFilter" onchange="handleFilterChange()">
+            <option value="">Semua Posisi Lowongan</option>
+          </select>
+        </div>
+
+        <div>
+          <select class="filter-select" id="stageFilter" onchange="handleFilterChange()">
+            <option value="" selected>🌐 Semua Tahapan Aktif</option>
+            <option value="Prospect">Tahap Prospect</option>
+            <option value="Screening">Tahap Screening</option>
+            <option value="Interviewed">Tahap Interviewed</option>
+            <option value="Shortlisted">Tahap Shortlisted</option>
+            <option value="Offered">Tahap Offered</option>
+            <option value="Hired">Tahap Hired</option>
+            <option value="Archived">📁 Archived / Gugur</option>
+            <option value="ALL_WITH_ARCHIVED">Semua (Termasuk Archived)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="status-tabs" id="statusTabsWrap">
+        <span style="font-size: 11px; font-family: var(--font-mono); font-weight: 700; text-transform: uppercase; color: #64748B; margin-right: 6px;">Status Tes:</span>
+        <button type="button" class="status-tab active" data-status="all" onclick="setStatusTab('all')">Semua (<span id="tabCountAll">0</span>)</button>
+        <button type="button" class="status-tab" data-status="pending" onclick="setStatusTab('pending')">Belum Tes (<span id="tabCountPending">0</span>)</button>
+        <button type="button" class="status-tab" data-status="completed" onclick="setStatusTab('completed')">Sudah Selesai (<span id="tabCountCompleted">0</span>)</button>
+      </div>
+    </section>
+
+    <!-- Candidate List Feed -->
+    <section class="candidates-grid" id="candidatesList">
+      <div class="empty-card">
+        <div class="spinner" style="margin: 0 auto 12px; width: 28px; height: 28px; border: 3px solid #E2E8F0; border-top-color: #0F172A; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <p>Menghubungkan ke database PGE Talent Pool...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" id="toastPopup"></div>
+
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    /* ---------------------------------------------------- */
+        /* ---------------------------------------------------- */
+    /* 0. Appwrite Cloud Configuration                      */
+    /* ---------------------------------------------------- */
+    const APPWRITE_CONFIG = {
+      endpoint: 'https://sgp.cloud.appwrite.io/v1',
+      projectId: '6a9131260006737c5919',
+      databaseId: 'talent_pool_db',
+      collectionId: 'talents',
+      bucketId: '6a913140001b7455f5ff'
+    };
+
+    const appwriteClient = new Appwrite.Client()
+      .setEndpoint(APPWRITE_CONFIG.endpoint)
+      .setProject(APPWRITE_CONFIG.projectId);
+
+    const databases = new Appwrite.Databases(appwriteClient);
+
+    /* 1. Firebase Initialization                           */
+    /* ---------------------------------------------------- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8HZVXj6kzxVrdMrbmenfKRb5itrtvboA",
+      authDomain: "talentpool-34137.firebaseapp.com",
+      databaseURL: "https://talentpool-34137-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "talentpool-34137",
+      storageBucket: "talentpool-34137.firebasestorage.app",
+      messagingSenderId: "530363287467",
+      appId: "1:530363287467:web:6d58c64fb7dffd70b534ee"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const rtdb = firebase.database();
+
+    /* ---------------------------------------------------- */
+    /* 2. State Management                                  */
+    /* ---------------------------------------------------- */
+    const state = {
+      portalMode: 'launcher', // 'launcher' | 'results'
+      resultsViewLayout: 'table', // 'table' | 'cards'
+      expandedLeaderboardId: null, // talent id whose drawer is open
+      talents: [],
+      assessments: {},
+      selectedModules: ['bigfive', 'disc', 'cognitive'],
+      filterStatus: 'all', // 'all' | 'pending' | 'completed'
+      filterSearch: '',
+      filterRole: '',
+      filterStage: '',
+      filterDisc: '',
+      resultsSort: 'cognitive_desc',
+      expandedDetailsId: null
+    };
+
+    function switchResultsViewLayout(layout) {
+      state.resultsViewLayout = layout;
+      renderCandidates();
+    }
+
+    function toggleLeaderboardDrawer(talentId, event) {
+      if (event) event.stopPropagation();
+      state.expandedLeaderboardId = (state.expandedLeaderboardId === talentId) ? null : talentId;
+      renderCandidates();
+    }
+
+    /* ---------------------------------------------------- */
+    /* 2. Mode Switching Logic (Launcher vs Results)        */
+    /* ---------------------------------------------------- */
+    function switchPortalMode(mode) {
+      state.portalMode = mode;
+      
+      const btnLauncher = document.getElementById('btnModeLauncher');
+      const btnResults = document.getElementById('btnModeResults');
+      const launcherHero = document.getElementById('stationHeroLauncher');
+      const resultsHero = document.getElementById('resultsHero');
+      const statusTabs = document.getElementById('statusTabsWrap');
+      const filterColStage = document.getElementById('filterColStage');
+      const filterColDisc = document.getElementById('filterColDisc');
+      const filterColSort = document.getElementById('filterColSort');
+
+      if (mode === 'results') {
+        history.replaceState(null, null, '#results');
+        btnLauncher.classList.remove('active');
+        btnResults.classList.add('active');
+        if (launcherHero) launcherHero.style.display = 'none';
+        if (resultsHero) resultsHero.style.display = 'block';
+        if (statusTabs) statusTabs.style.display = 'none';
+        if (filterColStage) filterColStage.style.display = 'none';
+        if (filterColDisc) filterColDisc.style.display = 'block';
+        if (filterColSort) filterColSort.style.display = 'block';
+      } else {
+        history.replaceState(null, null, '#launcher');
+        btnLauncher.classList.add('active');
+        btnResults.classList.remove('active');
+        if (launcherHero) launcherHero.style.display = 'block';
+        if (resultsHero) resultsHero.style.display = 'none';
+        if (statusTabs) statusTabs.style.display = 'flex';
+        if (filterColStage) filterColStage.style.display = 'block';
+        if (filterColDisc) filterColDisc.style.display = 'none';
+        if (filterColSort) filterColSort.style.display = 'none';
+      }
+
+      renderCandidates();
+    }
+
+    function handleDiscFilter(val) {
+      state.filterDisc = val;
+      renderCandidates();
+    }
+
+    function handleResultsSort(val) {
+      state.resultsSort = val;
+      renderCandidates();
+    }
+
+    function updateResultsKpis(completedList) {
+      const kpiTestedCount = document.getElementById('kpiTestedCount');
+      const kpiTestedSub = document.getElementById('kpiTestedSub');
+      const kpiAvgCognitive = document.getElementById('kpiAvgCognitive');
+      const kpiAvgCognitiveSub = document.getElementById('kpiAvgCognitiveSub');
+      const kpiDominantDisc = document.getElementById('kpiDominantDisc');
+      const kpiDominantDiscSub = document.getElementById('kpiDominantDiscSub');
+
+      if (!kpiTestedCount) return;
+
+      const totalPool = state.talents.length;
+      kpiTestedCount.textContent = `${completedList.length} Selesai`;
+      kpiTestedSub.textContent = `dari total ${totalPool} kandidat terdaftar`;
+
+      if (completedList.length === 0) {
+        kpiAvgCognitive.textContent = '0%';
+        kpiAvgCognitiveSub.textContent = 'Belum ada data pengerjaan';
+        kpiDominantDisc.textContent = '-';
+        kpiDominantDiscSub.textContent = 'Belum ada data gaya kerja';
+        return;
+      }
+
+      // 1. Avg Cognitive
+      let sumPct = 0;
+      let cogCount = 0;
+      let sumScore = 0;
+      let sumTotal = 0;
+      const discDistribution = { D: 0, I: 0, S: 0, C: 0 };
+
+      completedList.forEach(item => {
+        const ass = item.assessment;
+        if (ass.cognitive && typeof ass.cognitive.percentage === 'number') {
+          sumPct += ass.cognitive.percentage;
+          sumScore += (ass.cognitive.score || 0);
+          sumTotal += (ass.cognitive.total || 15);
+          cogCount++;
+        }
+        if (ass.disc && ass.disc.profilePattern) {
+          const primaryLetter = ass.disc.profilePattern.charAt(0).toUpperCase();
+          if (discDistribution[primaryLetter] !== undefined) {
+            discDistribution[primaryLetter]++;
+          }
+        }
+      });
+
+      if (cogCount > 0) {
+        const avg = Math.round(sumPct / cogCount);
+        kpiAvgCognitive.textContent = `${avg}%`;
+        kpiAvgCognitiveSub.textContent = `Rata-rata ${(sumScore / cogCount).toFixed(1)} / ${(sumTotal / cogCount).toFixed(0)} soal`;
+      } else {
+        kpiAvgCognitive.textContent = '-';
+        kpiAvgCognitiveSub.textContent = 'Tidak ada modul kognitif';
+      }
+
+      // 2. Dominant DISC
+      let maxD = 'D';
+      let maxVal = -1;
+      Object.entries(discDistribution).forEach(([k, v]) => {
+        if (v > maxVal) {
+          maxVal = v;
+          maxD = k;
+        }
+      });
+
+      const discNames = {
+        D: 'Tipe D (Dominance)',
+        I: 'Tipe I (Influence)',
+        S: 'Tipe S (Steadiness)',
+        C: 'Tipe C (Compliance)'
+      };
+
+      const discSubs = {
+        D: 'Eksekutor, Cepat, Tegas & Berorientasi Target',
+        I: 'Komunikatif, Persuasif, Antusias & Kolaboratif',
+        S: 'Tenang, Konsisten, Loyal & Pendengar Baik',
+        C: 'Teliti, Analitis, Sistematis & Akurat'
+      };
+
+      if (maxVal > 0) {
+        kpiDominantDisc.textContent = discNames[maxD] || `Tipe ${maxD}`;
+        kpiDominantDiscSub.textContent = discSubs[maxD] || `${maxVal} kandidat berkarakter ini`;
+      } else {
+        kpiDominantDisc.textContent = '-';
+        kpiDominantDiscSub.textContent = 'Belum ada data DISC';
+      }
+    }
+
+    /* ---------------------------------------------------- */
+    /* 3. Module Presets & Toggles                          */
+    /* ---------------------------------------------------- */
+    function applyModulePreset(preset) {
+      const chkBigFive = document.getElementById('chkModuleBigFive');
+      const chkDisc = document.getElementById('chkModuleDisc');
+      const chkCog = document.getElementById('chkModuleCognitive');
+
+      if (preset === 'all') {
+        chkBigFive.checked = true;
+        chkDisc.checked = true;
+        chkCog.checked = true;
+      } else if (preset === 'personality_disc') {
+        chkBigFive.checked = true;
+        chkDisc.checked = true;
+        chkCog.checked = false;
+      } else if (preset === 'disc_cog') {
+        chkBigFive.checked = false;
+        chkDisc.checked = true;
+        chkCog.checked = true;
+      } else if (preset === 'cog_only') {
+        chkBigFive.checked = false;
+        chkDisc.checked = false;
+        chkCog.checked = true;
+      }
+
+      updateSelectedModules();
+    }
+
+    function updateSelectedModules() {
+      const chkBigFive = document.getElementById('chkModuleBigFive');
+      const chkDisc = document.getElementById('chkModuleDisc');
+      const chkCog = document.getElementById('chkModuleCognitive');
+
+      const cardBigFive = document.getElementById('cardModuleBigFive');
+      const cardDisc = document.getElementById('cardModuleDisc');
+      const cardCog = document.getElementById('cardModuleCognitive');
+
+      cardBigFive.classList.toggle('active', chkBigFive.checked);
+      cardDisc.classList.toggle('active', chkDisc.checked);
+      cardCog.classList.toggle('active', chkCog.checked);
+
+      const mods = [];
+      let totalQuestions = 0;
+      if (chkBigFive.checked) { mods.push('bigfive'); totalQuestions += 50; }
+      if (chkDisc.checked) { mods.push('disc'); totalQuestions += 24; }
+      if (chkCog.checked) { mods.push('cognitive'); totalQuestions += 15; }
+
+      if (mods.length === 0) {
+        // Prevent all unselected - fallback to at least one
+        chkDisc.checked = true;
+        cardDisc.classList.add('active');
+        mods.push('disc');
+        totalQuestions += 24;
+        showToast('Minimal 1 modul tes harus diaktifkan.');
+      }
+
+      state.selectedModules = mods;
+
+      // Update banner text
+      const summaryText = document.getElementById('activeSummaryText');
+      if (summaryText) {
+        summaryText.innerHTML = `Saat ini <strong>${mods.length} modul aktif</strong> (${totalQuestions} Soal). Kandidat yang diluncurkan akan mengerjakan modul-modul ini.`;
+      }
+    }
+
+    /* ---------------------------------------------------- */
+    /* 4. Filter Handling                                   */
+    /* ---------------------------------------------------- */
+    function setStatusTab(status) {
+      state.filterStatus = status;
+      document.querySelectorAll('.status-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-status') === status);
+      });
+      renderCandidates();
+    }
+
+    function handleFilterChange() {
+      state.filterSearch = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      state.filterRole = document.getElementById('roleFilter').value;
+      state.filterStage = document.getElementById('stageFilter').value;
+      renderCandidates();
+    }
+
+    function populateRoleDropdown() {
+      const select = document.getElementById('roleFilter');
+      if (!select) return;
+      const current = select.value;
+      const rolesMap = {};
+      state.talents.forEach(t => {
+        const r = (t.role || 'Freelance Content Creator').trim();
+        if (r) {
+          rolesMap[r] = (rolesMap[r] || 0) + 1;
+        }
+      });
+
+      const sortedRoles = Object.keys(rolesMap).sort();
+      let html = `<option value="">🌐 Semua Posisi Lowongan (${state.talents.length})</option>`;
+      sortedRoles.forEach(r => {
+        const isSel = (r === current) ? 'selected' : '';
+        html += `<option value="${escapeHtml(r)}" ${isSel}>${escapeHtml(r)} (${rolesMap[r]})</option>`;
+      });
+      select.innerHTML = html;
+    }
+
+    /* ---------------------------------------------------- */
+    /* 5. Launch & Manage Assessments                       */
+    /* ---------------------------------------------------- */
+    function launchCandidateTest(talentId) {
+      const talent = state.talents.find(t => t.id === talentId);
+      if (!talent) return;
+
+      const mods = state.selectedModules.length > 0 ? state.selectedModules : ['bigfive', 'disc', 'cognitive'];
+      const url = 'assessment.html?id=' + encodeURIComponent(talent.id) +
+                  '&name=' + encodeURIComponent(talent.name || '') +
+                  '&role=' + encodeURIComponent(talent.role || '') +
+                  '&tests=' + encodeURIComponent(mods.join(','));
+
+      window.open(url, '_blank');
+      showToast(`🚀 Membuka lembar asesmen untuk ${talent.name}...`);
+    }
+
+    function toggleScoreDetails(talentId) {
+      state.expandedDetailsId = (state.expandedDetailsId === talentId) ? null : talentId;
+      renderCandidates();
+    }
+
+    async function resetCandidateData(talentId) {
+      const talent = state.talents.find(t => t.id === talentId);
+      const name = talent ? talent.name : talentId;
+
+      const confirmed = window.confirm(
+        `Apakah Anda yakin ingin mereset hasil tes untuk ${name} (${talentId})?\n\nData respon dan skor akan dihapus dari database agar kandidat dapat mengerjakan ulang.`
+      );
+      if (!confirmed) return;
+
+      try {
+        await Promise.all([
+          rtdb.ref('/candidate_assessments/' + talentId).remove(),
+          rtdb.ref('/talents/' + talentId + '/assessment').remove()
+        ]);
+        showToast(`✓ Hasil asesmen untuk ${name} berhasil direset.`);
+      } catch (err) {
+        console.error('Reset error:', err);
+        showToast('⚠️ Gagal mereset asesmen: ' + err.message);
+      }
+    }
+
+    /* ---------------------------------------------------- */
+    /* 6. Render Candidates Feed                            */
+    /* ---------------------------------------------------- */
+    
+    /* ---------------------------------------------------- */
+    /* 8. Official Candidate Dossier Print / PDF Export     */
+    /* ---------------------------------------------------- */
+    function printCandidateDossier(talentId) {
+      const talent = state.talents.find(t => t.id === talentId);
+      if (!talent) return;
+      const assessment = state.assessments[talent.id] || talent.assessment;
+      if (!assessment) {
+        showToast('Kandidat ini belum memiliki data asesmen untuk dicetak.');
+        return;
+      }
+
+      const b5 = assessment.dimensions || assessment.scores;
+      const dateStr = assessment.completedAt 
+        ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) 
+        : '-';
+
+      const printWindow = window.open('', '_blank', 'width=980,height=800');
+      if (!printWindow) {
+        alert('Browser memblokir jendela pop-up cetak. Harap izinkan pop-up untuk mencetak dossier.');
+        return;
+      }
+
+      const dossierHtml = `
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Dossier Evaluasi Kandidat - ${talent.id} ${escapeHtml(talent.name)}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;700&display=swap" rel="stylesheet">
+          <style>
+            @page {
+              size: A4;
+              margin: 12mm 15mm;
+            }
+            body {
+              font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+              color: #0F172A;
+              background: #FFFFFF;
+              margin: 0;
+              padding: 20px;
+              font-size: 11.5px;
+              line-height: 1.45;
+            }
+            .header {
+              border-bottom: 2px solid #0F172A;
+              padding-bottom: 12px;
+              margin-bottom: 16px;
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+            }
+            .brand {
+              font-size: 18px;
+              font-weight: 800;
+              color: #0F172A;
+              letter-spacing: -0.02em;
+            }
+            .sub {
+              font-size: 10px;
+              color: #64748B;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            .dossier-tag {
+              font-family: 'Geist Mono', monospace;
+              font-size: 9px;
+              font-weight: 700;
+              background: #F1F5F9;
+              padding: 4px 8px;
+              border-radius: 4px;
+              color: #334155;
+            }
+            .bio-grid {
+              display: grid;
+              grid-template-columns: repeat(4, 1fr);
+              gap: 8px;
+              background: #F8FAFC;
+              border: 1px solid #E2E8F0;
+              border-radius: 8px;
+              padding: 12px 14px;
+              margin-bottom: 16px;
+            }
+            .bio-label {
+              font-size: 9.5px;
+              color: #64748B;
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+            .bio-val {
+              font-size: 12px;
+              font-weight: 700;
+              color: #0F172A;
+              margin-top: 1px;
+            }
+            .two-col {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 14px;
+              margin-bottom: 16px;
+            }
+            .box {
+              border: 1px solid #E2E8F0;
+              border-radius: 8px;
+              padding: 12px 14px;
+              background: #FFFFFF;
+            }
+            .box-title {
+              font-size: 11.5px;
+              font-weight: 700;
+              color: #0F172A;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              margin-bottom: 8px;
+              padding-bottom: 6px;
+              border-bottom: 1px solid #F1F5F9;
+            }
+            .notes-box {
+              border: 1px dashed #94A3B8;
+              border-radius: 8px;
+              padding: 10px 14px;
+              min-height: 80px;
+              background: #FAFAFA;
+            }
+            .no-print-bar {
+              background: #0F172A;
+              color: #FFFFFF;
+              padding: 10px 20px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+              border-radius: 8px;
+            }
+            @media print {
+              .no-print-bar { display: none !important; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="no-print-bar">
+            <span>📄 Dokumen Dossier Evaluasi Asesmen Kandidat (Siap Cetak / Save as PDF)</span>
+            <button onclick="window.print()" style="background:#3B82F6; color:#FFF; border:none; padding:6px 14px; border-radius:6px; font-weight:700; cursor:pointer;">
+              🖨️ Cetak / Simpan PDF
+            </button>
+          </div>
+
+          <div class="header">
+            <div>
+              <div class="brand">PGE TALENT POOL</div>
+              <div class="sub">Laporan Resmi Evaluasi Psikometrik &amp; Kognitif On-Site</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="dossier-tag">CONFIDENTIAL • FOR INTERNAL USE ONLY</span>
+              <div style="font-size: 10px; color: #64748B; margin-top: 4px;">Selesai: ${dateStr}</div>
+            </div>
+          </div>
+
+          <div class="bio-grid">
+            <div>
+              <div class="bio-label">Nama Kandidat</div>
+              <div class="bio-val">${escapeHtml(talent.name)}</div>
+            </div>
+            <div>
+              <div class="bio-label">ID Kandidat &amp; Posisi</div>
+              <div class="bio-val">${talent.id} • ${escapeHtml(talent.role || 'Content Creator')}</div>
+            </div>
+            <div>
+              <div class="bio-label">Domisili / Kota</div>
+              <div class="bio-val">${escapeHtml(talent.domisili || '-')}</div>
+            </div>
+            <div>
+              <div class="bio-label">Pendidikan / Tahapan</div>
+              <div class="bio-val">${escapeHtml(talent.pendidikan || '-')} (${talent.stage || 'Screening'})</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <!-- 1. Pentagon Matrix -->
+            <div class="box">
+              <div class="box-title">
+                <span>🧠</span> <span>Pentagon Matrix: IPIP Big Five Personality</span>
+              </div>
+              ${b5 ? renderPentagonMatrixSvg(b5) : '<p>Tidak ada data Big Five</p>'}
+              <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 10px;">
+                ${b5 ? Object.entries(b5).map(([k, d]) => `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 4px 6px; border-radius: 4px;">
+                    <span style="color:#64748B;">${k}:</span> <strong style="color:#1E40AF;">${d.percentage}% (${d.level})</strong>
+                  </div>
+                `).join('') : ''}
+              </div>
+            </div>
+
+            <!-- 2. DISC Curve -->
+            <div class="box">
+              <div class="box-title">
+                <span>🧩</span> <span>DISC Behavioral Element Line Graph</span>
+              </div>
+              ${assessment.disc ? renderDiscLineGraphSvg(assessment.disc) : '<p>Tidak ada data DISC</p>'}
+              ${assessment.disc ? `
+                <div style="margin-top: 8px; padding: 8px; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 6px;">
+                  <div style="font-weight: 700; color: #7C3AED; font-size: 11px;">
+                    Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})
+                  </div>
+                  <div style="font-size: 10.5px; color: #5B21B6; margin-top: 2px; line-height: 1.35;">
+                    ${escapeHtml(assessment.disc.desc || '')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <!-- 3. Cognitive Aspects -->
+          <div class="box" style="margin-bottom: 16px;">
+            <div class="box-title" style="justify-content: space-between;">
+              <span>📊 Aspek Logika, Penalaran Kognitif &amp; Analisis Bisnis</span>
+              <strong style="font-family: 'Geist Mono', monospace; color: #059669;">
+                Skor Akhir: ${assessment.cognitive ? assessment.cognitive.score : 0} / ${assessment.cognitive ? assessment.cognitive.total : 15} (${assessment.cognitive ? assessment.cognitive.percentage : 0}%)
+              </strong>
+            </div>
+            ${assessment.cognitive ? renderCognitiveAspectsBarsHtml(assessment.cognitive) : '<p>Tidak ada data Kognitif</p>'}
+          </div>
+
+          <!-- 4. Interviewer Notes & Recommendation -->
+          <div class="box">
+            <div class="box-title" style="justify-content: space-between;">
+              <span>📝 Catatan Evaluasi &amp; Rekomendasi Interviewer</span>
+              <div style="font-size: 10px; color: #64748B;">
+                [ &nbsp; ] Disarankan &nbsp;&nbsp;&nbsp; [ &nbsp; ] Dipertimbangkan &nbsp;&nbsp;&nbsp; [ &nbsp; ] Tidak Disarankan
+              </div>
+            </div>
+            <div class="notes-box">
+              <div style="font-size: 10px; color: #94A3B8; font-style: italic;">
+                Tuliskan catatan observasi karakter kerja kandidat selama wawancara berlangsung...
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 24px; gap: 40px; font-size: 10px;">
+              <div style="text-align: center;">
+                <div style="border-bottom: 1px solid #000; width: 140px; margin-bottom: 4px; height: 35px;"></div>
+                <div>Tanda Tangan Interviewer</div>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(dossierHtml);
+      printWindow.document.close();
+    }
+
+    function exportResultsSummaryCsv() {
+      const completed = state.talents.filter(t => {
+        const ass = state.assessments[t.id] || t.assessment;
+        return ass && ass.status === 'completed';
+      });
+
+      if (completed.length === 0) {
+        showToast('Belum ada kandidat yang menyelesaikan asesmen.');
+        return;
+      }
+
+      let csv = 'ID,Nama,Posisi,Domisili,Tahap,Skor Logika,Persen Logika,Tipe DISC,Pola DISC,Extraversion,Agreeableness,Conscientiousness,Emotional Stability,Intellect,Waktu Selesai\n';
+
+      completed.forEach(t => {
+        const ass = state.assessments[t.id] || t.assessment;
+        const b5 = ass.dimensions || ass.scores || {};
+        const disc = ass.disc || {};
+        const cog = ass.cognitive || {};
+        const dateStr = ass.completedAt ? new Date(ass.completedAt).toISOString() : '';
+
+        const row = [
+          t.id,
+          `"${(t.name || '').replace(/"/g, '""')}"`,
+          `"${(t.role || '').replace(/"/g, '""')}"`,
+          `"${(t.domisili || '').replace(/"/g, '""')}"`,
+          t.stage || '',
+          cog.score || 0,
+          (cog.percentage || 0) + '%',
+          disc.primaryName || '',
+          disc.profilePattern || '',
+          (b5.extraversion ? b5.extraversion.percentage + '%' : ''),
+          (b5.agreeableness ? b5.agreeableness.percentage + '%' : ''),
+          (b5.conscientiousness ? b5.conscientiousness.percentage + '%' : ''),
+          (b5.emotionalStability ? b5.emotionalStability.percentage + '%' : ''),
+          (b5.intellect ? b5.intellect.percentage + '%' : ''),
+          dateStr
+        ];
+
+        csv += row.join(',') + '\n';
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `PGE_Hasil_Asesmen_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Export CSV berhasil diunduh.');
+    }
+
+function renderCandidates() {
+      const container = document.getElementById('candidatesList');
+      if (!container) return;
+
+      const isResultsMode = (state.portalMode === 'results');
+
+      // Update counters based on active stage scope
+      const pool = state.talents.filter(t => {
+        if (state.filterStage === 'ALL_WITH_ARCHIVED') return true;
+        if (state.filterStage) return t.stage === state.filterStage;
+        return t.stage !== 'Archived';
+      });
+
+      const totalAll = pool.length;
+      const completedList = [];
+      pool.forEach(t => {
+        const ass = state.assessments[t.id] || t.assessment;
+        if (ass && ass.status === 'completed') {
+          completedList.push({ talent: t, assessment: ass });
+        }
+      });
+      const countCompleted = completedList.length;
+      const countPending = totalAll - countCompleted;
+
+      // Update badge counters
+      const statTotal = document.getElementById('statTotal');
+      if (statTotal) statTotal.textContent = `Total: ${totalAll}`;
+      const statPending = document.getElementById('statPending');
+      if (statPending) statPending.textContent = `Belum Tes: ${countPending}`;
+      const statCompleted = document.getElementById('statCompleted');
+      if (statCompleted) statCompleted.textContent = `Selesai: ${countCompleted}`;
+
+      const tabCountAll = document.getElementById('tabCountAll');
+      if (tabCountAll) tabCountAll.textContent = totalAll;
+      const tabCountPending = document.getElementById('tabCountPending');
+      if (tabCountPending) tabCountPending.textContent = countPending;
+      const tabCountCompleted = document.getElementById('tabCountCompleted');
+      if (tabCountCompleted) tabCountCompleted.textContent = countCompleted;
+
+      const modeBadge = document.getElementById('modeResultsCountBadge');
+      if (modeBadge) modeBadge.textContent = countCompleted;
+
+      // Update Results Mode KPI summary
+      updateResultsKpis(completedList);
+
+      // Filtering candidates
+      let filtered = state.talents.filter(t => {
+        const assessment = state.assessments[t.id] || t.assessment;
+        const isCompleted = Boolean(assessment && assessment.status === 'completed');
+
+        // IN RESULTS MODE: Only show candidates who finished assessment
+        if (isResultsMode) {
+          if (!isCompleted) return false;
+
+          // Filter by DISC archetype
+          if (state.filterDisc && assessment.disc) {
+            const pattern = (assessment.disc.profilePattern || '').toUpperCase();
+            if (!pattern.startsWith(state.filterDisc)) return false;
+          }
+        } else {
+          // IN LAUNCHER MODE: filter by status tabs
+          if (state.filterStatus === 'pending' && isCompleted) return false;
+          if (state.filterStatus === 'completed' && !isCompleted) return false;
+
+          // Stage filter
+          if (state.filterStage === 'ALL_WITH_ARCHIVED') {
+            // show all
+          } else if (state.filterStage) {
+            if (t.stage !== state.filterStage) return false;
+          } else {
+            if (t.stage === 'Archived') return false;
+          }
+        }
+
+        // Common Role filter
+        if (state.filterRole && t.role !== state.filterRole) return false;
+
+        // Search text
+        if (state.filterSearch) {
+          const q = state.filterSearch.toLowerCase();
+          const nameMatch = (t.name || '').toLowerCase().includes(q);
+          const idMatch = (t.id || '').toLowerCase().includes(q);
+          const roleMatch = (t.role || '').toLowerCase().includes(q);
+          if (!nameMatch && !idMatch && !roleMatch) return false;
+        }
+
+        return true;
+      });
+
+      // Sorting for Results Mode
+      if (isResultsMode) {
+        filtered.sort((a, b) => {
+          const assA = state.assessments[a.id] || a.assessment || {};
+          const assB = state.assessments[b.id] || b.assessment || {};
+          const cogA = assA.cognitive ? (assA.cognitive.percentage || 0) : 0;
+          const cogB = assB.cognitive ? (assB.cognitive.percentage || 0) : 0;
+
+          if (state.resultsSort === 'cognitive_desc') return cogB - cogA;
+          if (state.resultsSort === 'cognitive_asc') return cogA - cogB;
+          if (state.resultsSort === 'name_asc') return (a.name || '').localeCompare(b.name || '');
+          if (state.resultsSort === 'date_desc') {
+            const timeA = assA.completedAt || 0;
+            const timeB = assB.completedAt || 0;
+            return timeB - timeA;
+          }
+          return 0;
+        });
+      }
+
+      // If no candidates match
+      if (filtered.length === 0) {
+        if (isResultsMode) {
+          container.innerHTML = `
+            <div class="empty-card">
+              <div style="font-size: 36px; margin-bottom: 8px;">📊</div>
+              <h3 style="font-size: 16px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Belum ada hasil asesmen yang cocok</h3>
+              <p style="font-size: 13px; color: #64748B; max-width: 480px; margin: 0 auto 16px;">
+                Belum ada kandidat yang menyelesaikan tes dengan kriteria filter ini.
+              </p>
+              <button type="button" class="btn btn-primary" onclick="switchPortalMode('launcher')">
+                <span>🚀 Buka Peluncur Tes On-Site</span>
+              </button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="empty-card">
+              <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+              <h3 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Tidak ada kandidat yang cocok</h3>
+              <p style="font-size: 13px; color: #64748B;">Coba sesuaikan kata kunci pencarian atau ganti filter posisi dan tahapan seleksi.</p>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // ----------------------------------------------------
+      // BRANCH 1: RESULTS MODE (TABLE LEADERBOARD OR FULL CARDS)
+      // ----------------------------------------------------
+      if (isResultsMode) {
+        const viewToolbar = `
+          <div class="results-view-toolbar">
+            <div style="font-size: 14px; font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+              <span>🏆</span> Leaderboard Hasil Asesmen
+              <span style="font-size: 12px; font-weight: 600; color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 2px 8px; border-radius: 999px;">
+                ${filtered.length} Kandidat Selesai
+              </span>
+            </div>
+            <div class="layout-toggle-wrap" style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="exportResultsSummaryCsv()" title="Download laporan ringkasan dalam format CSV/Excel" style="font-size: 11.5px; padding: 5px 10px; font-weight: 600;">
+                <span>📥 Export CSV</span>
+              </button>
+              <button type="button" class="layout-btn ${state.resultsViewLayout === 'table' ? 'active' : ''}" onclick="switchResultsViewLayout('table')">
+                <span>📋</span> Tabel Leaderboard
+              </button>
+              <button type="button" class="layout-btn ${state.resultsViewLayout === 'cards' ? 'active' : ''}" onclick="switchResultsViewLayout('cards')">
+                <span>🖼️</span> Kartu Penuh
+              </button>
+            </div>
+          </div>
+        `;
+
+if (state.resultsViewLayout === 'table') {
+          let rowsHtml = '';
+          filtered.forEach((talent, idx) => {
+            const assessment = state.assessments[talent.id] || talent.assessment || {};
+            const b5 = assessment.dimensions || assessment.scores || {};
+            const disc = assessment.disc || {};
+            const cog = assessment.cognitive || {};
+            const isDrawerOpen = (state.expandedLeaderboardId === talent.id);
+
+            const fit = (window.AssessmentExtensions && window.AssessmentExtensions.calculateRoleFitScore)
+              ? window.AssessmentExtensions.calculateRoleFitScore(talent, assessment)
+              : null;
+
+            const rankNum = idx + 1;
+            let rankClass = '';
+            if (rankNum === 1) rankClass = 'rank-1';
+            else if (rankNum === 2) rankClass = 'rank-2';
+            else if (rankNum === 3) rankClass = 'rank-3';
+
+            const parts = (talent.name || '').trim().split(/\s+/);
+            const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'NA');
+
+            const cogPct = cog.percentage !== undefined ? cog.percentage : 0;
+            let cogBadgeBg = '#ECFDF5'; let cogBadgeColor = '#065F46'; let cogBorder = '#A7F3D0';
+            if (cogPct < 50) { cogBadgeBg = '#FEF2F2'; cogBadgeColor = '#991B1B'; cogBorder = '#FECACA'; }
+            else if (cogPct < 75) { cogBadgeBg = '#FFFBEB'; cogBadgeColor = '#92400E'; cogBorder = '#FDE68A'; }
+
+            const discPattern = disc.profilePattern || '-';
+            const discName = disc.primaryName || 'DISC';
+
+            rowsHtml += `
+              <tr class="leaderboard-row ${isDrawerOpen ? 'expanded' : ''}" onclick="toggleLeaderboardDrawer('${talent.id}', event)">
+                <!-- 1. Rank & Checkbox -->
+                <td class="leaderboard-cell" style="text-align: center; width: 85px;" onclick="event.stopPropagation()">
+                  <div style="display: inline-flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" class="candidate-compare-checkbox compare-check-${talent.id}" onchange="AssessmentExtensions.toggleCandidateCompare('${talent.id}', this.checked)" title="Centang untuk komparasi berdampingan">
+                    <span class="rank-badge ${rankClass}">#${rankNum}</span>
+                  </div>
+                </td>
+
+                <!-- 2. Candidate & Role -->
+                <td class="leaderboard-cell">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: #0F172A; color: #FFF; font-family: var(--font-mono); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      ${initials}
+                    </div>
+                    <div>
+                      <div style="font-weight: 700; font-size: 14px; color: #0F172A;">${escapeHtml(talent.name)}</div>
+                      <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
+                        <span style="font-weight: 600; color: #334155;">💼 ${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
+                        <span style="color: #94A3B8; margin-left: 6px; font-family: var(--font-mono); font-size: 11px;">${talent.id}</span>
+                        ${talent.domisili ? `<span style="color: #94A3B8; margin-left: 4px;">• 📍 ${escapeHtml(talent.domisili)}</span>` : ''}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- 3. Role Fit Score -->
+                <td class="leaderboard-cell" style="width: 170px;">
+                  ${fit ? `
+                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                      <span class="fit-score-pill" style="background: ${fit.badgeBg}; color: ${fit.badgeColor}; border: 1px solid ${fit.badgeBorder}; font-size: 11.5px; padding: 3px 8px; width: fit-content;" title="Kesesuaian profil untuk posisi ini">
+                        🎯 ${fit.score}% Match
+                      </span>
+                      <span style="font-size: 11px; color: #64748B; font-weight: 600; margin-left: 2px;">
+                        ${fit.label}
+                      </span>
+                    </div>
+                  ` : '<span style="color:#94A3B8; font-size:12px;">-</span>'}
+                </td>
+
+                <!-- 4. Assessment Summary (Cognitive + DISC) -->
+                <td class="leaderboard-cell" style="width: 240px;">
+                  <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 11px; color: #64748B; font-weight: 600; width: 44px;">Logika:</span>
+                      <div style="width: 80px; height: 6px; background: #F1F5F9; border-radius: 999px; overflow: hidden;">
+                        <div style="width: ${cogPct}%; height: 100%; background: ${cogPct >= 75 ? '#059669' : (cogPct >= 50 ? '#D97706' : '#DC2626')}; border-radius: 999px;"></div>
+                      </div>
+                      <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #0F172A;">${cog.score !== undefined ? cog.score : 0}/${cog.total || 15}</span>
+                      <span style="font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px; background: ${cogBadgeBg}; color: ${cogBadgeColor}; border: 1px solid ${cogBorder}; font-family: var(--font-mono);">${cogPct}%</span>
+                    </div>
+                    ${disc.profilePattern ? `
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11px; color: #64748B; font-weight: 600; width: 44px;">DISC:</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #F5F3FF; border: 1px solid #DDD6FE; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 700; color: #7C3AED; font-family: var(--font-mono);">
+                          Tipe ${discPattern} <span style="font-weight: 500; font-family: var(--font-sans); color: #6D28D9; font-size: 10.5px;">(${discName})</span>
+                        </span>
+                      </div>
+                    ` : ''}
+                  </div>
+                </td>
+
+                <!-- 5. Actions -->
+                <td class="leaderboard-cell" style="text-align: right; width: 175px;">
+                  <div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px;" onclick="event.stopPropagation()">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="AssessmentExtensions.openWhatsAppModal('${talent.id}', event)" title="Hubungi via WhatsApp" style="font-size: 11.5px; padding: 5px 9px; color: #16A34A; border-color: #BBF7D0; background: #F0FDF4; font-weight: 700;">
+                      <span>💬 WA</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleLeaderboardDrawer('${talent.id}', event)" style="font-size: 11.5px; padding: 5px 10px; font-weight: 700; color: ${isDrawerOpen ? '#0F172A' : '#1E40AF'}; border-color: ${isDrawerOpen ? '#0F172A' : '#BFDBFE'}; background: ${isDrawerOpen ? '#E2E8F0' : '#EFF6FF'};">
+                      <span>${isDrawerOpen ? '▲ Tutup' : '📊 Buka Grafik ▼'}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+
+            if (isDrawerOpen) {
+              const b5Data = assessment.dimensions || assessment.scores;
+              const completedDate = assessment.completedAt ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : 'Baru saja';
+              const probeQuestions = (window.AssessmentExtensions && window.AssessmentExtensions.generateInterviewProbeQuestions)
+                ? window.AssessmentExtensions.generateInterviewProbeQuestions(talent, assessment)
+                : [];
+
+              rowsHtml += `
+                <tr class="leaderboard-drawer-row">
+                  <td colspan="5">
+                    <div class="leaderboard-drawer-content">
+                      <!-- Drawer Header with Clean Controls -->
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E2E8F0; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                          <span style="font-size: 15px; font-weight: 700; color: #0F172A;">📊 Dossier Hasil Lengkap: ${escapeHtml(talent.name)}</span>
+                          <span style="font-size: 12px; color: #64748B; margin-left: 8px;">(${talent.id} • Selesai: ${completedDate})</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                          <!-- Stage Selector Dropdown (Native select - never overlaps) -->
+                          <div style="display: flex; align-items: center; gap: 6px; background: #F8FAFC; border: 1px solid #CBD5E1; padding: 4px 8px; border-radius: 6px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569;">Tahap:</span>
+                            <select onchange="AssessmentExtensions.updateCandidateStageDirectly('${talent.id}', this.value, event)" style="border: none; background: transparent; font-size: 11.5px; font-weight: 700; color: #0F172A; cursor: pointer; outline: none;">
+                              <option value="Screening" ${talent.stage === 'Screening' ? 'selected' : ''}>🔍 Screening</option>
+                              <option value="Interview" ${talent.stage === 'Interview' ? 'selected' : ''}>🎙️ Interview</option>
+                              <option value="Offered" ${talent.stage === 'Offered' ? 'selected' : ''}>🎉 Offered</option>
+                              <option value="Archived" ${talent.stage === 'Archived' ? 'selected' : ''}>📁 Arsipkan</option>
+                            </select>
+                          </div>
+
+                          <!-- WhatsApp Candidate -->
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="AssessmentExtensions.openWhatsAppModal('${talent.id}', event)" style="font-size: 11.5px; font-weight: 700; color: #16A34A; border-color: #BBF7D0; background: #F0FDF4;">
+                            💬 WhatsApp
+                          </button>
+
+                          <!-- Print PDF -->
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="printCandidateDossier('${talent.id}')" style="font-size: 11.5px; font-weight: 700; color: #1E40AF; border-color: #BFDBFE; background: #EFF6FF;">
+                            🖨️ Cetak PDF
+                          </button>
+
+                          <!-- Full Modal -->
+                          <button type="button" class="btn btn-primary btn-sm" onclick="openAssessmentResultModal('${talent.id}')" style="font-size: 11.5px;">
+                            ↗ Perbesar Modal
+                          </button>
+
+                          <!-- Reset -->
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="resetCandidateData('${talent.id}')" style="font-size: 11.5px; color: #DC2626; border-color: #FECACA;">
+                            🔄 Reset
+                          </button>
+                        </div>
+                      </div>
+
+
+    <!-- Segmented Section Switcher (Detail Asesmen vs Panduan Wawancara) -->
+    <div style="display: flex; gap: 8px; margin: 12px 0 16px 0; background: #F1F5F9; padding: 4px; border-radius: 10px; width: fit-content; border: 1px solid #E2E8F0;">
+      <button type="button" 
+              id="dossierTabBtn_details_${talent.id}"
+              onclick="switchCandidateDossierTab('${talent.id}', 'details')"
+              style="display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; background: #FFFFFF; color: #1E40AF; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <span>📊 1. Detail Hasil Asesmen</span>
+      </button>
+      <button type="button" 
+              id="dossierTabBtn_interview_${talent.id}"
+              onclick="switchCandidateDossierTab('${talent.id}', 'interview')"
+              style="display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; background: transparent; color: #64748B;">
+        <span>🎙️ 2. Panduan Wawancara (Probing)</span>
+        <span style="font-size: 10px; font-weight: 700; background: #EEF2FF; color: #4338CA; padding: 1px 6px; border-radius: 999px; margin-left: 2px;">
+          ${probeQuestions.length} Aspek
+        </span>
+      </button>
+    </div>
+
+    <!-- SEKSI 1: DETAIL HASIL ASESMEN PSIKOMETRIK & LOGIKA -->
+    <div id="dossierPanel_details_${talent.id}" style="display: block;">
+      <div class="dossier-visual-grid" style="margin-bottom: 14px;">
+        <div class="dossier-subcard">
+          <div class="dossier-subcard-title" style="color:#1E40AF;">
+            <span>🧠 Pentagon Matrix: Big Five Personality</span>
+            <span style="font-family:var(--font-mono); font-size:10px; background:#EFF6FF; color:#1E40AF; padding:2px 6px; border-radius:4px;">5 Dimensi</span>
+          </div>
+          ${b5Data ? renderPentagonMatrixSvg(b5Data) : '<div style="color:#94A3B8; font-size:12px;">Modul Big Five tidak diujikan</div>'}
+          ${b5Data ? `
+            <div style="margin-top:6px; display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px; font-size:10.5px;">
+              ${Object.entries(b5Data).map(([k, d]) => `
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:4px 6px; border-radius:6px;">
+                  <div style="color:#64748B; font-size:9.5px; text-transform:capitalize;">${k}</div>
+                  <div style="font-weight:700; color:#1E40AF;">${d.percentage}% (${d.level})</div>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="dossier-subcard">
+          <div class="dossier-subcard-title" style="color:#7C3AED;">
+            <span>🧩 DISC Element Line Graph (D-I-S-C)</span>
+            <span style="font-family:var(--font-mono); font-size:10px; background:#F5F3FF; color:#7C3AED; padding:2px 6px; border-radius:4px;">Behavior Curve</span>
+          </div>
+          ${assessment.disc ? renderDiscLineGraphSvg(assessment.disc) : '<div style="color:#94A3B8; font-size:12px;">Modul DISC tidak diujikan</div>'}
+          ${assessment.disc ? `
+            <div style="margin-top:6px; padding:8px 10px; background:#F5F3FF; border:1px solid #DDD6FE; border-radius:6px;">
+              <div style="font-weight:700; color:#7C3AED; font-size:12px; font-family:var(--font-mono); display:flex; justify-content:space-between;">
+                <span>Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})</span>
+                <span style="font-size:10.5px; color:#6D28D9;">D:${assessment.disc.tally ? assessment.disc.tally.change.D : 0} I:${assessment.disc.tally ? assessment.disc.tally.change.I : 0} S:${assessment.disc.tally ? assessment.disc.tally.change.S : 0} C:${assessment.disc.tally ? assessment.disc.tally.change.C : 0}</span>
+              </div>
+              <div style="font-size:11.5px; color:#5B21B6; margin-top:2px; line-height:1.4;">
+                ${escapeHtml(assessment.disc.desc || '')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+
+      ${assessment.cognitive ? `
+        <div class="dossier-subcard" style="margin-top: 14px;">
+          <div class="dossier-subcard-title" style="color:#059669;">
+            <span style="display:flex; align-items:center; gap:6px;"><span>📊</span> Aspek Logika, Penalaran Kognitif &amp; Analisis Bisnis</span>
+            <span style="font-family:var(--font-mono); font-size:12px; font-weight:700; color:#059669; background:#ECFDF5; border:1px solid #A7F3D0; padding:2px 8px; border-radius:4px;">
+              Total Skor: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
+            </span>
+          </div>
+          ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- SEKSI 2: PANDUAN PERTANYAAN WAWANCARA (PROBING) -->
+    <div id="dossierPanel_interview_${talent.id}" style="display: none;">
+      ${probeQuestions.length > 0 ? `
+        <div class="dossier-subcard" style="border-left: 4px solid #4F46E5;">
+          <div class="dossier-subcard-title" style="color: #4F46E5; flex-wrap: wrap; gap: 8px;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span>🎙️</span> Panduan Pertanyaan Wawancara Khusus: ${escapeHtml(talent.role || 'Umum')}
+            </span>
+            <span style="font-family: var(--font-mono); font-size: 10.5px; background: #EEF2FF; color: #4F46E5; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+              ${probeQuestions.length} Aspek Probing
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-top: 8px;">
+            ${probeQuestions.map((q, qIdx) => `
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                
+                <!-- Card Header -->
+                <div style="margin-bottom: 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
+                  <div style="font-size: 13px; font-weight: 700; color: #312E81; line-height: 1.4; margin-bottom: 6px;">
+                    #${qIdx + 1}. ${escapeHtml(q.topic)}
+                  </div>
+                  <div style="display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; color: #4338CA; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 3px 8px; border-radius: 6px; line-height: 1.35; max-width: 100%; word-break: break-word;">
+                    ${escapeHtml(q.indicator)}
+                  </div>
+                </div>
+
+                <!-- Interactive Pill Tabs Switcher -->
+                <div style="display: flex; gap: 4px; margin-bottom: 10px; background: #E2E8F0; padding: 3px; border-radius: 8px;">
+                  ${(q.options || []).map((opt, optIdx) => {
+                    const isFirst = optIdx === 0;
+                    const shortTitle = opt.label && opt.label.includes('A') ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
+                    return `
+                      <button type="button" 
+                              class="probe-pill-btn probe-pill-${talent.id}-${qIdx}-${optIdx}" 
+                              onclick="AssessmentExtensions.switchProbeTab('${talent.id}', ${qIdx}, ${optIdx})"
+                              style="flex: 1; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; ${isFirst ? 'background: #FFFFFF; color: #4338CA; box-shadow: 0 1px 2px rgba(0,0,0,0.06);' : 'background: transparent; color: #64748B;'}">
+                        ${shortTitle}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Tab Content Panels -->
+                <div style="flex: 1;">
+                  ${(q.options || [{ label: 'Pertanyaan Wawancara', question: q.question, whatToLookFor: q.whatToLookFor }]).map((opt, optIdx) => `
+                    <div id="probePanel_${talent.id}_${qIdx}_${optIdx}" 
+                         style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: ${optIdx === 0 ? 'block' : 'none'}; min-height: 140px;">
+                      <div style="font-size: 9.5px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                        ${escapeHtml(opt.label || `Pilihan ${optIdx + 1}`)}
+                      </div>
+                      <p style="font-size: 12px; color: #0F172A; font-weight: 600; line-height: 1.5; margin: 0 0 10px 0;">
+                        "${escapeHtml(opt.question)}"
+                      </p>
+                      <div style="font-size: 10.5px; color: #475569; line-height: 1.4; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                        <strong style="color: #334155;">Fokus Dinilai:</strong> ${escapeHtml(opt.whatToLookFor)}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Interviewer Scratchpad / Notes -->
+          <div style="margin-top: 16px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px; padding: 12px 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #475569;">📝 Catatan &amp; Impresi Interviewer:</span>
+              <span style="font-size: 10px; color: #94A3B8;">Untuk evaluasi tim internal saat sesi wawancara</span>
+            </div>
+            <textarea placeholder="Tuliskan catatan respon atau observasi karakter kandidat di sini..." style="width: 100%; height: 75px; font-size: 12px; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 10px; outline: none; font-family: sans-serif; resize: vertical; box-sizing: border-box; background: #FFFFFF;"></textarea>
+          </div>
+        </div>
+      ` : '<div style="padding: 24px; text-align: center; color: #94A3B8;">Belum ada panduan wawancara untuk kandidat ini.</div>'}
+    </div>
+  
+                                        </div>
+                  </td>
+                </tr>
+              `;
+            }
+          });
+
+          container.innerHTML = `
+            ${viewToolbar}
+            <div class="leaderboard-table-wrap">
+              <table class="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th style="width: 85px; text-align: center;"># Rank</th>
+                    <th>Kandidat &amp; Posisi</th>
+                    <th style="width: 170px;">Kecocokan Jabatan</th>
+                    <th style="width: 240px;">Ringkasan Asesmen</th>
+                    <th style="width: 175px; text-align: right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml}
+                </tbody>
+              </table>
+            </div>
+          `;
+          return;
+        }
+
+                // FULL CARDS VIEW
+        container.innerHTML = viewToolbar + filtered.map(talent => {
+          const assessment = state.assessments[talent.id] || talent.assessment || {};
+          const b5 = assessment.dimensions || assessment.scores;
+          const completedDate = assessment.completedAt ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Baru saja';
+          const parts = (talent.name || '').trim().split(/\s+/);
+          const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'NA');
+
+          return `
+            <div class="dossier-card" id="dossier_${talent.id}" style="margin-bottom: 16px;">
+              <div class="dossier-header">
+                <div class="candidate-profile-area">
+                  <div class="candidate-avatar" style="background:#0F172A; width:48px; height:48px; font-size:16px;">${initials}</div>
+                  <div class="candidate-details">
+                    <div class="candidate-name-row">
+                      <span class="candidate-name" style="font-size:16px;">${escapeHtml(talent.name)}</span>
+                      <span class="candidate-id-badge" style="font-size:11px;">${escapeHtml(talent.id)}</span>
+                      <span class="status-badge-complete" style="font-size:11px; padding:2px 8px;">✓ Selesai Terasesmen</span>
+                    </div>
+                    <div class="candidate-meta" style="margin-top:3px;">
+                      <span>💼 ${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
+                      ${talent.domisili ? `<span>• 📍 ${escapeHtml(talent.domisili)}</span>` : ''}
+                      <span>• 🕒 Selesai: ${completedDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dossier-actions">
+                  <button type="button" class="btn btn-secondary" onclick="printCandidateDossier('${talent.id}')" title="Cetak laporan resmi 1 lembar atau Simpan PDF" style="font-size:12px; font-weight:700; color:#1E40AF; border-color:#BFDBFE; background:#EFF6FF;">
+                    <span>🖨️ Cetak Dossier (PDF)</span>
+                  </button>
+                  <button type="button" class="btn btn-primary" onclick="openAssessmentResultModal('${talent.id}')" title="Buka modal layar penuh" style="font-size:12px; font-weight:600;">
+                    <span>↗ Modal Lengkap</span>
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="resetCandidateData('${talent.id}')" title="Reset agar kandidat dapat tes ulang" style="font-size:11.5px; color:#DC2626; border-color:#FECACA;">
+                    <span>🔄 Reset</span>
+                  </button>
+                </div>
+              </div>
+
+
+    <!-- Segmented Section Switcher (Detail Asesmen vs Panduan Wawancara) -->
+    <div style="display: flex; gap: 8px; margin: 12px 0 16px 0; background: #F1F5F9; padding: 4px; border-radius: 10px; width: fit-content; border: 1px solid #E2E8F0;">
+      <button type="button" 
+              id="dossierTabBtn_details_${talent.id}"
+              onclick="switchCandidateDossierTab('${talent.id}', 'details')"
+              style="display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; background: #FFFFFF; color: #1E40AF; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <span>📊 1. Detail Hasil Asesmen</span>
+      </button>
+      <button type="button" 
+              id="dossierTabBtn_interview_${talent.id}"
+              onclick="switchCandidateDossierTab('${talent.id}', 'interview')"
+              style="display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; background: transparent; color: #64748B;">
+        <span>🎙️ 2. Panduan Wawancara (Probing)</span>
+        <span style="font-size: 10px; font-weight: 700; background: #EEF2FF; color: #4338CA; padding: 1px 6px; border-radius: 999px; margin-left: 2px;">
+          ${probeQuestions.length} Aspek
+        </span>
+      </button>
+    </div>
+
+    <!-- SEKSI 1: DETAIL HASIL ASESMEN PSIKOMETRIK & LOGIKA -->
+    <div id="dossierPanel_details_${talent.id}" style="display: block;">
+      <div class="dossier-visual-grid" style="margin-bottom: 14px;">
+        <div class="dossier-subcard">
+          <div class="dossier-subcard-title" style="color:#1E40AF;">
+            <span>🧠 Pentagon Matrix: Big Five Personality</span>
+            <span style="font-family:var(--font-mono); font-size:10px; background:#EFF6FF; color:#1E40AF; padding:2px 6px; border-radius:4px;">5 Dimensi</span>
+          </div>
+          ${b5 ? renderPentagonMatrixSvg(b5) : '<div style="color:#94A3B8; font-size:12px;">Modul Big Five tidak diujikan</div>'}
+          ${b5 ? `
+            <div style="margin-top:6px; display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px; font-size:10.5px;">
+              ${Object.entries(b5).map(([k, d]) => `
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:4px 6px; border-radius:6px;">
+                  <div style="color:#64748B; font-size:9.5px; text-transform:capitalize;">${k}</div>
+                  <div style="font-weight:700; color:#1E40AF;">${d.percentage}% (${d.level})</div>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="dossier-subcard">
+          <div class="dossier-subcard-title" style="color:#7C3AED;">
+            <span>🧩 DISC Element Line Graph (D-I-S-C)</span>
+            <span style="font-family:var(--font-mono); font-size:10px; background:#F5F3FF; color:#7C3AED; padding:2px 6px; border-radius:4px;">Behavior Curve</span>
+          </div>
+          ${assessment.disc ? renderDiscLineGraphSvg(assessment.disc) : '<div style="color:#94A3B8; font-size:12px;">Modul DISC tidak diujikan</div>'}
+          ${assessment.disc ? `
+            <div style="margin-top:6px; padding:8px 10px; background:#F5F3FF; border:1px solid #DDD6FE; border-radius:6px;">
+              <div style="font-weight:700; color:#7C3AED; font-size:12px; font-family:var(--font-mono); display:flex; justify-content:space-between;">
+                <span>Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})</span>
+                <span style="font-size:10.5px; color:#6D28D9;">D:${assessment.disc.tally ? assessment.disc.tally.change.D : 0} I:${assessment.disc.tally ? assessment.disc.tally.change.I : 0} S:${assessment.disc.tally ? assessment.disc.tally.change.S : 0} C:${assessment.disc.tally ? assessment.disc.tally.change.C : 0}</span>
+              </div>
+              <div style="font-size:11.5px; color:#5B21B6; margin-top:2px; line-height:1.4;">
+                ${escapeHtml(assessment.disc.desc || '')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+
+      ${assessment.cognitive ? `
+        <div class="dossier-subcard" style="margin-top: 14px;">
+          <div class="dossier-subcard-title" style="color:#059669;">
+            <span style="display:flex; align-items:center; gap:6px;"><span>📊</span> Aspek Logika, Penalaran Kognitif &amp; Analisis Bisnis</span>
+            <span style="font-family:var(--font-mono); font-size:12px; font-weight:700; color:#059669; background:#ECFDF5; border:1px solid #A7F3D0; padding:2px 8px; border-radius:4px;">
+              Total Skor: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
+            </span>
+          </div>
+          ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- SEKSI 2: PANDUAN PERTANYAAN WAWANCARA (PROBING) -->
+    <div id="dossierPanel_interview_${talent.id}" style="display: none;">
+      ${probeQuestions.length > 0 ? `
+        <div class="dossier-subcard" style="border-left: 4px solid #4F46E5;">
+          <div class="dossier-subcard-title" style="color: #4F46E5; flex-wrap: wrap; gap: 8px;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span>🎙️</span> Panduan Pertanyaan Wawancara Khusus: ${escapeHtml(talent.role || 'Umum')}
+            </span>
+            <span style="font-family: var(--font-mono); font-size: 10.5px; background: #EEF2FF; color: #4F46E5; padding: 2px 8px; border-radius: 4px; font-weight: 700;">
+              ${probeQuestions.length} Aspek Probing
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-top: 8px;">
+            ${probeQuestions.map((q, qIdx) => `
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                
+                <!-- Card Header -->
+                <div style="margin-bottom: 12px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
+                  <div style="font-size: 13px; font-weight: 700; color: #312E81; line-height: 1.4; margin-bottom: 6px;">
+                    #${qIdx + 1}. ${escapeHtml(q.topic)}
+                  </div>
+                  <div style="display: inline-flex; align-items: center; font-size: 10px; font-weight: 600; color: #4338CA; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 3px 8px; border-radius: 6px; line-height: 1.35; max-width: 100%; word-break: break-word;">
+                    ${escapeHtml(q.indicator)}
+                  </div>
+                </div>
+
+                <!-- Interactive Pill Tabs Switcher -->
+                <div style="display: flex; gap: 4px; margin-bottom: 10px; background: #E2E8F0; padding: 3px; border-radius: 8px;">
+                  ${(q.options || []).map((opt, optIdx) => {
+                    const isFirst = optIdx === 0;
+                    const shortTitle = opt.label && opt.label.includes('A') ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
+                    return `
+                      <button type="button" 
+                              class="probe-pill-btn probe-pill-${talent.id}-${qIdx}-${optIdx}" 
+                              onclick="AssessmentExtensions.switchProbeTab('${talent.id}', ${qIdx}, ${optIdx})"
+                              style="flex: 1; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; ${isFirst ? 'background: #FFFFFF; color: #4338CA; box-shadow: 0 1px 2px rgba(0,0,0,0.06);' : 'background: transparent; color: #64748B;'}">
+                        ${shortTitle}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Tab Content Panels -->
+                <div style="flex: 1;">
+                  ${(q.options || [{ label: 'Pertanyaan Wawancara', question: q.question, whatToLookFor: q.whatToLookFor }]).map((opt, optIdx) => `
+                    <div id="probePanel_${talent.id}_${qIdx}_${optIdx}" 
+                         style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: ${optIdx === 0 ? 'block' : 'none'}; min-height: 140px;">
+                      <div style="font-size: 9.5px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                        ${escapeHtml(opt.label || `Pilihan ${optIdx + 1}`)}
+                      </div>
+                      <p style="font-size: 12px; color: #0F172A; font-weight: 600; line-height: 1.5; margin: 0 0 10px 0;">
+                        "${escapeHtml(opt.question)}"
+                      </p>
+                      <div style="font-size: 10.5px; color: #475569; line-height: 1.4; border-top: 1px dashed #E2E8F0; padding-top: 8px;">
+                        <strong style="color: #334155;">Fokus Dinilai:</strong> ${escapeHtml(opt.whatToLookFor)}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Interviewer Scratchpad / Notes -->
+          <div style="margin-top: 16px; background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 8px; padding: 12px 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 700; color: #475569;">📝 Catatan &amp; Impresi Interviewer:</span>
+              <span style="font-size: 10px; color: #94A3B8;">Untuk evaluasi tim internal saat sesi wawancara</span>
+            </div>
+            <textarea placeholder="Tuliskan catatan respon atau observasi karakter kandidat di sini..." style="width: 100%; height: 75px; font-size: 12px; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 10px; outline: none; font-family: sans-serif; resize: vertical; box-sizing: border-box; background: #FFFFFF;"></textarea>
+          </div>
+        </div>
+      ` : '<div style="padding: 24px; text-align: center; color: #94A3B8;">Belum ada panduan wawancara untuk kandidat ini.</div>'}
+    </div>
+  
+                        </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      // ----------------------------------------------------
+      // BRANCH 2: LAUNCHER MODE (STANDARD CARDS)
+      // ----------------------------------------------------
+      container.innerHTML = filtered.map(talent => {
+        const assessment = state.assessments[talent.id] || talent.assessment;
+        const isCompleted = Boolean(assessment && assessment.status === 'completed');
+        const isExpanded = state.expandedDetailsId === talent.id;
+
+        const parts = (talent.name || '').trim().split(/\s+/);
+        const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'NA');
+
+        let stageClass = 'stage-prospect';
+        if (talent.stage === 'Screening') stageClass = 'stage-screening';
+        else if (talent.stage === 'Interview') stageClass = 'stage-interview';
+        else if (talent.stage === 'Offered') stageClass = 'stage-offered';
+
+        let actionAreaHtml = '';
+        let scorePanelHtml = '';
+
+        if (isCompleted) {
+          const cogStr = assessment.cognitive ? `Logika: ${assessment.cognitive.score}/${assessment.cognitive.total}` : null;
+          const discStr = assessment.disc ? `DISC: ${assessment.disc.profilePattern}` : null;
+          const summaryPills = [cogStr, discStr].filter(Boolean).map(s => `
+            <span style="background: #FFFFFF; border: 1px solid #BBF7D0; color: #166534; font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 600;">${s}</span>
+          `).join(' ');
+
+          actionAreaHtml = `
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span class="status-badge-complete">
+                ✓ Selesai
+              </span>
+              ${summaryPills}
+              <button type="button" class="btn btn-secondary" onclick="toggleScoreDetails('${talent.id}')" style="font-size: 11.5px; padding: 5px 10px;">
+                ${isExpanded ? '▲ Tutup' : '📊 Rincian Skor'}
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="launchCandidateTest('${talent.id}')" style="font-size: 11.5px; padding: 5px 10px;" title="Buka kembali lembar tes">
+                Buka ↗
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="resetCandidateData('${talent.id}')" style="font-size: 11.5px; padding: 5px 8px; color: #DC2626; border-color: #FECACA;" title="Reset respon agar kandidat dapat tes ulang">
+                🔄 Reset
+              </button>
+            </div>
+          `;
+
+          if (isExpanded) {
+            const b5 = assessment.dimensions || assessment.scores;
+          const probeQuestions = (window.AssessmentExtensions && window.AssessmentExtensions.generateInterviewProbeQuestions)
+            ? window.AssessmentExtensions.generateInterviewProbeQuestions(talent, assessment)
+            : [];
+
+            scorePanelHtml = `
+              <div class="score-details-panel open">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #E2E8F0;">
+                  <span style="font-weight: 700; font-size: 13px; color: #0F172A;">📊 Dashboard Matriks Hasil Asesmen</span>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openAssessmentResultModal('${talent.id}')" style="font-size: 11px; padding: 4px 10px;">
+                    Perbesar Tampilan Modal ↗
+                  </button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+                  ${b5 ? `
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px;">
+                      <div style="font-size: 12px; font-weight: 700; color: #1E40AF; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span>🧠</span> Pentagon Matrix: Big Five Personality
+                      </div>
+                      ${renderPentagonMatrixSvg(b5)}
+                    </div>
+                  ` : ''}
+
+                  ${assessment.disc ? `
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px;">
+                      <div style="font-size: 12px; font-weight: 700; color: #7C3AED; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <span>🧩</span> DISC Element Line Graph (D-I-S-C)
+                      </div>
+                      ${renderDiscLineGraphSvg(assessment.disc)}
+                      <div style="margin-top: 6px; font-size: 11.5px; color: #7C3AED; font-weight: 700; font-family: var(--font-mono); text-align: center;">
+                        Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+
+                ${assessment.cognitive ? `
+                  <div style="margin-top: 14px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                      <div style="font-size: 12px; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 6px;">
+                        <span>📊</span> Aspek Logika, Kognitif &amp; Bisnis Praktis
+                      </div>
+                      <span style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; color: #059669;">
+                        Total: ${assessment.cognitive.score}/${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
+                      </span>
+                    </div>
+                    ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }
+
+        } else {
+          actionAreaHtml = `
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span class="status-badge-incomplete">
+                ⏳ Belum Tes
+              </span>
+              <button type="button" class="btn btn-launch" onclick="launchCandidateTest('${talent.id}')">
+                <span>🚀 Mulai Test ↗</span>
+              </button>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="candidate-card" id="card_${talent.id}">
+            <div class="candidate-main-row">
+              <div class="candidate-profile-area">
+                <div class="candidate-avatar">${initials}</div>
+                <div class="candidate-details">
+                  <div class="candidate-name-row">
+                    <span class="candidate-name">${escapeHtml(talent.name)}</span>
+                    <span class="candidate-id-badge">${escapeHtml(talent.id)}</span>
+                    <span class="stage-badge ${stageClass}">${escapeHtml(talent.stage || 'Prospect')}</span>
+                  </div>
+                  <div class="candidate-meta">
+                    <span>💼 ${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
+                    ${talent.domisili ? `<span>• 📍 ${escapeHtml(talent.domisili)}</span>` : ''}
+                    ${talent.pendidikan ? `<span>• 🎓 ${escapeHtml(talent.pendidikan)}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <div class="candidate-actions-area">
+                ${actionAreaHtml}
+              </div>
+            </div>
+
+            ${scorePanelHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+        /* ---------------------------------------------------- */
+    /* 7. Realtime Firebase RTDB Listeners                  */
+    /* ---------------------------------------------------- */
+    async function loadAppwriteCandidatesDirect() {
+      try {
+        const response = await databases.listDocuments(
+          APPWRITE_CONFIG.databaseId,
+          APPWRITE_CONFIG.collectionId,
+          [Appwrite.Query.limit(100)]
+        );
+        if (response && response.documents && response.documents.length > 0) {
+          const list = response.documents.map(doc => ({
+            id: doc.talentId || doc.$id,
+            appwriteId: doc.$id,
+            name: doc.name || '',
+            role: doc.role || 'Freelance Content Creator',
+            phone: doc.phone || '',
+            email: doc.email || '',
+            domisili: doc.domisili || '',
+            education: doc.education || '',
+            stage: doc.stage || 'Prospect',
+            overallRating: Number(doc.overallRating) || 4,
+            expectedSalary: doc.expectedSalary || 'Standard Uang Saku',
+            cvUrl: doc.cvUrl || '',
+            portfolioUrl: doc.portfolioUrl || '',
+            notes: doc.notes || '',
+            outreachStatus: doc.outreachStatus || 'Pending'
+          }));
+
+          list.sort((a, b) => {
+            const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
+            const numB = parseInt((b.id || '').replace(/\D/g, ''), 10) || 0;
+            return numB - numA;
+          });
+
+          state.talents = list;
+          populateRoleDropdown();
+          renderCandidates();
+        }
+      } catch (err) {
+        console.warn('Appwrite direct load fallback to RTDB:', err);
+      }
+    }
+
+    function initRealtimeListeners() {
+      // 1. Load from Appwrite Cloud directly
+      loadAppwriteCandidatesDirect();
+
+      // 2. Listen to /talents in Firebase RTDB as live sync
+      rtdb.ref('/talents').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const list = [];
+        Object.keys(data).forEach(k => {
+          if (data[k] && typeof data[k] === 'object') {
+            list.push({ ...data[k], id: k });
+          }
+        });
+
+        if (list.length > 0) {
+          list.sort((a, b) => {
+            const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
+            const numB = parseInt((b.id || '').replace(/\D/g, ''), 10) || 0;
+            return numB - numA;
+          });
+          state.talents = list;
+          populateRoleDropdown();
+          renderCandidates();
+        }
+      });
+
+      // 3. Listen to /candidate_assessments
+      rtdb.ref('/candidate_assessments').on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        state.assessments = { ...state.assessments, ...data };
+        renderCandidates();
+      });
+    }
+
+    /* ---------------------------------------------------- */
+    /* 8. Helper Functions                                  */
+    /* ---------------------------------------------------- */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastPopup');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('visible');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 2500);
+    }
+
+    // Startup
+    
+    /* ---------------------------------------------------- */
+    /* VISUAL DASHBOARD CHART GENERATORS                    */
+    /* 1. Pentagon Matrix for IPIP Big Five                 */
+    /* 2. Line Graph for DISC Elements                      */
+    /* 3. Aspect Bars for Cognitive & Business Logic        */
+    /* ---------------------------------------------------- */
+
+function renderPentagonMatrixSvg(dimensions) {
+      const W = 520;
+      const H = 320;
+      const cx = 260;
+      const cy = 155;
+      const R = 85;
+
+      const dims = [
+        { key: 'extraversion', label: 'Extraversion', icon: '⚡' },
+        { key: 'agreeableness', label: 'Agreeableness', icon: '🤝' },
+        { key: 'conscientiousness', label: 'Conscientiousness', icon: '🎯' },
+        { key: 'emotionalStability', label: 'Emotional Stability', icon: '🧘' },
+        { key: 'intellect', label: 'Intellect / Openness', icon: '💡' }
+      ];
+
+      const angles = [0, 1, 2, 3, 4].map(i => -Math.PI / 2 + (i * 2 * Math.PI / 5));
+
+      // Concentric pentagon rings
+      const rings = [0.2, 0.4, 0.6, 0.8, 1.0];
+      let ringsSvg = '';
+      rings.forEach((scale, idx) => {
+        const pts = angles.map(a => (cx + Math.cos(a) * R * scale).toFixed(1) + ',' + (cy + Math.sin(a) * R * scale).toFixed(1)).join(' ');
+        const isOuter = (idx === rings.length - 1);
+        ringsSvg += '<polygon points="' + pts + '" fill="' + (idx % 2 === 0 ? '#F8FAFC' : '#FFFFFF') + '" stroke="' + (isOuter ? '#94A3B8' : '#E2E8F0') + '" stroke-width="' + (isOuter ? '1.5' : '1') + '" />';
+      });
+
+      // Spokes from center
+      let spokesSvg = '';
+      angles.forEach(a => {
+        const x2 = (cx + Math.cos(a) * R).toFixed(1);
+        const y2 = (cy + Math.sin(a) * R).toFixed(1);
+        spokesSvg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="2 2" />';
+      });
+
+      // Data polygon
+      const dataPoints = dims.map((d, i) => {
+        const dataObj = dimensions ? dimensions[d.key] : null;
+        const pct = dataObj ? Math.max(10, Math.min(100, dataObj.percentage || 50)) : 50;
+        const r = (pct / 100) * R;
+        const x = cx + Math.cos(angles[i]) * r;
+        const y = cy + Math.sin(angles[i]) * r;
+        return { x, y, pct, label: d.label, level: dataObj ? dataObj.level : 'Sedang' };
+      });
+
+      const polyPoints = dataPoints.map(p => p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+
+      // Vertices dots
+      let dotsSvg = '';
+      dataPoints.forEach(p => {
+        dotsSvg += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="5.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="2" />' +
+                   '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2" fill="#FFFFFF" />';
+      });
+
+      // Axis Labels with safe bounds
+      const labelOffsets = [
+        { x: 0, y: -16, align: 'middle' },
+        { x: 10, y: -2, align: 'start' },
+        { x: 8, y: 14, align: 'start' },
+        { x: -8, y: 14, align: 'end' },
+        { x: -10, y: -2, align: 'end' }
+      ];
+
+      let labelsSvg = '';
+      dims.forEach((d, i) => {
+        const outerX = cx + Math.cos(angles[i]) * (R + 10);
+        const outerY = cy + Math.sin(angles[i]) * (R + 10);
+        const offset = labelOffsets[i];
+        const dataObj = dimensions ? dimensions[d.key] : null;
+        const pct = dataObj ? dataObj.percentage : 50;
+        const level = dataObj ? dataObj.level : 'Sedang';
+
+        labelsSvg += '<g transform="translate(' + (outerX + offset.x) + ', ' + (outerY + offset.y) + ')">' +
+          '<text text-anchor="' + offset.align + '" font-family="var(--font-sans, system-ui, sans-serif)" font-size="11" font-weight="700" fill="#0F172A">' +
+            d.icon + ' ' + d.label +
+          '</text>' +
+          '<text text-anchor="' + offset.align + '" y="14" font-family="var(--font-mono, monospace)" font-size="10" font-weight="600" fill="#2563EB">' +
+            pct + '% (' + level + ')' +
+          '</text>' +
+        '</g>';
+      });
+
+      return '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; overflow: visible;" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+          '<linearGradient id="pentagonGradient" x1="0%" y1="0%" x2="100%" y2="100%">' +
+            '<stop offset="0%" stop-color="#3B82F6" stop-opacity="0.5" />' +
+            '<stop offset="100%" stop-color="#1D4ED8" stop-opacity="0.2" />' +
+          '</linearGradient>' +
+        '</defs>' +
+        ringsSvg +
+        spokesSvg +
+        '<polygon points="' + polyPoints + '" fill="url(#pentagonGradient)" stroke="#2563EB" stroke-width="2.5" stroke-linejoin="round" />' +
+        dotsSvg +
+        labelsSvg +
+      '</svg>';
+    }
+
+        function renderDiscLineGraphSvg(discData) {
+      const W = 360;
+      const H = 220;
+      const padLeft = 45;
+      const padRight = 35;
+      const padTop = 35;
+      const padBottom = 40;
+
+      const graphW = W - padLeft - padRight;
+      const graphH = H - padTop - padBottom;
+      const midY = padTop + graphH / 2;
+
+      const elements = [
+        { key: 'D', name: 'Dominance', color: '#DC2626', x: padLeft + graphW * 0.12 },
+        { key: 'I', name: 'Influence', color: '#D97706', x: padLeft + graphW * 0.38 },
+        { key: 'S', name: 'Steadiness', color: '#059669', x: padLeft + graphW * 0.64 },
+        { key: 'C', name: 'Compliance', color: '#2563EB', x: padLeft + graphW * 0.90 }
+      ];
+
+      const changeScores = (discData && discData.tally && discData.tally.change) ? discData.tally.change : { D: 0, I: 0, S: 0, C: 0 };
+      const maxAmp = 18;
+      const scaleY = (graphH / 2 - 8) / maxAmp;
+
+      const points = elements.map(el => {
+        const val = changeScores[el.key] || 0;
+        const clamped = Math.max(-maxAmp, Math.min(maxAmp, val));
+        const y = midY - (clamped * scaleY);
+        return { ...el, val, y };
+      });
+
+      const linePath = points.map((p, idx) => (idx === 0 ? `M ${p.x.toFixed(1)} ${p.y.toFixed(1)}` : `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)).join(' ');
+
+      return `
+        <svg viewBox="0 0 ${W} ${H}" style="width: 100%; max-width: 380px; height: auto; display: block; margin: 0 auto;" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shaded Zones -->
+          <rect x="${padLeft}" y="${padTop}" width="${graphW}" height="${graphH/2}" fill="#F0FDF4" fill-opacity="0.5" />
+          <rect x="${padLeft}" y="${midY}" width="${graphW}" height="${graphH/2}" fill="#F8FAFC" fill-opacity="0.8" />
+          <rect x="${padLeft}" y="${padTop}" width="${graphW}" height="${graphH}" fill="none" stroke="#E2E8F0" stroke-width="1" rx="4" />
+
+          <!-- High / Low Guide labels on left -->
+          <text x="${padLeft - 6}" y="${padTop + 14}" text-anchor="end" font-family="var(--font-mono)" font-size="9" fill="#059669" font-weight="600">+HIGH</text>
+          <text x="${padLeft - 6}" y="${midY + 3}" text-anchor="end" font-family="var(--font-mono)" font-size="9" fill="#64748B" font-weight="600">0</text>
+          <text x="${padLeft - 6}" y="${padTop + graphH - 6}" text-anchor="end" font-family="var(--font-mono)" font-size="9" fill="#DC2626" font-weight="600">-LOW</text>
+
+          <!-- Midline (0) -->
+          <line x1="${padLeft}" y1="${midY}" x2="${padLeft + graphW}" y2="${midY}" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="4 3" />
+
+          <!-- Vertical Grid Lines -->
+          ${points.map(p => `
+            <line x1="${p.x.toFixed(1)}" y1="${padTop}" x2="${p.x.toFixed(1)}" y2="${padTop + graphH}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2 2" />
+          `).join('')}
+
+          <!-- Connected Profile Line -->
+          <path d="${linePath}" fill="none" stroke="#7C3AED" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+          <!-- Points and Callouts -->
+          ${points.map(p => `
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="7" fill="${p.color}" fill-opacity="0.2" />
+            <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4.5" fill="${p.color}" stroke="#FFFFFF" stroke-width="2" />
+            <g transform="translate(${p.x.toFixed(1)}, ${p.val >= 0 ? (p.y - 12).toFixed(1) : (p.y + 16).toFixed(1)})">
+              <text text-anchor="middle" font-family="var(--font-mono)" font-size="10.5" font-weight="700" fill="${p.color}">
+                ${p.val > 0 ? '+' + p.val : p.val}
+              </text>
+            </g>
+            <g transform="translate(${p.x.toFixed(1)}, ${padTop + graphH + 16})">
+              <text text-anchor="middle" font-family="var(--font-mono)" font-size="12" font-weight="700" fill="${p.color}">
+                ${p.key}
+              </text>
+              <text text-anchor="middle" y="11" font-family="var(--font-sans)" font-size="9" fill="#64748B">
+                ${p.name}
+              </text>
+            </g>
+          `).join('')}
+        </svg>
+      `;
+    }
+
+        function renderCognitiveItemsAuditHtml(cogData) {
+      if (!cogData || !Array.isArray(cogData.items) || cogData.items.length === 0) {
+        return '';
+      }
+
+      const items = cogData.items;
+      const score = cogData.score || 0;
+      const total = cogData.total || items.length;
+      const wrongItems = items.filter(it => !it.isCorrect);
+
+      let wrongCardsHtml = '';
+      if (wrongItems.length > 0) {
+        wrongCardsHtml = `
+          <div style="margin-top: 14px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 10px; padding: 14px 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 7px;">
+                <span style="font-size: 15px;">⚠️</span>
+                <span style="font-size: 11.5px; font-weight: 700; color: #9F1239; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Butir Soal Perlu Evaluasi / Klarifikasi Wawancara (${wrongItems.length})
+                </span>
+              </div>
+              <span style="font-size: 10.5px; font-weight: 700; color: #BE123C; background: #FFE4E6; border: 1px solid #FDA4AF; padding: 2px 8px; border-radius: 6px;">
+                Akurasi: ${score}/${total}
+              </span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              ${wrongItems.map((item, idx) => `
+                <div style="background: #FFFFFF; border: 1px solid #FDA4AF; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px;">
+                    <span style="font-size: 10.5px; font-weight: 700; color: #BE123C; background: #FFF1F2; border: 1px solid #FECDD3; padding: 2px 7px; border-radius: 5px;">
+                      ${escapeHtml(item.category || 'Soal')}
+                    </span>
+                    <span style="font-size: 10.5px; font-weight: 700; color: #E11D48; display: inline-flex; align-items: center; gap: 3px;">
+                      ✕ Kurang Tepat
+                    </span>
+                  </div>
+
+                  <div style="font-size: 12.5px; font-weight: 600; color: #1E293B; line-height: 1.45; margin-bottom: 10px;">
+                    ${escapeHtml(item.question)}
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 8px;">
+                    <!-- Jawaban Kandidat -->
+                    <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; padding: 8px 10px;">
+                      <div style="font-size: 9.5px; font-weight: 700; color: #E11D48; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                        ✕ Jawaban Kandidat:
+                      </div>
+                      <div style="font-size: 11.5px; font-weight: 600; color: #9F1239; line-height: 1.35;">
+                        ${escapeHtml(item.candidateAnswer || '(Tidak ada jawaban)')}
+                      </div>
+                    </div>
+
+                    <!-- Kunci Jawaban -->
+                    <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 6px; padding: 8px 10px;">
+                      <div style="font-size: 9.5px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">
+                        ✓ Kunci Jawaban yang Benar:
+                      </div>
+                      <div style="font-size: 11.5px; font-weight: 600; color: #065F46; line-height: 1.35;">
+                        ${escapeHtml(item.correctAnswer || '-')}
+                      </div>
+                    </div>
+                  </div>
+
+                  ${item.explanation ? `
+                    <div style="background: #F8FAFC; border-left: 3px solid #F43F5E; border-radius: 0 6px 6px 0; padding: 8px 10px; font-size: 11px; color: #475569; line-height: 1.45;">
+                      <strong style="color: #9F1239;">💡 Analisis &amp; Rasional:</strong> ${escapeHtml(item.explanation)}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        wrongCardsHtml = `
+          <div style="margin-top: 14px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">🎯</span>
+            <div style="font-size: 12px; font-weight: 600; color: #065F46;">
+              <strong>Sempurna (${total}/${total}):</strong> Seluruh butir soal logika &amp; kognitif dijawab dengan benar tanpa kesalahan.
+            </div>
+          </div>
+        `;
+      }
+
+      // Collapsible full 15 items breakdown
+      const fullListHtml = `
+        <details style="margin-top: 12px; border: 1px solid #E2E8F0; border-radius: 8px; background: #F8FAFC; overflow: hidden;">
+          <summary style="padding: 10px 14px; font-size: 11.5px; font-weight: 700; color: #475569; cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <span>📋</span> Buka Seluruh ${items.length} Butir Soal &amp; Respon Lengkap
+            </span>
+            <span style="font-size: 10px; font-weight: 600; color: #64748B;">(Klik untuk expand / collapse)</span>
+          </summary>
+          <div style="padding: 12px 14px; background: #FFFFFF; border-top: 1px solid #E2E8F0; display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto;">
+            ${items.map((it, idx) => `
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 6px; background: ${it.isCorrect ? '#F8FAFC' : '#FFF1F2'}; border: 1px solid ${it.isCorrect ? '#F1F5F9' : '#FECDD3'}; font-size: 11.5px;">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 700; color: #64748B;">#${idx + 1}</span>
+                    <span style="font-size: 10px; font-weight: 600; color: #475569; background: #E2E8F0; padding: 1px 5px; border-radius: 4px;">${escapeHtml(it.category || 'Soal')}</span>
+                  </div>
+                  <div style="font-weight: 600; color: #1E293B; line-height: 1.35; margin-bottom: 4px;">
+                    ${escapeHtml(it.question)}
+                  </div>
+                  <div style="font-size: 11px; color: ${it.isCorrect ? '#065F46' : '#9F1239'};">
+                    ${it.isCorrect ? `<strong>Respon:</strong> ${escapeHtml(it.candidateAnswer)}` : `<strong>Jawaban:</strong> <span style="text-decoration: line-through;">${escapeHtml(it.candidateAnswer || '-')}</span> &rarr; <strong>Kunci:</strong> ${escapeHtml(it.correctAnswer)}`}
+                  </div>
+                </div>
+                <span style="font-size: 11px; font-weight: 700; color: ${it.isCorrect ? '#059669' : '#E11D48'}; white-space: nowrap; padding-top: 2px;">
+                  ${it.isCorrect ? '✓ Benar' : '✕ Salah'}
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </details>
+      `;
+
+      return `
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #E2E8F0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #0F172A;">🔍 Audit Butir Soal &amp; Evaluasi Jawaban</span>
+              <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0;">
+                ${score}/${total} Benar
+              </span>
+              ${wrongItems.length > 0 ? `
+                <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; background: #FFF1F2; color: #BE123C; border: 1px solid #FECDD3;">
+                  ${wrongItems.length} Perlu Evaluasi
+                </span>
+              ` : ''}
+            </div>
+          </div>
+
+          ${wrongCardsHtml}
+          ${fullListHtml}
+        </div>
+      `;
+    }
+
+    function switchCandidateDossierTab(talentId, tabName) {
+      if (window.AssessmentExtensions && window.AssessmentExtensions.switchCandidateDossierTab) {
+        window.AssessmentExtensions.switchCandidateDossierTab(talentId, tabName);
+      }
+    }
+
+    function renderCognitiveAspectsBarsHtml(cogData) {
+      const score = cogData ? (cogData.score || 0) : 0;
+      const total = cogData ? (cogData.total || 15) : 15;
+      const pct = cogData ? (cogData.percentage || 0) : 0;
+
+      let level = 'Perlu Evaluasi';
+      let levelColor = '#DC2626';
+      let levelBg = '#FEF2F2';
+      let levelBorder = '#FECACA';
+      let ringColor = '#DC2626';
+
+      if (pct >= 80) {
+        level = 'Sangat Baik';
+        levelColor = '#059669';
+        levelBg = '#ECFDF5';
+        levelBorder = '#A7F3D0';
+        ringColor = '#059669';
+      } else if (pct >= 60) {
+        level = 'Kompeten / Cukup';
+        levelColor = '#2563EB';
+        levelBg = '#EFF6FF';
+        levelBorder = '#BFDBFE';
+        ringColor = '#2563EB';
+      } else if (pct >= 40) {
+        level = 'Cukup';
+        levelColor = '#D97706';
+        levelBg = '#FFFBEB';
+        levelBorder = '#FDE68A';
+        ringColor = '#D97706';
+      }
+
+      // Consolidate categories to avoid fragmented 1-question bars
+      const rawCats = (cogData && cogData.categories) ? cogData.categories : {};
+      const aspects = [
+        { name: 'Deret Angka & Pola', icon: '🔢', correct: rawCats['Deret Angka'] ? rawCats['Deret Angka'].correct : 0, total: rawCats['Deret Angka'] ? rawCats['Deret Angka'].total : 3 },
+        { name: 'Aritmatika Bisnis', icon: '➕', correct: rawCats['Aritmatika Dasar'] ? rawCats['Aritmatika Dasar'].correct : 0, total: rawCats['Aritmatika Dasar'] ? rawCats['Aritmatika Dasar'].total : 3 },
+        { name: 'Logika Komersial', icon: '💼', correct: rawCats['Logika Komersial'] ? rawCats['Logika Komersial'].correct : 0, total: rawCats['Logika Komersial'] ? rawCats['Logika Komersial'].total : 4 },
+        { name: 'Analisis Data', icon: '📈', correct: rawCats['Analisis Data'] ? rawCats['Analisis Data'].correct : 0, total: rawCats['Analisis Data'] ? rawCats['Analisis Data'].total : 3 },
+        { name: 'Penalaran & Silogisme', icon: '🧩', correct: (rawCats['Penalaran Kritis'] ? rawCats['Penalaran Kritis'].correct : 0) + (rawCats['Silogisme'] ? rawCats['Silogisme'].correct : 0), total: (rawCats['Penalaran Kritis'] ? rawCats['Penalaran Kritis'].total : 1) + (rawCats['Silogisme'] ? rawCats['Silogisme'].total : 1) }
+      ];
+
+      // Gauge math
+      const r = 46;
+      const circ = 2 * Math.PI * r; // ~289.0
+      const strokeOffset = circ - (pct / 100) * circ;
+
+      // SVG Bar Chart geometry
+      const w = 530;
+      const h = 180;
+      const padLeft = 175;
+      const barW = 265;
+      const rowH = 30;
+      const startY = 32;
+
+      let ticksSvg = '';
+      [0, 25, 50, 75, 100].forEach(tick => {
+        const x = padLeft + (tick / 100) * barW;
+        ticksSvg += `
+          <line x1="${x.toFixed(1)}" y1="18" x2="${x.toFixed(1)}" y2="${startY + aspects.length * rowH}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2 2" />
+          <text x="${x.toFixed(1)}" y="13" text-anchor="middle" font-family="'Geist Mono', monospace" font-size="9" fill="#94A3B8" font-weight="600">${tick}%</text>
+        `;
+      });
+
+      let barsSvg = '';
+      aspects.forEach((asp, i) => {
+        const y = startY + i * rowH;
+        const aPct = asp.total > 0 ? Math.round((asp.correct / asp.total) * 100) : 0;
+        const fillWidth = Math.max(6, (aPct / 100) * barW);
+
+        let barFill = '#059669';
+        let valColor = '#065F46';
+        if (aPct < 50) {
+          barFill = '#DC2626';
+          valColor = '#991B1B';
+        } else if (aPct < 75) {
+          barFill = '#D97706';
+          valColor = '#92400E';
+        }
+
+        barsSvg += `
+          <!-- Label -->
+          <text x="${padLeft - 10}" y="${y + 11}" text-anchor="end" font-family="'Geist', sans-serif" font-size="11" font-weight="600" fill="#1E293B">
+            ${asp.icon} ${escapeHtml(asp.name)}
+          </text>
+
+          <!-- Track -->
+          <rect x="${padLeft}" y="${y}" width="${barW}" height="13" rx="6.5" fill="#F1F5F9" />
+
+          <!-- Fill -->
+          <rect x="${padLeft}" y="${y}" width="${fillWidth.toFixed(1)}" height="13" rx="6.5" fill="${barFill}" />
+
+          <!-- Score Value -->
+          <text x="${padLeft + barW + 8}" y="${y + 11}" font-family="'Geist Mono', monospace" font-size="10.5" font-weight="700" fill="${valColor}">
+            ${asp.correct}/${asp.total} (${aPct}%)
+          </text>
+        `;
+      });
+
+      return `
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+          <div class="cognitive-viz-grid">
+            
+            <!-- Left: Donut Gauge Score Card -->
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+              <div style="position: relative; width: 110px; height: 110px;">
+                <svg viewBox="0 0 110 110" width="110" height="110" style="transform: rotate(-90deg); display: block;">
+                  <circle cx="55" cy="55" r="${r}" fill="none" stroke="#E2E8F0" stroke-width="10" />
+                  <circle cx="55" cy="55" r="${r}" fill="none" stroke="${ringColor}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}" style="transition: stroke-dashoffset 0.6s ease;" />
+                </svg>
+                <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                  <span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 800; color: #0F172A; line-height: 1;">${pct}%</span>
+                  <span style="font-size: 10.5px; font-weight: 600; color: #64748B; margin-top: 3px;">${score} / ${total} Benar</span>
+                </div>
+              </div>
+              <div style="margin-top: 10px; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; background: ${levelBg}; color: ${levelColor}; border: 1px solid ${levelBorder};">
+                ${level}
+              </div>
+              <div style="font-size: 10px; color: #64748B; margin-top: 4px; font-weight: 500;">
+                Akurasi Logika &amp; Bisnis
+              </div>
+            </div>
+
+            <!-- Right: SVG Aspect Horizontal Bar Chart -->
+            <div style="overflow-x: auto;">
+              <svg viewBox="0 0 ${w} ${h}" width="100%" style="display: block; max-width: 580px; margin: 0 auto;">
+                ${ticksSvg}
+                ${barsSvg}
+              </svg>
+            </div>
+
+          </div>
+
+          ${renderCognitiveItemsAuditHtml(cogData)}
+        </div>
+      `;
+    }
+
+    /* Modal Open / Close */
+    function openAssessmentResultModal(talentId) {
+      const talent = state.talents.find(t => t.id === talentId);
+      if (!talent) return;
+      const assessment = state.assessments[talent.id] || talent.assessment;
+      if (!assessment) {
+        showToast('Kandidat ini belum memiliki data asesmen.');
+        return;
+      }
+
+      document.getElementById('resModalCandidateName').textContent = talent.name;
+      document.getElementById('resModalCandidateId').textContent = talent.id;
+      const dateStr = assessment.completedAt ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : 'Baru saja';
+      document.getElementById('resModalCandidateMeta').textContent = `Posisi: ${talent.role || 'Freelance Content Creator'} • Selesai: ${dateStr}`;
+
+      const body = document.getElementById('resModalBody');
+
+      // 1. Pentagon Matrix (Big Five)
+      let bigFiveCardHtml = '';
+      if ((assessment.dimensions || assessment.scores)) {
+        bigFiveCardHtml = `
+          <div class="report-card">
+            <div class="report-card-title">
+              <span>🧠</span> <span>Pentagon Matrix: IPIP Big Five Personality</span>
+            </div>
+            ${renderPentagonMatrixSvg((assessment.dimensions || assessment.scores))}
+            <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 6px; font-size: 11px;">
+              ${Object.entries((assessment.dimensions || assessment.scores)).map(([k, d]) => `
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 5px 8px; border-radius: 6px;">
+                  <div style="color: #64748B; font-size: 10px;">${k}</div>
+                  <div style="font-weight: 700; color: #1E40AF;">${d.percentage}% (${d.level})</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. DISC Line Graph
+      let discCardHtml = '';
+      if (assessment.disc) {
+        discCardHtml = `
+          <div class="report-card">
+            <div class="report-card-title">
+              <span>🧩</span> <span>DISC Element Line Graph (D-I-S-C)</span>
+            </div>
+            ${renderDiscLineGraphSvg(assessment.disc)}
+            <div style="margin-top: 10px; padding: 10px; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #7C3AED;">
+                  Pola Profil: Tipe ${assessment.disc.profilePattern} (${assessment.disc.primaryName})
+                </span>
+                <span style="font-size: 11px; font-weight: 600; color: #6D28D9; font-family: var(--font-mono);">
+                  D:${assessment.disc.tally.change.D} I:${assessment.disc.tally.change.I} S:${assessment.disc.tally.change.S} C:${assessment.disc.tally.change.C}
+                </span>
+              </div>
+              <div style="font-size: 12px; color: #5B21B6; line-height: 1.45;">
+                ${escapeHtml(assessment.disc.desc || '')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. Cognitive Aspect Bars
+      let cogCardHtml = '';
+      if (assessment.cognitive) {
+        cogCardHtml = `
+          <div class="report-card" style="grid-column: 1 / -1;">
+            <div class="report-card-title" style="display: flex; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📊</span> <span>Aspek Logika, Kognitif &amp; Bisnis Praktis</span>
+              </div>
+              <span style="font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; color: #059669;">
+                Skor Akhir: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
+              </span>
+            </div>
+            ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+          </div>
+        `;
+      }
+
+      body.innerHTML = `
+        <div class="report-grid-3col">
+          ${bigFiveCardHtml}
+          ${discCardHtml}
+          ${cogCardHtml}
+        </div>
+      `;
+
+      document.getElementById('assessmentResultModalBackdrop').classList.add('open');
+    }
+
+    function closeAssessmentResultModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('assessmentResultModalBackdrop').classList.remove('open');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initRealtimeListeners();
+      updateSelectedModules();
+      if (window.location.hash === '#results' || window.location.search.includes('view=results')) {
+        switchPortalMode('results');
+      }
+    });
+  </script>
+
+  <!-- Fullscreen / Detailed Assessment Result Modal -->
+  <div class="assessment-modal-backdrop" id="assessmentResultModalBackdrop" onclick="closeAssessmentResultModal(event)">
+    <div class="assessment-modal-card" onclick="event.stopPropagation()">
+      <div class="assessment-modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">📊</span>
+            <h2 style="font-size: 18px; font-weight: 700; color: #0F172A;" id="resModalCandidateName">Laporan Hasil Asesmen</h2>
+            <span class="candidate-id-badge" id="resModalCandidateId">PGE-000</span>
+          </div>
+          <div style="font-size: 12.5px; color: #64748B; margin-top: 3px;" id="resModalCandidateMeta">
+            Posisi: Freelance Content Creator • Tanggal Asesmen: -
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeAssessmentResultModal()" style="padding: 6px 12px; font-size: 14px; font-weight: 700;">
+          ✕ Tutup
+        </button>
+      </div>
+
+      <div class="assessment-modal-body" id="resModalBody">
+        <!-- Content will be injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .assessment-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .assessment-modal-backdrop.open {
+      display: flex;
+      animation: modalFadeIn 0.2s ease;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .assessment-modal-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 1080px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .assessment-modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFFFFF;
+    }
+
+    .assessment-modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      background: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .report-grid-3col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .report-grid-3col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .report-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .report-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+  </style>
+
+</body>
+</html>
