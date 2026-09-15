@@ -3199,6 +3199,20 @@
       console.warn('Realtime cloud whitelist error:', e);
     }
 
+    // Realtime Cloud Custom Roles Listener
+    try {
+      rtdb.ref('/metadata/customRoles').on('value', (snap) => {
+        const val = snap.val();
+        if (Array.isArray(val) && val.length > 0) {
+          try {
+            localStorage.setItem('pge_custom_roles', JSON.stringify(val));
+          } catch (e) {}
+        }
+      });
+    } catch (e) {
+      console.warn('Realtime custom roles sync error:', e);
+    }
+
     function getCustomWhitelist() {
       if (cloudWhitelist && cloudWhitelist.length > 0) {
         return cloudWhitelist;
@@ -8444,10 +8458,218 @@ function renderPentagonMatrixSvg(dimensions) {
       openDrawer();
     }
 
+    /* ---------------------------------------------------- */
+    /* MASTER ROLES & JOB VACANCY CATALOG                   */
+    /* ---------------------------------------------------- */
+    const PGE_DEFAULT_ROLES = [
+      'Business Development',
+      'Freelance Content Creator',
+      'Video Editor',
+      'Graphic Designer',
+      'Social Media Specialist',
+      'Host Live / Streamer',
+      'KOL Specialist',
+      'Admin Recruitment',
+      'Content Writer / Scriptwriter',
+      'Digital Marketing',
+      'Talent Coordinator'
+    ];
+
+    function getMasterRoles() {
+      let customRoles = [];
+      try {
+        const saved = localStorage.getItem('pge_custom_roles');
+        if (saved) customRoles = JSON.parse(saved);
+      } catch (e) {}
+
+      const candidateRoles = (state.talents || [])
+        .map(t => (t.role || '').trim())
+        .filter(Boolean);
+
+      // Merge defaults, custom saved, and any candidate roles
+      const allRoles = [...PGE_DEFAULT_ROLES, ...customRoles, ...candidateRoles];
+      const seen = new Set();
+      const unique = [];
+
+      allRoles.forEach(r => {
+        const normalized = toTitleCase(r.trim());
+        if (normalized && !seen.has(normalized.toLowerCase())) {
+          seen.add(normalized.toLowerCase());
+          unique.push(normalized);
+        }
+      });
+
+      return unique;
+    }
+
+    function saveCustomRole(newRole) {
+      if (!newRole) return;
+      const normalized = toTitleCase(newRole.trim());
+      if (!normalized) return;
+
+      try {
+        let customRoles = [];
+        const saved = localStorage.getItem('pge_custom_roles');
+        if (saved) customRoles = JSON.parse(saved);
+
+        const existsInDefaults = PGE_DEFAULT_ROLES.some(r => r.toLowerCase() === normalized.toLowerCase());
+        const existsInCustom = customRoles.some(r => r.toLowerCase() === normalized.toLowerCase());
+
+        if (!existsInDefaults && !existsInCustom) {
+          customRoles.push(normalized);
+          localStorage.setItem('pge_custom_roles', JSON.stringify(customRoles));
+          console.log('Saved new custom role:', normalized);
+          
+          try {
+            rtdb.ref('/metadata/customRoles').set(customRoles).catch(() => {});
+          } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('Failed to persist custom role:', e);
+      }
+    }
+
+    function openRoleDropdown() {
+      const menu = document.getElementById('roleDropdownMenu');
+      const input = document.getElementById('inputRole');
+      if (!menu || !input) return;
+      renderRoleDropdownItems(input.value);
+      menu.style.display = 'block';
+    }
+
+    function closeRoleDropdown() {
+      const menu = document.getElementById('roleDropdownMenu');
+      if (menu) menu.style.display = 'none';
+    }
+
+    function toggleRoleDropdown(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const menu = document.getElementById('roleDropdownMenu');
+      const input = document.getElementById('inputRole');
+      if (!menu) return;
+      if (menu.style.display === 'block') {
+        closeRoleDropdown();
+      } else {
+        if (input) {
+          input.focus();
+          renderRoleDropdownItems(''); // Show full list when clicking toggle arrow
+        }
+        menu.style.display = 'block';
+      }
+    }
+
+    function filterRoleDropdown(val) {
+      const menu = document.getElementById('roleDropdownMenu');
+      if (!menu) return;
+      menu.style.display = 'block';
+      renderRoleDropdownItems(val);
+    }
+
+    function selectRoleOption(roleName) {
+      const input = document.getElementById('inputRole');
+      if (input) {
+        input.value = roleName;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      closeRoleDropdown();
+    }
+
+    function handleRoleInputBlur(input) {
+      if (!input) return;
+      setTimeout(() => {
+        input.value = toTitleCase(input.value.trim()) || 'Freelance Content Creator';
+        closeRoleDropdown();
+      }, 200);
+    }
+
+    function renderRoleDropdownItems(searchQuery) {
+      const menu = document.getElementById('roleDropdownMenu');
+      if (!menu) return;
+
+      const roles = getMasterRoles();
+      const query = (searchQuery || '').toLowerCase().trim();
+      const currentVal = (document.getElementById('inputRole')?.value || '').toLowerCase().trim();
+
+      const matchedRoles = query 
+        ? roles.filter(r => r.toLowerCase().includes(query))
+        : roles;
+
+      let html = '';
+      if (matchedRoles.length > 0) {
+        html += '<div style="padding: 4px;">';
+        matchedRoles.forEach(r => {
+          const isSelected = r.toLowerCase() === currentVal;
+          const bg = isSelected ? '#EFF6FF' : 'transparent';
+          const color = isSelected ? '#1D4ED8' : '#1F2937';
+          const weight = isSelected ? '600' : '500';
+          const checkIcon = isSelected ? '<span style="color: #2563EB; font-size: 13px;">✓</span>' : '';
+          const escapedJs = escapeHtml(r).replace(/'/g, "\\'");
+
+          html += `
+            <div class="role-dropdown-item" 
+                 onmousedown="selectRoleOption('${escapedJs}')" 
+                 style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; font-size: 13px; color: ${color}; font-weight: ${weight}; background: ${bg}; border-radius: 6px; cursor: pointer; transition: background 0.1s ease;"
+                 onmouseover="if('${bg}' === 'transparent') this.style.background = '#F3F4F6'"
+                 onmouseout="if('${bg}' === 'transparent') this.style.background = 'transparent'">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px; opacity: 0.7;">💼</span>
+                <span>${escapeHtml(r)}</span>
+              </div>
+              ${checkIcon}
+            </div>
+          `;
+        });
+        html += '</div>';
+      } else {
+        html += `
+          <div style="padding: 12px 14px; text-align: center; color: #6B7280; font-size: 12px;">
+            Tidak ditemukan peran yang cocok
+          </div>
+        `;
+      }
+
+      // If user typed something that isn't an exact match, offer "+ Gunakan role custom"
+      if (query && !roles.some(r => r.toLowerCase() === query)) {
+        const titleCasedNew = toTitleCase(query);
+        const escapedCustomJs = escapeHtml(titleCasedNew).replace(/'/g, "\\'");
+        html += `
+          <div style="border-top: 1px solid #E5E7EB; padding: 6px 8px; background: #F9FAFB;">
+            <div class="role-dropdown-item" 
+                 onmousedown="selectRoleOption('${escapedCustomJs}')" 
+                 style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 12.5px; color: #2563EB; font-weight: 600; border-radius: 6px; cursor: pointer; background: #EFF6FF;"
+                 onmouseover="this.style.background = '#DBEAFE'"
+                 onmouseout="this.style.background = '#EFF6FF'">
+              <span>➕</span>
+              <span>Gunakan role custom: "<strong>${escapeHtml(titleCasedNew)}</strong>"</span>
+            </div>
+          </div>
+        `;
+      }
+
+      menu.innerHTML = html;
+    }
+
+    document.addEventListener('click', (e) => {
+      const group = document.getElementById('roleComboboxGroup');
+      if (group && !group.contains(e.target)) {
+        closeRoleDropdown();
+      }
+    });
+
+    window.openRoleDropdown = openRoleDropdown;
+    window.closeRoleDropdown = closeRoleDropdown;
+    window.toggleRoleDropdown = toggleRoleDropdown;
+    window.filterRoleDropdown = filterRoleDropdown;
+    window.selectRoleOption = selectRoleOption;
+    window.handleRoleInputBlur = handleRoleInputBlur;
+    window.getMasterRoles = getMasterRoles;
+    window.saveCustomRole = saveCustomRole;
+
     function renderDrawerForm(data) {
       if (!el.drawerBody) return;
-      const uniqueRoles = Array.from(new Set(state.talents.map(t => (t.role || '').trim()).filter(Boolean)));
-      const datalistOptions = uniqueRoles.map(r => `<option value="${escapeHtml(r)}"></option>`).join('');
 
       el.drawerBody.innerHTML = `
         <form id="talentForm" onsubmit="event.preventDefault(); handleSaveCandidate();">
@@ -8461,15 +8683,32 @@ function renderPentagonMatrixSvg(dimensions) {
           </div>
 
           <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">
+            <div class="form-group" style="position: relative;" id="roleComboboxGroup">
+              <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
                 <span>Role / Job Vacancy *</span>
-                <span style="font-size: 10px; color: #2563EB; font-weight: normal;">Datalist / Custom</span>
+                <span style="font-size: 10px; color: #2563EB; font-weight: 500;">Pilih atau Ketik Custom</span>
               </label>
-              <input type="text" id="inputRole" list="registeredRolesList" class="form-input" value="${escapeHtml(data.role || 'Freelance Content Creator')}" placeholder="Pilih atau ketik nama lowongan..." onblur="this.value = toTitleCase(this.value)">
-              <datalist id="registeredRolesList">
-                ${datalistOptions}
-              </datalist>
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="text" id="inputRole" class="form-input" 
+                       value="${escapeHtml(data.role || 'Freelance Content Creator')}" 
+                       placeholder="Pilih dari daftar atau ketik peran..." 
+                       autocomplete="off"
+                       onfocus="openRoleDropdown()"
+                       oninput="filterRoleDropdown(this.value)"
+                       onblur="handleRoleInputBlur(this)"
+                       style="padding-right: 36px;">
+                <button type="button" id="btnToggleRoleDropdown" onclick="toggleRoleDropdown(event)" 
+                        tabindex="-1"
+                        title="Tampilkan daftar lowongan"
+                        style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #6B7280; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 11px; border-radius: 4px;">
+                  ▼
+                </button>
+              </div>
+
+              <!-- Floating Role Dropdown Menu -->
+              <div id="roleDropdownMenu" class="custom-dropdown-menu" 
+                   style="display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; max-height: 230px; overflow-y: auto; background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.18), 0 8px 10px -6px rgba(0,0,0,0.1); z-index: 2500;">
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label">Experience Level</label>
@@ -10380,6 +10619,7 @@ function renderPentagonMatrixSvg(dimensions) {
 
       const name = toTitleCase(rawName);
       const role = toTitleCase(document.getElementById('inputRole').value.trim()) || 'Freelance Content Creator';
+      saveCustomRole(role);
       const phone = formatToInternationalPhone(document.getElementById('inputPhone').value.trim());
       const email = cleanEmail(document.getElementById('inputEmail').value.trim());
       const experienceLevel = document.getElementById('inputLevel').value;
