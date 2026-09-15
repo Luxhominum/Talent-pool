@@ -2597,14 +2597,17 @@
       </div>
       <div class="modal-body">
         <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
-          Enter the new agreed date and time for the candidate. This will be recorded in their profile notes.
+          Masukkan tanggal dan jam baru yang disepakati bersama kandidat. Sistem mengizinkan hari khusus (Senin/Minggu) jika memang diminta oleh kandidat.
         </p>
         <div class="form-group">
-          <label class="form-label">New Date</label>
-          <input type="date" id="rescheduleDate" class="form-input">
+          <label class="form-label">Tanggal Baru (New Date)</label>
+          <input type="date" id="rescheduleDate" class="form-input" onchange="checkRescheduleDateNotice(this.value)">
+          <div id="rescheduleSpecialNotice" style="display: none; margin-top: 8px; padding: 8px 12px; background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 6px; font-size: 11.5px; color: #92400E; align-items: center; gap: 6px;">
+            <span>⚡</span> <span><strong>Pengecualian Diizinkan:</strong> Tanggal yang dipilih jatuh di hari non-reguler (<span id="rescheduleDayLabel" style="font-weight: 700;"></span>). Jadwal khusus ini akan diakomodasi atas permintaan kandidat.</span>
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">New Time</label>
+          <label class="form-label">Jam Baru (New Time)</label>
           <input type="time" id="rescheduleTime" class="form-input">
         </div>
       </div>
@@ -6722,15 +6725,47 @@
     }
 
     
+    function checkRescheduleDateNotice(val) {
+      const notice = document.getElementById('rescheduleSpecialNotice');
+      const label = document.getElementById('rescheduleDayLabel');
+      if (!val) {
+        if (notice) notice.style.display = 'none';
+        return;
+      }
+      const d = new Date(val + 'T00:00:00');
+      const day = d.getDay();
+      if (day === 0 || day === 1) {
+        const name = (day === 0 ? 'Hari Minggu' : 'Hari Senin');
+        if (label) label.textContent = name;
+        if (notice) notice.style.display = 'flex';
+      } else {
+        if (notice) notice.style.display = 'none';
+      }
+    }
+    window.checkRescheduleDateNotice = checkRescheduleDateNotice;
+
     let currentRescheduleId = null;
     function openRescheduleModal(id) {
       currentRescheduleId = id;
       const target = state.talents.find(t => t.id === id || t.$id === id);
       const dateEl = document.getElementById('rescheduleDate');
       const timeEl = document.getElementById('rescheduleTime');
-      const todayStr = new Date().toISOString().split('T')[0];
-      if (dateEl) dateEl.value = dateEl.value || todayStr;
-      if (timeEl) timeEl.value = timeEl.value || '10:00';
+      const defaultIso = formatIsoDate(getEarliestInterviewDate());
+      
+      let prefillDate = defaultIso;
+      let prefillTime = '10:00';
+      if (target) {
+        const sched = getTalentAssignedSchedule(target);
+        if (sched && sched.assignedTime && sched.assignedTime !== '-') {
+          prefillTime = sched.assignedTime.replace(' WIB', '').trim();
+        }
+      }
+
+      if (dateEl) {
+        dateEl.value = dateEl.value || prefillDate;
+        checkRescheduleDateNotice(dateEl.value);
+      }
+      if (timeEl) timeEl.value = prefillTime;
       const modal = document.getElementById('rescheduleModalBackdrop');
       if (modal) modal.style.display = 'flex';
     }
@@ -6758,6 +6793,7 @@
       if (!target) return;
       
       const displayDate = formatDisplayDate(dateVal);
+      const isForbidden = !isInterviewDay(new Date(dateVal + 'T00:00:00'));
       const remark = `\n[Rescheduled to: ${displayDate} ${timeVal} WIB]`;
       const updatedNotes = (target.notes || '') + remark;
       
@@ -6765,6 +6801,17 @@
       target.outreachStatus = 'Reschedule';
       target.notes = updatedNotes;
       
+      // Update local state map and dates immediately
+      if (!state.smartScheduleMap) state.smartScheduleMap = {};
+      if (!state.smartScheduleDates) state.smartScheduleDates = {};
+      state.smartScheduleMap[target.id] = timeVal + ' WIB';
+      state.smartScheduleDates[target.id] = displayDate;
+      
+      try {
+        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
+        localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
+      } catch (e) {}
+
       const packedNotes = packOutreachStatus(updatedNotes, 'Reschedule');
       
       closeRescheduleModal();
@@ -6774,6 +6821,12 @@
       if (typeof renderTableView === 'function') renderTableView();
       if (typeof renderKanbanBoard === 'function') renderKanbanBoard();
       updateMetrics();
+
+      if (isForbidden) {
+        showToast(`⚡ Jadwal khusus ${displayDate} @ ${timeVal} WIB berhasil diakomodasi untuk ${target.name}!`);
+      } else {
+        showToast(`✅ Jadwal baru berhasil disimpan: ${displayDate} @ ${timeVal} WIB untuk ${target.name}`);
+      }
       
       try {
         const docId = target.$id || (target.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -6786,7 +6839,6 @@
             notes: packedNotes
           }
         );
-        showToast(`✅ Rescheduled to ${displayDate} ${timeVal} for ${target.name}`);
       } catch (e) {
         console.warn('Save error:', e);
         showToast('⚠️ Saved locally, but failed in Cloud');
@@ -7056,13 +7108,20 @@
                     `;
                   } else {
                     return `
-                      <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'};">
+                      <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'}; cursor: pointer;" onclick="openRescheduleModal('${talent.id}')" title="Klik untuk reschedule atau sesuaikan jadwal">
                         ${isRescheduled ? '🔄 ' : ''}${assignedTime}
                       </div>
                     `;
                   }
                 })()}
-                <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'};">${displayDate}</div>
+                <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'}; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px;">
+                  <span>${displayDate}</span>
+                  ${(displayDate.includes('Senin') || displayDate.includes('Minggu')) ? `
+                    <span style="font-size: 9.5px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; display: inline-flex; align-items: center; gap: 3px;" title="Wawancara diakomodasi di hari non-reguler atas permintaan kandidat">
+                      ⚡ Permintaan Khusus
+                    </span>
+                  ` : ''}
+                </div>
               </td>
               <td style="text-align: right;">
                 ${phone ? `
