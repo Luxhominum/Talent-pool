@@ -2332,16 +2332,22 @@
         <div id="bcTabTemplate" style="display: none; padding: 0 20px;">
           <div class="broadcast-control-card" style="grid-template-columns: 1fr; max-width: 800px;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF;">
-                  📝 Custom Message Box
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #1E40AF; display: flex; align-items: center; gap: 8px;">
+                  <span>📝 Custom Message Box</span>
+                  <span id="templateSyncBadge" style="font-size: 10px; font-weight: 600; text-transform: none; color: #15803D; background: #DCFCE7; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">☁️ Cloud Synced</span>
                 </div>
-                <select id="bcTemplateSelect" class="form-select" style="width: auto; padding: 4px 8px; font-size: 11px;" onchange="handleBroadcastTemplateChange()">
-                  <option value="interview">Template: Undangan Interview</option>
-                  <option value="screening">Template: Follow-up Screening</option>
-                  <option value="offering">Template: Pemberitahuan Shortlist</option>
-                  <option value="custom">Template: Pesan Kustom Bebas</option>
-                </select>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <select id="bcTemplateSelect" class="form-select" style="width: auto; padding: 4px 8px; font-size: 11px;" onchange="handleBroadcastTemplateChange()">
+                    <option value="interview">Template: Undangan Interview</option>
+                    <option value="screening">Template: Follow-up Screening</option>
+                    <option value="offering">Template: Pemberitahuan Shortlist</option>
+                    <option value="custom">Template: Pesan Kustom Bebas</option>
+                  </select>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="resetCurrentTemplateToDefault()" style="font-size: 11px; padding: 4px 8px;" title="Kembalikan template ini ke teks bawaan sistem">
+                    ↺ Reset Default
+                  </button>
+                </div>
               </div>
 
               <div style="margin-bottom: 8px;">
@@ -3414,24 +3420,27 @@
 
     
     function saveBcSettings() {
-      let savedCustomMsg = '';
-      try {
-        savedCustomMsg = localStorage.getItem('pge_saved_broadcast_custom_template') || '';
-        if (!savedCustomMsg) {
-          const prev = JSON.parse(localStorage.getItem('pge_bc_settings') || '{}');
-          savedCustomMsg = prev.customMsg || '';
-        }
-      } catch(e) {}
+      const curTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
+      if (!state.customTemplates) state.customTemplates = {};
+
+      if (el.bcCustomMessage && typeof el.bcCustomMessage.value === 'string' && el.bcCustomMessage.value.trim().length > 0) {
+        state.customTemplates[curTmpl] = el.bcCustomMessage.value;
+        try {
+          localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
+          localStorage.setItem('pge_saved_broadcast_custom_template', el.bcCustomMessage.value);
+        } catch(e) {}
+      }
+
+      let savedCustomMsg = (state.customTemplates && state.customTemplates[curTmpl]) || '';
+      if (!savedCustomMsg) {
+        try {
+          savedCustomMsg = localStorage.getItem('pge_saved_broadcast_custom_template') || '';
+        } catch(e) {}
+      }
 
       const currentMsg = (el.bcCustomMessage && el.bcCustomMessage.value && el.bcCustomMessage.value.trim().length > 0)
         ? el.bcCustomMessage.value
         : savedCustomMsg;
-
-      if (el.bcCustomMessage && el.bcCustomMessage.value && el.bcCustomMessage.value.trim().length > 0) {
-        try {
-          localStorage.setItem('pge_saved_broadcast_custom_template', el.bcCustomMessage.value);
-        } catch(e) {}
-      }
 
       const settings = {
         filter: el.bcStageFilter ? el.bcStageFilter.value : '',
@@ -3440,8 +3449,9 @@
         interval: el.bcIntervalInput ? el.bcIntervalInput.value : '',
         vacancyDurations: state.vacancyDurations || {},
         location: el.bcLocationInput ? el.bcLocationInput.value : '',
-        template: el.bcTemplateSelect ? el.bcTemplateSelect.value : '',
+        template: curTmpl,
         customMsg: currentMsg,
+        customTemplates: state.customTemplates,
         autoUpdate: el.bcAutoUpdateStage ? el.bcAutoUpdateStage.checked : true
       };
       try {
@@ -3703,19 +3713,35 @@
       }
     }
 
-    function handleSaveTemplateSettings() {
-      if (el.bcCustomMessage && el.bcCustomMessage.value.trim().length > 0) {
-        try {
-          localStorage.setItem('pge_saved_broadcast_custom_template', el.bcCustomMessage.value);
-        } catch(e) {}
+    async function handleSaveTemplateSettings() {
+      const msg = el.bcCustomMessage ? el.bcCustomMessage.value : '';
+      const tmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
+      if (!msg || msg.trim().length === 0) {
+        showToast('⚠️ Template pesan tidak boleh kosong.');
+        return;
       }
+
+      if (!state.customTemplates) state.customTemplates = {};
+      state.customTemplates[tmpl] = msg;
+
+      try {
+        localStorage.setItem('pge_saved_broadcast_custom_template', msg);
+        localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
+      } catch(e) {}
+
+      // Save to Firebase RTDB for permanent cross-device persistence
+      try {
+        if (typeof rtdb !== 'undefined') {
+          await rtdb.ref('/metadata/broadcastTemplates').set(state.customTemplates);
+          await rtdb.ref('/metadata/broadcastCurrentTemplate').set(msg);
+        }
+      } catch(e) {
+        console.warn('Could not sync template to Firebase:', e);
+      }
+
       const ok = saveBcSettings();
       updateBroadcastPreview();
-      if (ok) {
-        showToast('✅ Template pesan WhatsApp berhasil disimpan secara permanen!');
-      } else {
-        showToast('⚠️ Gagal menyimpan template pesan.');
-      }
+      showToast('✅ Template pesan (' + tmpl + ') berhasil disimpan permanen di Cloud & Browser!');
     }
 
     function cacheDOMElements() {
@@ -6359,44 +6385,127 @@
     /* ---------------------------------------------------- */
     /* WHATSAPP BROADCAST TAB LOGIC                         */
     /* ---------------------------------------------------- */
+    const DEFAULT_BROADCAST_TEMPLATES = {
+      interview: `Halo Kak {name},\n\nTerima kasih telah melamar posisi {role} di PGE Talent Pool.\n\nKami telah meninjau portofolio Kakak dan ingin mengundang Kakak untuk sesi Interview:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Lokasi: {location}\n\nMohon konfirmasi kehadiran Kakak dengan membalas pesan ini ya. Terima kasih!\n- Tim HR PGE Talent Pool`,
+      screening: `Halo Kak {name},\n\nKami dari Tim Rekrutmen PGE Talent Pool sedang meninjau aplikasi Kakak untuk posisi {role}.\n\nBisakah Kakak mengirimkan link portofolio video/desain terbaru dan konfirmasi kesiapan interview pada {date} pukul {time}?\n\nTerima kasih Kak!\n- Tim Rekrutmen PGE`,
+      offering: `Selamat Kak {name}! 🎉\n\nBerdasarkan hasil evaluasi tim, Kakak telah terpilih untuk melanjutkan ke tahap penawaran kerja sama (Offering) posisi {role}.\n\nSesi penjelasan kontrak & onboarding akan dilaksanakan pada:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Link/Tempat: {location}\n\nApakah Kakak siap bergabung?\n\nTerima kasih!\n- Management PGE Team`,
+      custom: `Halo Kak {name},\n\n`
+    };
+
+    let previousBroadcastTemplateKey = 'interview';
+
     function initDefaultBroadcastTemplate() {
-      const dedicatedMsg = localStorage.getItem('pge_saved_broadcast_custom_template');
-      if (dedicatedMsg && el.bcCustomMessage) {
-        el.bcCustomMessage.value = dedicatedMsg;
-        return;
-      }
+      if (!state.customTemplates) state.customTemplates = {};
       try {
-        const savedSettings = JSON.parse(localStorage.getItem('pge_bc_settings') || '{}');
-        if (savedSettings && savedSettings.customMsg && el.bcCustomMessage) {
-          el.bcCustomMessage.value = savedSettings.customMsg;
-          return;
+        const savedMap = localStorage.getItem('pge_broadcast_templates_map');
+        if (savedMap) {
+          state.customTemplates = Object.assign({}, state.customTemplates, JSON.parse(savedMap));
         }
       } catch(e) {}
 
-      if (el.bcCustomMessage && (!el.bcCustomMessage.value || el.bcCustomMessage.value.trim() === '')) {
-        el.bcCustomMessage.value = `Halo Kak {name},\n\nTerima kasih telah melamar posisi {role} di PGE Talent Pool.\n\nKami telah meninjau portofolio Kakak dan ingin mengundang Kakak untuk sesi Interview:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Lokasi: {location}\n\nMohon konfirmasi kehadiran Kakak dengan membalas pesan ini ya. Terima kasih!\n- Tim HR PGE Talent Pool`;
+      const dedicatedMsg = localStorage.getItem('pge_saved_broadcast_custom_template');
+      if (dedicatedMsg && !state.customTemplates['interview']) {
+        state.customTemplates['interview'] = dedicatedMsg;
+      }
+
+      const curTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
+      previousBroadcastTemplateKey = curTmpl;
+
+      if (el.bcCustomMessage) {
+        if (state.customTemplates && state.customTemplates[curTmpl]) {
+          el.bcCustomMessage.value = state.customTemplates[curTmpl];
+        } else if (dedicatedMsg && curTmpl === 'interview') {
+          el.bcCustomMessage.value = dedicatedMsg;
+        } else {
+          el.bcCustomMessage.value = DEFAULT_BROADCAST_TEMPLATES[curTmpl] || DEFAULT_BROADCAST_TEMPLATES.interview;
+        }
+      }
+
+      // Attach Firebase RTDB listener for cloud template sync across devices
+      try {
+        if (typeof rtdb !== 'undefined') {
+          rtdb.ref('/metadata/broadcastTemplates').on('value', snap => {
+            const cloudTemplates = snap.val();
+            if (cloudTemplates && typeof cloudTemplates === 'object') {
+              if (!state.customTemplates) state.customTemplates = {};
+              state.customTemplates = Object.assign({}, cloudTemplates, state.customTemplates);
+              try {
+                localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
+              } catch(e) {}
+
+              const activeTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
+              // If textarea is currently empty or matching default, populate with cloud version
+              if (el.bcCustomMessage && (!el.bcCustomMessage.value || el.bcCustomMessage.value === DEFAULT_BROADCAST_TEMPLATES[activeTmpl])) {
+                if (state.customTemplates[activeTmpl]) {
+                  el.bcCustomMessage.value = state.customTemplates[activeTmpl];
+                  updateBroadcastPreview();
+                }
+              }
+              const syncBadge = document.getElementById('templateSyncBadge');
+              if (syncBadge) syncBadge.innerHTML = '☁️ Cloud Synced';
+            }
+          });
+        }
+      } catch(e) {
+        console.warn('Firebase template listener error:', e);
       }
     }
 
     function handleBroadcastTemplateChange() {
-      // Change template and save immediately
-      const tmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
       const msgBox = el.bcCustomMessage;
       if (!msgBox) return;
 
-      if (tmpl === 'interview') {
-        msgBox.value = `Halo Kak {name},\n\nTerima kasih telah melamar posisi {role} di PGE Talent Pool.\n\nKami telah meninjau portofolio Kakak dan ingin mengundang Kakak untuk sesi Interview:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Lokasi: {location}\n\nMohon konfirmasi kehadiran Kakak dengan membalas pesan ini ya. Terima kasih!\n- Tim HR PGE Talent Pool`;
-      } else if (tmpl === 'screening') {
-        msgBox.value = `Halo Kak {name},\n\nKami dari Tim Rekrutmen PGE Talent Pool sedang meninjau aplikasi Kakak untuk posisi {role}.\n\nBisakah Kakak mengirimkan link portofolio video/desain terbaru dan konfirmasi kesiapan interview pada {date} pukul {time}?\n\nTerima kasih Kak!\n- Tim Rekrutmen PGE`;
-      } else if (tmpl === 'offering') {
-        msgBox.value = `Selamat Kak {name}! 🎉\n\nBerdasarkan hasil evaluasi tim, Kakak telah terpilih untuk melanjutkan ke tahap penawaran kerja sama (Offering) posisi {role}.\n\nSesi penjelasan kontrak & onboarding akan dilaksanakan pada:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Link/Tempat: {location}\n\nApakah Kakak siap bergabung?\n\nTerima kasih!\n- Management PGE Team`;
+      // 1. Preserve whatever was typed in the previous template before switching!
+      if (!state.customTemplates) state.customTemplates = {};
+      if (msgBox.value && msgBox.value.trim().length > 0) {
+        state.customTemplates[previousBroadcastTemplateKey] = msgBox.value;
+        try {
+          localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
+        } catch(e) {}
+      }
+
+      // 2. Load the newly selected template
+      const newTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
+      previousBroadcastTemplateKey = newTmpl;
+
+      // Check if user has a saved version for this template; otherwise fallback to default
+      if (state.customTemplates[newTmpl] && state.customTemplates[newTmpl].trim().length > 0) {
+        msgBox.value = state.customTemplates[newTmpl];
       } else {
-        msgBox.value = `Halo Kak {name},\n\n`;
+        msgBox.value = DEFAULT_BROADCAST_TEMPLATES[newTmpl] || `Halo Kak {name},\n\n`;
       }
 
       saveBcSettings();
       updateBroadcastPreview();
     }
+
+    function resetCurrentTemplateToDefault() {
+      const curTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
+      const defaultText = DEFAULT_BROADCAST_TEMPLATES[curTmpl] || DEFAULT_BROADCAST_TEMPLATES.interview;
+      if (!confirm('Kembalikan template ini ke format teks bawaan sistem?')) return;
+
+      if (el.bcCustomMessage) {
+        el.bcCustomMessage.value = defaultText;
+      }
+      if (!state.customTemplates) state.customTemplates = {};
+      state.customTemplates[curTmpl] = defaultText;
+
+      try {
+        localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
+        localStorage.setItem('pge_saved_broadcast_custom_template', defaultText);
+      } catch(e) {}
+
+      try {
+        if (typeof rtdb !== 'undefined') {
+          rtdb.ref('/metadata/broadcastTemplates/' + curTmpl).set(defaultText);
+        }
+      } catch(e) {}
+
+      saveBcSettings();
+      updateBroadcastPreview();
+      showToast('↺ Template berhasil di-reset ke format bawaan.');
+    }
+    window.resetCurrentTemplateToDefault = resetCurrentTemplateToDefault;
 
     function insertVariableIntoMessage(variableTag) {
       const textarea = el.bcCustomMessage;
