@@ -1848,9 +1848,9 @@
         Internal Candidate Repository, Skill Benchmarking, and Recruitment Outreach System.
       </p>
 
-      <!-- 1-Click Direct Access for HR Team -->
-      <button type="button" class="btn btn-primary" id="btnDirectAccess" onclick="handleDirectSuperAdminLogin()" style="width: 100%; justify-content: center; padding: 12px 18px; font-size: 13px; font-weight: 600; margin-top: 18px; margin-bottom: 12px; background: #111827; border-color: #111827; color: #FFFFFF; display: flex; align-items: center; gap: 8px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); cursor: pointer; transition: transform 0.15s ease, background 0.15s ease;">
-        <span>⚡</span> Masuk Langsung (HR Super Admin)
+      <!-- Direct Access for HR Super Admin with Password -->
+      <button type="button" class="btn btn-primary" id="btnDirectAccess" onclick="openSuperAdminPasswordModal()" style="width: 100%; justify-content: center; padding: 12px 18px; font-size: 13px; font-weight: 600; margin-top: 18px; margin-bottom: 12px; background: #111827; border-color: #111827; color: #FFFFFF; display: flex; align-items: center; gap: 8px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); cursor: pointer; transition: transform 0.15s ease, background 0.15s ease;">
+        <span>🔒</span> Masuk via Password Super Admin
       </button>
 
       <div style="display: flex; align-items: center; gap: 10px; margin: 12px 0 16px; color: var(--text-muted); font-size: 11px;">
@@ -1890,6 +1890,9 @@
       </div>
       <button type="button" class="btn btn-secondary btn-sm" onclick="handleSignOut()" style="width: 100%;">
         Sign in with Different Account
+      </button>
+      <button type="button" class="btn btn-primary" onclick="openSuperAdminPasswordModal()" style="width: 100%; margin-top: 10px; background: #111827; border-color: #111827; color: #FFFFFF; font-size: 12.5px; font-weight: 600; padding: 10px 14px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+        <span>🔑</span> Buka Akses via Password Super Admin
       </button>
     </div>
   </div>
@@ -2521,9 +2524,57 @@
     <button type="button" class="btn btn-secondary btn-sm" style="background: transparent; color: #9CA3AF; border-color: rgba(255,255,255,0.2);" onclick="clearComparison()">Clear</button>
   </div>
 
-  
+  <!-- Super Admin Password Verification Modal -->
+  <div class="modal-backdrop" id="superAdminPasswordModalBackdrop" style="display: none; z-index: 3100;" onclick="if(event.target === this) closeSuperAdminPasswordModal()">
+    <div class="modal-card" style="max-width: 420px; width: 92%; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); padding: 0;">
+      <div class="modal-header" style="background: #111827; color: #FFFFFF; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">🔒</span>
+          <div>
+            <h2 style="font-size: 16px; font-weight: 600; color: #FFFFFF; margin: 0;">Verifikasi Super Admin</h2>
+            <p style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">Master Password Access Portal</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeSuperAdminPasswordModal()" style="color: #9CA3AF; background: transparent; border: none; font-size: 16px; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 22px 24px; background: #FFFFFF;">
+        <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          Masukkan Master Password untuk membuka akses penuh PGE Talent Pool tanpa harus login email whitelist.
+        </p>
+
+        <div id="superAdminPasswordError" style="display: none; padding: 10px 14px; background: #FEE2E2; border: 1px solid #FCA5A5; border-radius: 8px; font-size: 12px; color: #991B1B; font-weight: 500; margin-bottom: 14px;">
+          ❌ Password salah. Harap perhatikan huruf besar dan kecil (case sensitive).
+        </div>
+
+        <div class="form-group" style="margin-bottom: 8px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block;">Master Password <span style="color: #DC2626;">*</span></label>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="superAdminPasswordInput" class="form-input" placeholder="Masukkan password..." onkeydown="if(event.key === 'Enter') verifySuperAdminPassword()" style="font-size: 14px; padding: 10px 42px 10px 14px; width: 100%; border-radius: 8px;">
+            <button type="button" onclick="toggleSuperAdminPasswordVisibility()" title="Lihat / Sembunyikan Password" style="position: absolute; right: 10px; background: transparent; border: none; cursor: pointer; font-size: 16px; color: #6B7280; padding: 4px;">
+              👁️
+            </button>
+          </div>
+          <span style="font-size: 11px; color: var(--text-muted); margin-top: 5px; display: block;">
+            ⚠️ Bersifat <em>case sensitive</em> (huruf besar/kecil berpengaruh).
+          </span>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 14px 24px; background: #F9FAFB; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeSuperAdminPasswordModal()" style="cursor: pointer; padding: 8px 16px; border-radius: 6px;">
+          Batal
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="verifySuperAdminPassword()" style="background: #111827; border-color: #111827; color: #FFFFFF; font-weight: 600; padding: 8px 18px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <span>🔓</span> Buka Akses
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Reschedule Modal -->
   <div class="modal-backdrop" id="rescheduleModalBackdrop" style="display: none; z-index: 2000;" onclick="if(event.target === this) closeRescheduleModal()">
+
     <div class="modal-card" style="max-width: 400px;">
       <div class="modal-header">
         <div>
@@ -3172,6 +3223,7 @@
     }
 
     function isEmailAuthorized(email) {
+      if (localStorage.getItem('pge_master_authenticated') === 'true') return true;
       if (!email) return false;
       const lower = email.toLowerCase().trim();
       if (SUPER_ADMIN_EMAILS.includes(lower)) return true;
@@ -3645,7 +3697,10 @@
     }
 
     function isSuperAdmin() {
-      if (!state.currentUser || !state.currentUser.email) return false;
+      if (localStorage.getItem('pge_master_authenticated') === 'true') return true;
+      if (!state.currentUser) return false;
+      if (state.currentUser.isMasterSuperAdmin) return true;
+      if (!state.currentUser.email) return false;
       const lower = state.currentUser.email.toLowerCase().trim();
       return SUPER_ADMIN_EMAILS.includes(lower);
     }
@@ -3766,19 +3821,81 @@
       });
     }
 
-    function handleDirectSuperAdminLogin() {
-      const adminUser = {
-        uid: 'superadmin-direct',
-        email: 'hrdcvpge@gmail.com',
-        displayName: 'HR Super Admin',
-        photoURL: 'https://ui-avatars.com/api/?name=HR+Admin&background=111827&color=fff'
-      };
-      try {
-        localStorage.setItem('pge_direct_session', JSON.stringify(adminUser));
-      } catch (e) {}
-      evaluateUserAccess(adminUser);
-      showToast('⚡ Berhasil masuk sebagai HR Super Admin');
+    // Master Super Admin Password System (Strictly Case-Sensitive, Admin Configured)
+    const SUPER_ADMIN_MASTER_PASSWORD = 'Aloysiuz1912';
+
+    function openSuperAdminPasswordModal() {
+      const modal = document.getElementById('superAdminPasswordModalBackdrop');
+      const input = document.getElementById('superAdminPasswordInput');
+      const errorMsg = document.getElementById('superAdminPasswordError');
+      if (modal) modal.style.display = 'flex';
+      if (errorMsg) errorMsg.style.display = 'none';
+      if (input) {
+        input.value = '';
+        input.type = 'password';
+        setTimeout(() => input.focus(), 80);
+      }
     }
+
+    function closeSuperAdminPasswordModal() {
+      const modal = document.getElementById('superAdminPasswordModalBackdrop');
+      const input = document.getElementById('superAdminPasswordInput');
+      const errorMsg = document.getElementById('superAdminPasswordError');
+      if (modal) modal.style.display = 'none';
+      if (errorMsg) errorMsg.style.display = 'none';
+      if (input) input.value = '';
+    }
+
+    function toggleSuperAdminPasswordVisibility() {
+      const input = document.getElementById('superAdminPasswordInput');
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function verifySuperAdminPassword() {
+      const input = document.getElementById('superAdminPasswordInput');
+      const errorMsg = document.getElementById('superAdminPasswordError');
+      if (!input) return;
+
+      const enteredPassword = input.value; // Strictly case-sensitive, no trimming
+      if (enteredPassword === SUPER_ADMIN_MASTER_PASSWORD) {
+        try {
+          localStorage.setItem('pge_master_authenticated', 'true');
+        } catch (e) {}
+
+        const activeAuthUser = auth.currentUser;
+        const adminUser = {
+          uid: activeAuthUser ? activeAuthUser.uid : 'superadmin-master',
+          email: (activeAuthUser && activeAuthUser.email) ? activeAuthUser.email : 'hrdcvpge@gmail.com',
+          displayName: (activeAuthUser && activeAuthUser.displayName) ? activeAuthUser.displayName + ' (Super Admin)' : 'HR Super Admin',
+          photoURL: (activeAuthUser && activeAuthUser.photoURL) ? activeAuthUser.photoURL : 'https://ui-avatars.com/api/?name=HR+Admin&background=111827&color=fff',
+          isMasterSuperAdmin: true
+        };
+
+        try {
+          localStorage.setItem('pge_direct_session', JSON.stringify(adminUser));
+        } catch (e) {}
+
+        closeSuperAdminPasswordModal();
+        evaluateUserAccess(adminUser);
+        showToast('🔓 Master Password Terverifikasi! Selamat datang Super Admin.');
+      } else {
+        if (errorMsg) errorMsg.style.display = 'block';
+        input.focus();
+        showToast('❌ Password salah. Harap perhatikan huruf besar dan kecil.');
+      }
+    }
+
+    // Direct access handler delegates to password modal for security
+    function handleDirectSuperAdminLogin() {
+      openSuperAdminPasswordModal();
+    }
+
+    window.openSuperAdminPasswordModal = openSuperAdminPasswordModal;
+    window.closeSuperAdminPasswordModal = closeSuperAdminPasswordModal;
+    window.toggleSuperAdminPasswordVisibility = toggleSuperAdminPasswordVisibility;
+    window.verifySuperAdminPassword = verifySuperAdminPassword;
+    window.handleDirectSuperAdminLogin = handleDirectSuperAdminLogin;
 
     async function handleGoogleSignIn() {
       const btn = document.getElementById('btnGoogleSignIn');
@@ -3812,6 +3929,7 @@
     async function handleSignOut() {
       try {
         localStorage.removeItem('pge_direct_session');
+        localStorage.removeItem('pge_master_authenticated');
         await auth.signOut();
         state.currentUser = null;
         if (el.authGate) el.authGate.style.display = 'flex';
@@ -5053,14 +5171,18 @@
       initAuthListener();
 
       // Auto-restore active session from localStorage (Zero wait time)
+      const isMasterAuth = localStorage.getItem('pge_master_authenticated') === 'true';
       const savedDirectSession = localStorage.getItem('pge_direct_session');
-      if (savedDirectSession) {
+      if (savedDirectSession && isMasterAuth) {
         try {
           const directUser = JSON.parse(savedDirectSession);
           if (directUser && directUser.email) {
+            directUser.isMasterSuperAdmin = true;
             evaluateUserAccess(directUser);
           }
         } catch (e) {}
+      } else if (savedDirectSession && !isMasterAuth) {
+        localStorage.removeItem('pge_direct_session');
       }
     }
 
