@@ -470,6 +470,7 @@
 
     .stage-prospect { background-color: var(--pastel-blue-bg); color: var(--pastel-blue-text); border-color: var(--pastel-blue-border); }
     .stage-screening { background-color: var(--pastel-yellow-bg); color: var(--pastel-yellow-text); border-color: var(--pastel-yellow-border); }
+    .stage-invited { background-color: #E0E7FF; color: #3730A3; border-color: #C7D2FE; }
     .stage-interviewed { background-color: var(--pastel-purple-bg); color: var(--pastel-purple-text); border-color: var(--pastel-purple-border); }
     .stage-shortlisted { background-color: var(--pastel-green-bg); color: var(--pastel-green-text); border-color: var(--pastel-green-border); }
     .stage-offered { background-color: #FEF3C7; color: #92400E; border-color: #FDE68A; }
@@ -2145,6 +2146,7 @@
           <option value="ALL">All Active Candidates</option>
           <option value="Prospect">Prospect</option>
           <option value="Screening">Screening</option>
+          <option value="Invited">Invited</option>
           <option value="Interviewed">Interviewed</option>
           <option value="Shortlisted">Shortlisted</option>
           <option value="Offered">Offered</option>
@@ -2227,6 +2229,7 @@
                 <select id="bcStageFilter" class="form-select" onchange="renderBroadcastTable()" style="font-size: 12px; padding: 6px 10px;">
                   <option value="ALL">All Active Candidates</option>
                   <option value="Screening" selected>Screening Candidates Only</option>
+                  <option value="Invited">Invited Candidates</option>
                   <option value="Prospect">Prospect Candidates</option>
                   <option value="Interviewed">Interviewed Candidates</option>
                   <option value="Shortlisted">Shortlisted Candidates</option>
@@ -2309,7 +2312,7 @@
               <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 12px;">
                 <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; cursor: pointer; color: #166534;">
                   <input type="checkbox" id="bcAutoUpdateStage" checked style="margin-top: 2px;">
-                  <span><strong>Auto-Sync ke Appwrite:</strong> Otomatis simpan catatan jadwal &amp; ubah status kandidat ke <em>Interviewed</em> saat pesan dikirim.</span>
+                  <span><strong>Auto-Sync ke Appwrite:</strong> Otomatis simpan catatan jadwal &amp; ubah status kandidat ke <em>Invited</em> saat pesan dikirim.</span>
                 </label>
               </div>
               <div style="display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light);">
@@ -2723,6 +2726,10 @@
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Keputusan / Pindahkan ke Tahap:</label>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px;" id="postInterviewStageOptions">
+            <button type="button" class="stage-opt-btn" data-stage="Interviewed" onclick="selectPostInterviewStage('Interviewed')" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #FFFFFF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
+              <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">🎙️ Interviewed</div>
+              <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Selesai wawancara (review)</div>
+            </button>
             <button type="button" class="stage-opt-btn active" data-stage="Shortlisted" onclick="selectPostInterviewStage('Shortlisted')" style="padding: 10px; border-radius: 8px; border: 1.5px solid #2563EB; background: #EFF6FF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
               <div style="font-weight: 600; font-size: 12px; color: #1D4ED8;">⭐ Shortlisted</div>
               <div style="font-size: 10px; color: #3B82F6; margin-top: 2px;">Lolos ke tahap shortlist</div>
@@ -2735,7 +2742,7 @@
               <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">🎉 Hired</div>
               <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Resmi diterima bergabung</div>
             </button>
-            <button type="button" class="stage-opt-btn" data-stage="Archived" onclick="selectPostInterviewStage('Archived')" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #FFFFFF; text-align: left; cursor: pointer; transition: all 0.15s ease;">
+            <button type="button" class="stage-opt-btn" data-stage="Archived" onclick="selectPostInterviewStage('Archived')" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #FFFFFF; text-align: left; cursor: pointer; transition: all 0.15s ease; grid-column: span 2;">
               <div style="font-weight: 600; font-size: 12px; color: var(--text-primary);">📁 Archived / Gugur</div>
               <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Belum sesuai kriteria</div>
             </button>
@@ -2895,6 +2902,7 @@
                 <option value="Screening" selected>🎯 Hanya Tahap Screening</option>
                 <option value="ALL">🌐 Semua Tahapan</option>
                 <option value="Prospect">Prospect</option>
+                <option value="Invited">Invited</option>
                 <option value="Interviewed">Interviewed</option>
                 <option value="Shortlisted">Shortlisted</option>
               </select>
@@ -3272,7 +3280,7 @@
     const databases = new Appwrite.Databases(client);
     const storage = new Appwrite.Storage(client);
 
-    const STAGES = ['Prospect', 'Screening', 'Interviewed', 'Shortlisted', 'Offered', 'Hired', 'Archived'];
+    const STAGES = ['Prospect', 'Screening', 'Invited', 'Interviewed', 'Shortlisted', 'Offered', 'Hired', 'Archived'];
 
     const state = {
       currentUser: null,
@@ -4868,7 +4876,7 @@
                   <span style="font-size: 14.5px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: underline;" onclick="openCandidateProfileModal('${t.id}')">
                     ${escapeHtml(t.name)}
                   </span>
-                  <span class="stage-select-pill stage-${(t.stage || 'interviewed').toLowerCase()}" style="font-size: 10px; padding: 2px 7px; flex-shrink: 0;">${t.stage || 'Interviewed'}</span>
+                  <span class="stage-select-pill stage-${(t.stage || 'invited').toLowerCase()}" style="font-size: 10px; padding: 2px 7px; flex-shrink: 0;">${t.stage || 'Invited'}</span>
                   ${item.isRescheduled ? '<span style="font-size: 10px; font-weight: 600; background: #FEF3C7; color: #B45309; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; white-space: nowrap;">Rescheduled</span>' : ''}
                 </div>
                 ${hasConflict ? `<div style="font-size: 11px; color: #DC2626; font-weight: 600; margin-top: 3px;">⚠️ Jadwal bertabrakan dengan: ${conflictWithNames}</div>` : ''}
@@ -5089,7 +5097,7 @@
       let defaultStage = 'Shortlisted';
       if (talent.outreachStatus === 'Tidak Hadir') {
         defaultStage = 'Archived';
-      } else if (talent.stage && talent.stage !== 'Prospect' && talent.stage !== 'Screening' && talent.stage !== 'Interviewed') {
+      } else if (talent.stage && !['Prospect', 'Screening', 'Invited'].includes(talent.stage)) {
         defaultStage = talent.stage;
       }
       selectPostInterviewStage(defaultStage);
@@ -5277,6 +5285,13 @@
           ? extractOutreachStatus(item.notes || '')
           : { text: item.notes || '', status: 'Pending' };
 
+        const outreach = item.outreachStatus || parsedNotes.status || 'Pending';
+        const fullNotes = parsedNotes.text || item.notes || '';
+        let resolvedStage = item.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Prospect'));
+        if (resolvedStage === 'Interviewed' && (outreach === 'WA Sent' || outreach === 'Reschedule') && !fullNotes.includes('[Interview Result')) {
+          resolvedStage = 'Invited';
+        }
+
         return {
           $id: item.appwriteId || item.$id || (item.id || k).toLowerCase().replace(/[^a-z0-9_-]/g, '_'),
           id: item.id || k,
@@ -5286,7 +5301,7 @@
           email: cleanEmail(item.email || ''),
           experienceLevel: item.experienceLevel || 'Junior',
           overallRating: Number(item.overallRating) || 3,
-          stage: item.stage || (parsedNotes.status === 'Reschedule' ? 'Interviewed' : (parsedNotes.status === 'Tidak Hadir' ? 'Archived' : 'Prospect')),
+          stage: resolvedStage,
           expectedSalary: item.expectedSalary || 'Standard Uang Saku',
           domisili: toTitleCase(item.domisili || ''),
           education: cleanEducation(item.education || ''),
@@ -5294,8 +5309,8 @@
           portfolioUrl: item.portfolioUrl || '',
           portfolioItems: portfolioItems,
           skills: skills,
-          notes: parsedNotes.text || item.notes || '',
-          outreachStatus: item.outreachStatus || parsedNotes.status || 'Pending'
+          notes: fullNotes,
+          outreachStatus: outreach
         };
       });
 
@@ -5376,6 +5391,13 @@
 
           const parsedNotes = typeof extractOutreachStatus === 'function' ? extractOutreachStatus(doc.notes || '') : { text: doc.notes || '', status: 'Pending' };
 
+          const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
+          const fullNotes = parsedNotes.text || doc.notes || '';
+          let resolvedStage = doc.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Prospect'));
+          if (resolvedStage === 'Interviewed' && (outreach === 'WA Sent' || outreach === 'Reschedule') && !fullNotes.includes('[Interview Result')) {
+            resolvedStage = 'Invited';
+          }
+
           return {
             $id: doc.$id,
             id: doc.talentId || doc.$id,
@@ -5385,7 +5407,7 @@
             email: cleanEmail(doc.email || ''),
             experienceLevel: doc.experienceLevel || 'Junior',
             overallRating: Number(doc.overallRating) || 3,
-            stage: doc.stage || (parsedNotes.status === 'Reschedule' ? 'Interviewed' : (parsedNotes.status === 'Tidak Hadir' ? 'Archived' : 'Prospect')),
+            stage: resolvedStage,
             expectedSalary: doc.expectedSalary || 'Standard Uang Saku',
             domisili: toTitleCase(doc.domisili || ''),
             education: cleanEducation(doc.education || ''),
@@ -5393,8 +5415,8 @@
             portfolioUrl: doc.portfolioUrl || '',
             portfolioItems: portfolioItems,
             skills: skills,
-            notes: parsedNotes.text || doc.notes || '',
-            outreachStatus: doc.outreachStatus || parsedNotes.status || 'Pending'
+            notes: fullNotes,
+            outreachStatus: outreach
           };
         });
 
@@ -5558,13 +5580,13 @@
               pipeline: 0,
               shortlisted: 0,
               topRated: 0,
-              stages: { Prospect: 0, Screening: 0, Interviewed: 0, Shortlisted: 0, Offered: 0, Hired: 0, Archived: 0 }
+              stages: { Prospect: 0, Screening: 0, Invited: 0, Interviewed: 0, Shortlisted: 0, Offered: 0, Hired: 0, Archived: 0 }
             };
           }
           rolesMap[r].total++;
           if (t.stage !== 'Archived') {
             rolesMap[r].active++;
-            if (['Prospect', 'Screening', 'Interviewed'].includes(t.stage)) rolesMap[r].pipeline++;
+            if (['Prospect', 'Screening', 'Invited', 'Interviewed'].includes(t.stage)) rolesMap[r].pipeline++;
             if (t.stage === 'Shortlisted') rolesMap[r].shortlisted++;
             if (t.overallRating === 5) rolesMap[r].topRated++;
           }
@@ -5640,12 +5662,13 @@
               <!-- Mini Stage Distribution Track -->
               <div style="margin-top: 10px; margin-bottom: 16px;">
                 <div style="display: flex; justify-content: space-between; font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); margin-bottom: 4px;">
-                  <span>Stage: ${v.stages.Prospect} Prs • ${v.stages.Screening} Scr • ${v.stages.Interviewed} Int • ${v.stages.Shortlisted} Shl</span>
+                  <span>Stage: ${v.stages.Prospect} Prs • ${v.stages.Screening} Scr • ${v.stages.Invited || 0} Inv • ${v.stages.Interviewed} Int • ${v.stages.Shortlisted} Shl</span>
                   <span>${v.topRated} Top (5★)</span>
                 </div>
                 <div style="height: 5px; background: #E5E7EB; border-radius: 3px; overflow: hidden; display: flex;">
                   <div style="background: #93C5FD; width: ${v.total ? (v.stages.Prospect / v.total * 100) : 0}%;"></div>
                   <div style="background: #3B82F6; width: ${v.total ? (v.stages.Screening / v.total * 100) : 0}%;"></div>
+                  <div style="background: #818CF8; width: ${v.total ? ((v.stages.Invited || 0) / v.total * 100) : 0}%;"></div>
                   <div style="background: #F59E0B; width: ${v.total ? (v.stages.Interviewed / v.total * 100) : 0}%;"></div>
                   <div style="background: #10B981; width: ${v.total ? (v.stages.Shortlisted / v.total * 100) : 0}%;"></div>
                   <div style="background: #059669; width: ${v.total ? (v.stages.Hired / v.total * 100) : 0}%;"></div>
@@ -5878,7 +5901,7 @@
       const activeTalents = baseList.filter(t => t.stage !== 'Archived');
       if (el.metricTotal) el.metricTotal.textContent = activeTalents.length;
       if (el.metricPipeline) {
-        const inPipe = baseList.filter(t => ['Prospect', 'Screening', 'Interviewed'].includes(t.stage)).length;
+        const inPipe = baseList.filter(t => ['Prospect', 'Screening', 'Invited', 'Interviewed'].includes(t.stage)).length;
         el.metricPipeline.textContent = inPipe;
       }
       if (el.metricShortlisted) {
@@ -6414,10 +6437,10 @@
       }
 
       // Hard-lock known active candidates for consistency
-      if ((talent.id === 'PGE-052' || (talent.name && talent.name.includes('Ghayu'))) && ['WA Sent', 'Interviewed'].includes(talent.outreachStatus)) {
+      if ((talent.id === 'PGE-052' || (talent.name && talent.name.includes('Ghayu'))) && ['WA Sent', 'Invited', 'Interviewed'].includes(talent.outreachStatus)) {
         assignedTime = '09:00 WIB';
         displayDate = 'Rabu, 16 September 2026';
-      } else if ((talent.id === 'PGE-057' || (talent.name && talent.name.includes('Sri Purwanti'))) && ['WA Sent', 'Interviewed'].includes(talent.outreachStatus)) {
+      } else if ((talent.id === 'PGE-057' || (talent.name && talent.name.includes('Sri Purwanti'))) && ['WA Sent', 'Invited', 'Interviewed'].includes(talent.outreachStatus)) {
         assignedTime = '13:00 WIB';
         displayDate = 'Rabu, 16 September 2026';
       }
@@ -6655,7 +6678,7 @@
       const remark = `\n[Rescheduled to: ${displayDate} ${timeVal} WIB]`;
       const updatedNotes = (target.notes || '') + remark;
       
-      target.stage = 'Interviewed';
+      target.stage = 'Invited';
       target.outreachStatus = 'Reschedule';
       target.notes = updatedNotes;
       
@@ -6676,7 +6699,7 @@
           APPWRITE_CONFIG.collectionId,
           docId,
           {
-            stage: 'Interviewed',
+            stage: 'Invited',
             notes: packedNotes
           }
         );
@@ -7166,7 +7189,7 @@
         const scheduleRemark = `\n[Interview Scheduled: ${dateVal} ${timeVal} @ ${locVal}]`;
         const updatedNotes = (talent.notes || '') + scheduleRemark;
 
-        talent.stage = 'Interviewed';
+        talent.stage = 'Invited';
         talent.notes = updatedNotes;
 
         try {
@@ -7178,7 +7201,7 @@
             APPWRITE_CONFIG.collectionId,
             docId,
             {
-              stage: 'Interviewed',
+              stage: 'Invited',
               notes: packedNotes
             }
           );
