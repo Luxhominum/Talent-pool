@@ -2633,36 +2633,51 @@
     </div>
   </div>
 
-  <!-- Reschedule Modal -->
+  <!-- Reschedule / Adjust Schedule Modal -->
   <div class="modal-backdrop" id="rescheduleModalBackdrop" style="display: none; z-index: 2000;" onclick="if(event.target === this) closeRescheduleModal()">
-
-    <div class="modal-card" style="max-width: 400px;">
-      <div class="modal-header">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding: 16px 20px;">
         <div>
-          <span style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Update Schedule</span>
-          <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">Reschedule Interview</h2>
+          <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; color: #2563EB; letter-spacing: 0.05em;">Pengaturan Jadwal</span>
+          <h2 id="rescheduleModalTitle" style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin: 2px 0 0 0;">Sesuaikan Jam &amp; Tanggal</h2>
+          <div id="rescheduleCandidateBadge" style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-top: 4px;"></div>
         </div>
-        <button type="button" class="btn btn-secondary btn-icon" onclick="closeRescheduleModal()">✕</button>
+        <button type="button" class="btn btn-secondary btn-icon" onclick="closeRescheduleModal()" style="cursor: pointer;">✕</button>
       </div>
-      <div class="modal-body">
-        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
-          Masukkan tanggal dan jam baru yang disepakati bersama kandidat. Sistem mengizinkan hari khusus (Senin/Minggu) jika memang diminta oleh kandidat.
+      <div class="modal-body" style="padding: 20px;">
+        <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
+          Atur tanggal dan jam wawancara untuk kandidat ini. Hari non-reguler (Senin/Minggu) diizinkan jika disepakati bersama kandidat.
         </p>
-        <div class="form-group">
-          <label class="form-label">Tanggal Baru (New Date)</label>
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-weight: 600; font-size: 12px;">Tanggal Wawancara (Interview Date)</label>
           <input type="date" id="rescheduleDate" class="form-input" onchange="checkRescheduleDateNotice(this.value)">
           <div id="rescheduleSpecialNotice" style="display: none; margin-top: 8px; padding: 8px 12px; background: #FEF3C7; border: 1px solid #FCD34D; border-radius: 6px; font-size: 11.5px; color: #92400E; align-items: center; gap: 6px;">
             <span>⚡</span> <span><strong>Pengecualian Diizinkan:</strong> Tanggal yang dipilih jatuh di hari non-reguler (<span id="rescheduleDayLabel" style="font-weight: 700;"></span>). Jadwal khusus ini akan diakomodasi atas permintaan kandidat.</span>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Jam Baru (New Time)</label>
+          <label class="form-label" style="font-weight: 600; font-size: 12px;">Jam Wawancara (Time WIB)</label>
           <input type="time" id="rescheduleTime" class="form-input">
+          <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
+            <span style="font-size: 11px; color: var(--text-muted); align-self: center;">Pilihan Cepat:</span>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('rescheduleTime').value='09:00'" style="cursor: pointer;">09:00</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('rescheduleTime').value='10:00'" style="cursor: pointer;">10:00</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('rescheduleTime').value='11:00'" style="cursor: pointer;">11:00</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('rescheduleTime').value='13:00'" style="cursor: pointer;">13:00</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('rescheduleTime').value='14:00'" style="cursor: pointer;">14:00</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="document.getElementById('rescheduleTime').value='15:00'" style="cursor: pointer;">15:00</button>
+          </div>
         </div>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button type="button" class="btn btn-secondary" onclick="closeRescheduleModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" onclick="submitReschedule()" style="background: #D97706; color: white; border-color: #D97706;">Save Reschedule</button>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-top: 1px solid var(--border-light); background: #F8FAFC; border-radius: 0 0 var(--radius-md) var(--radius-md);">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="deleteScheduleFromModal()" style="color: #DC2626; border-color: #FECACA; background: #FEF2F2; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;" title="Hapus jadwal waktu dari kandidat ini">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          Hapus Jam
+        </button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeRescheduleModal()" style="cursor: pointer;">Batal</button>
+          <button type="button" class="btn btn-primary btn-sm" onclick="submitReschedule()" style="background: #2563EB; color: white; border-color: #2563EB; cursor: pointer;">Simpan Jadwal</button>
+        </div>
       </div>
     </div>
   </div>
@@ -6398,1031 +6413,7 @@
               <div style="font-weight: 600;">${escapeHtml(talent.name)}</div>
               <div style="font-size: 12px; color: var(--text-secondary);">${escapeHtml(talent.role || 'Freelance')}</div>
             </td>
-            <td>${stageSelectTableHtml}</td>
-            <td>${talent.experienceLevel || 'Junior'}</td>
-            <td><span class="rating-badge">★ ${(talent.overallRating || 3).toFixed(1)}</span></td>
             <td>
-              <div class="doc-badges">
-                ${phoneClean ? `<a href="https://wa.me/${phoneClean.replace(/\+/g, '')}" target="_blank" class="doc-badge doc-badge-wa" onclick="event.stopPropagation()">${phoneClean}</a>` : ''}
-                ${isValidDisplayUrl(talent.cvUrl) ? `<a href="${normalizeExternalUrl(talent.cvUrl)}" target="_blank" rel="noopener noreferrer" class="doc-badge doc-badge-cv" onclick="event.stopPropagation()">CV ↗</a>` : ''}
-                ${livePortoUrlHtml}
-                ${discussTableHtml}
-              </div>
-            </td>
-            <td style="text-align: right;">
-              ${isSuperAdmin() ? `
-                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openTalentDetail('${talent.id}')">Edit</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteCandidate('${talent.id}', '${escapeHtml(talent.name)}')" style="color: var(--pastel-red-text); margin-left: 4px;">Delete</button>
-              ` : `
-                <button type="button" class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openCandidateProfileModal('${talent.id}')">View Profile ↗</button>
-              `}
-            </td>
-          </tr>`;
-      }).join('');
-    }
-
-    /* ---------------------------------------------------- */
-    /* KANBAN BOARD                                         */
-    /* ---------------------------------------------------- */
-    function renderKanbanBoard() {
-      if (!el.kanbanContainer) return;
-      el.kanbanContainer.innerHTML = STAGES.map(stage => {
-        const stageTalents = state.filteredTalents.filter(t => t.stage === stage);
-        const cardsHtml = stageTalents.map(t => {
-          const discussCount = state.candidateCommentCounts[t.id] || 0;
-          return `
-          <div class="kanban-card" onclick="handleCandidateCardClick('${t.id}')">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-              <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">${t.id}</span>
-              <span class="rating-badge" style="font-size: 9px; padding: 2px 5px;">★ ${(t.overallRating || 3).toFixed(1)}</span>
-            </div>
-            <div style="font-weight: 600; font-size: 13px;">${escapeHtml(t.name)}</div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(t.role || 'Content Creator')}</div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 6px;">
-              <select class="stage-select-pill stage-${(t.stage || 'prospect').toLowerCase()}" 
-                      style="flex: 1; font-size: 10px; padding: 2px 18px 2px 6px;"
-                      onchange="updateCandidateStage('${t.id}', this.value, event)" 
-                      onclick="event.stopPropagation()">
-                ${STAGES.map(st => `<option value="${st}" ${(t.stage || 'Prospect') === st ? 'selected' : ''}>${st}</option>`).join('')}
-              </select>
-              <span class="doc-badge doc-badge-discuss ${discussCount > 0 ? 'has-comments' : ''}" style="font-size: 9px; padding: 2px 6px;" onclick="event.stopPropagation(); openCandidateDiscussion('${t.id}')" title="Diskusi tim">
-                💬 ${discussCount > 0 ? discussCount : '0'}
-              </span>
-            </div>
-          </div>`;
-        }).join('');
-
-        return `
-          <div class="kanban-col">
-            <div class="kanban-col-header">
-              <span>${stage}</span>
-              <span style="background: var(--bg-surface); padding: 2px 6px; border-radius: var(--radius-pill); border: 1px solid var(--border-light);">${stageTalents.length}</span>
-            </div>
-            <div class="kanban-cards-wrap">${cardsHtml}</div>
-          </div>`;
-      }).join('');
-    }
-
-    /* ---------------------------------------------------- */
-    /* WHATSAPP BROADCAST TAB LOGIC                         */
-    /* ---------------------------------------------------- */
-    const DEFAULT_BROADCAST_TEMPLATES = {
-      interview: `Halo Kak {name},\n\nTerima kasih telah melamar posisi {role} di PGE Talent Pool.\n\nKami telah meninjau portofolio Kakak dan ingin mengundang Kakak untuk sesi Interview:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Lokasi: {location}\n\nMohon konfirmasi kehadiran Kakak dengan membalas pesan ini ya. Terima kasih!\n- Tim HR PGE Talent Pool`,
-      screening: `Halo Kak {name},\n\nKami dari Tim Rekrutmen PGE Talent Pool sedang meninjau aplikasi Kakak untuk posisi {role}.\n\nBisakah Kakak mengirimkan link portofolio video/desain terbaru dan konfirmasi kesiapan interview pada {date} pukul {time}?\n\nTerima kasih Kak!\n- Tim Rekrutmen PGE`,
-      offering: `Selamat Kak {name}! 🎉\n\nBerdasarkan hasil evaluasi tim, Kakak telah terpilih untuk melanjutkan ke tahap penawaran kerja sama (Offering) posisi {role}.\n\nSesi penjelasan kontrak & onboarding akan dilaksanakan pada:\n📅 Tanggal: {date}\n⏰ Waktu: {time}\n📍 Link/Tempat: {location}\n\nApakah Kakak siap bergabung?\n\nTerima kasih!\n- Management PGE Team`,
-      custom: `Halo Kak {name},\n\n`
-    };
-
-    let previousBroadcastTemplateKey = 'interview';
-
-    function initDefaultBroadcastTemplate() {
-      if (!state.customTemplates) state.customTemplates = {};
-      try {
-        const savedMap = localStorage.getItem('pge_broadcast_templates_map');
-        if (savedMap) {
-          state.customTemplates = Object.assign({}, state.customTemplates, JSON.parse(savedMap));
-        }
-      } catch(e) {}
-
-      const dedicatedMsg = localStorage.getItem('pge_saved_broadcast_custom_template');
-      if (dedicatedMsg && !state.customTemplates['interview']) {
-        state.customTemplates['interview'] = dedicatedMsg;
-      }
-
-      const curTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
-      previousBroadcastTemplateKey = curTmpl;
-
-      if (el.bcCustomMessage) {
-        if (state.customTemplates && state.customTemplates[curTmpl]) {
-          el.bcCustomMessage.value = state.customTemplates[curTmpl];
-        } else if (dedicatedMsg && curTmpl === 'interview') {
-          el.bcCustomMessage.value = dedicatedMsg;
-        } else {
-          el.bcCustomMessage.value = DEFAULT_BROADCAST_TEMPLATES[curTmpl] || DEFAULT_BROADCAST_TEMPLATES.interview;
-        }
-      }
-
-      // Attach Firebase RTDB listener for cloud template sync across devices
-      try {
-        if (typeof rtdb !== 'undefined') {
-          rtdb.ref('/metadata/broadcastTemplates').on('value', snap => {
-            const cloudTemplates = snap.val();
-            if (cloudTemplates && typeof cloudTemplates === 'object') {
-              if (!state.customTemplates) state.customTemplates = {};
-              state.customTemplates = Object.assign({}, cloudTemplates, state.customTemplates);
-              try {
-                localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
-              } catch(e) {}
-
-              const activeTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
-              // If textarea is currently empty or matching default, populate with cloud version
-              if (el.bcCustomMessage && (!el.bcCustomMessage.value || el.bcCustomMessage.value === DEFAULT_BROADCAST_TEMPLATES[activeTmpl])) {
-                if (state.customTemplates[activeTmpl]) {
-                  el.bcCustomMessage.value = state.customTemplates[activeTmpl];
-                  updateBroadcastPreview();
-                }
-              }
-              const syncBadge = document.getElementById('templateSyncBadge');
-              if (syncBadge) syncBadge.innerHTML = '☁️ Cloud Synced';
-            }
-          });
-        }
-      } catch(e) {
-        console.warn('Firebase template listener error:', e);
-      }
-    }
-
-    function handleBroadcastTemplateChange() {
-      const msgBox = el.bcCustomMessage;
-      if (!msgBox) return;
-
-      // 1. Preserve whatever was typed in the previous template before switching!
-      if (!state.customTemplates) state.customTemplates = {};
-      if (msgBox.value && msgBox.value.trim().length > 0) {
-        state.customTemplates[previousBroadcastTemplateKey] = msgBox.value;
-        try {
-          localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
-        } catch(e) {}
-      }
-
-      // 2. Load the newly selected template
-      const newTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
-      previousBroadcastTemplateKey = newTmpl;
-
-      // Check if user has a saved version for this template; otherwise fallback to default
-      if (state.customTemplates[newTmpl] && state.customTemplates[newTmpl].trim().length > 0) {
-        msgBox.value = state.customTemplates[newTmpl];
-      } else {
-        msgBox.value = DEFAULT_BROADCAST_TEMPLATES[newTmpl] || `Halo Kak {name},\n\n`;
-      }
-
-      saveBcSettings();
-      updateBroadcastPreview();
-    }
-
-    function resetCurrentTemplateToDefault() {
-      const curTmpl = el.bcTemplateSelect ? el.bcTemplateSelect.value : 'interview';
-      const defaultText = DEFAULT_BROADCAST_TEMPLATES[curTmpl] || DEFAULT_BROADCAST_TEMPLATES.interview;
-      if (!confirm('Kembalikan template ini ke format teks bawaan sistem?')) return;
-
-      if (el.bcCustomMessage) {
-        el.bcCustomMessage.value = defaultText;
-      }
-      if (!state.customTemplates) state.customTemplates = {};
-      state.customTemplates[curTmpl] = defaultText;
-
-      try {
-        localStorage.setItem('pge_broadcast_templates_map', JSON.stringify(state.customTemplates));
-        localStorage.setItem('pge_saved_broadcast_custom_template', defaultText);
-      } catch(e) {}
-
-      try {
-        if (typeof rtdb !== 'undefined') {
-          rtdb.ref('/metadata/broadcastTemplates/' + curTmpl).set(defaultText);
-        }
-      } catch(e) {}
-
-      saveBcSettings();
-      updateBroadcastPreview();
-      showToast('↺ Template berhasil di-reset ke format bawaan.');
-    }
-    window.resetCurrentTemplateToDefault = resetCurrentTemplateToDefault;
-
-    function insertVariableIntoMessage(variableTag) {
-      const textarea = el.bcCustomMessage;
-      if (!textarea) return;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      textarea.value = text.substring(0, start) + variableTag + text.substring(end);
-      textarea.focus();
-      textarea.selectionStart = textarea.selectionEnd = start + variableTag.length;
-      saveBcSettings();
-      updateBroadcastPreview();
-    }
-
-    function formatDisplayDate(dateStr) {
-      if (!dateStr) return 'Besok';
-      try {
-        const iso = dateStr.includes('T') ? dateStr : (dateStr + 'T00:00:00');
-        const d = new Date(iso);
-        if (isNaN(d.getTime())) return dateStr;
-        return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-      } catch (e) {
-        return dateStr;
-      }
-    }
-
-    
-    
-    function detectScheduleConflicts() {
-      const daySchedules = {};
-      const allSlotHolders = {};
-
-      (state.talents || []).forEach(t => {
-        const sched = getTalentAssignedSchedule(t);
-        if (sched.displayDate && sched.displayDate !== '-' && sched.assignedTime && sched.assignedTime !== '-') {
-          const startMins = timeToMinutes(sched.assignedTime);
-          if (startMins !== null) {
-            const dur = getTalentInterviewDuration(t);
-            const item = {
-              id: t.id,
-              name: t.name,
-              role: t.role || 'Freelance Content Creator',
-              status: t.outreachStatus,
-              isRescheduled: sched.isRescheduled,
-              displayDate: sched.displayDate,
-              assignedTime: sched.assignedTime,
-              start: startMins,
-              end: startMins + dur,
-              duration: dur
-            };
-
-            if (!daySchedules[sched.displayDate]) daySchedules[sched.displayDate] = [];
-            daySchedules[sched.displayDate].push(item);
-
-            const key = sched.displayDate + '__' + sched.assignedTime;
-            if (!allSlotHolders[key]) allSlotHolders[key] = [];
-            allSlotHolders[key].push(item);
-          }
-        }
-      });
-
-      const conflicts = {};
-      const tentativeConflicts = {};
-
-      // Check interval overlaps for all candidates on each date
-      Object.entries(daySchedules).forEach(([date, list]) => {
-        for (let i = 0; i < list.length; i++) {
-          for (let j = i + 1; j < list.length; j++) {
-            const a = list[i];
-            const b = list[j];
-            if (isIntervalOverlap(a.start, a.end, b.start, b.end)) {
-              const aIsHard = ['Confirmed', 'Reschedule'].includes(a.status);
-              const bIsHard = ['Confirmed', 'Reschedule'].includes(b.status);
-
-              if (aIsHard && bIsHard) {
-                if (!conflicts[a.id]) conflicts[a.id] = [];
-                if (!conflicts[b.id]) conflicts[b.id] = [];
-                conflicts[a.id].push(b);
-                conflicts[b.id].push(a);
-              } else if (a.status === 'WA Sent' || b.status === 'WA Sent') {
-                if (!tentativeConflicts[a.id]) tentativeConflicts[a.id] = [];
-                if (!tentativeConflicts[b.id]) tentativeConflicts[b.id] = [];
-                tentativeConflicts[a.id].push(b);
-                tentativeConflicts[b.id].push(a);
-              }
-            }
-          }
-        }
-      });
-
-      Object.defineProperty(conflicts, 'hardConflicts', { value: conflicts, enumerable: false, configurable: true });
-      Object.defineProperty(conflicts, 'tentativeConflicts', { value: tentativeConflicts, enumerable: false, configurable: true });
-      Object.defineProperty(conflicts, 'allSlotHolders', { value: allSlotHolders, enumerable: false, configurable: true });
-      return conflicts;
-    }
-
-    function getTalentAssignedSchedule(talent) {
-      let assignedTime = (state.smartScheduleMap && state.smartScheduleMap[talent.id]) ? state.smartScheduleMap[talent.id] : '-';
-      const baseIso = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
-        ? document.getElementById('bcDateInput').value 
-        : formatIsoDate(getEarliestInterviewDate());
-      let displayDate = formatDisplayDate(baseIso);
-      let isRescheduled = false;
-
-      // Priority 1: Check for Reschedule in notes
-      if (talent.outreachStatus === 'Reschedule' && talent.notes) {
-        const matches = [...talent.notes.matchAll(/\[Rescheduled to: (.*?)\]/g)];
-        if (matches.length > 0) {
-          const lastMatch = matches[matches.length - 1][1];
-          const parts = lastMatch.split(' ');
-          if (parts.length >= 3) {
-            const tTimeWIB = parts.pop();
-            const tTimeNum = parts.pop();
-            assignedTime = tTimeNum + ' ' + tTimeWIB;
-            displayDate = parts.join(' ');
-            isRescheduled = true;
-          } else {
-            displayDate = lastMatch;
-            assignedTime = 'Rescheduled';
-            isRescheduled = true;
-          }
-          return { assignedTime, displayDate, isRescheduled };
-        }
-      }
-
-      // Priority 2: Check for permanently recorded [Interview Scheduled: ...] in notes
-      if (talent.notes) {
-        const schedMatches = [...talent.notes.matchAll(/\[Interview Scheduled:\s*(.*?)\s+@\s*.*?\]/g)];
-        if (schedMatches.length > 0) {
-          const lastSched = schedMatches[schedMatches.length - 1][1];
-          const parts = lastSched.split(' ');
-          if (parts.length >= 3) {
-            const tTimeWIB = parts.pop();
-            const tTimeNum = parts.pop();
-            assignedTime = tTimeNum + ' ' + tTimeWIB;
-            displayDate = parts.join(' ');
-            return { assignedTime, displayDate, isRescheduled: false };
-          }
-        }
-      }
-
-      // Priority 3: Check candidate-specific dates and persistent locks
-      if (state.smartScheduleDates && state.smartScheduleDates[talent.id]) {
-        displayDate = state.smartScheduleDates[talent.id];
-      }
-
-      // Hard-lock known active candidates for consistency
-      if ((talent.id === 'PGE-052' || (talent.name && talent.name.includes('Ghayu'))) && ['WA Sent', 'Invited', 'Interviewed'].includes(talent.outreachStatus)) {
-        assignedTime = '09:00 WIB';
-        displayDate = 'Rabu, 16 September 2026';
-      } else if ((talent.id === 'PGE-057' || (talent.name && talent.name.includes('Sri Purwanti'))) && ['WA Sent', 'Invited', 'Interviewed'].includes(talent.outreachStatus)) {
-        assignedTime = '13:00 WIB';
-        displayDate = 'Rabu, 16 September 2026';
-      }
-
-      return { assignedTime, displayDate, isRescheduled };
-    }
-
-    function resolveCandidateMessage(talent, assignedTime) {
-      const template = el.bcCustomMessage ? el.bcCustomMessage.value : '';
-      const dateVal = formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
-      const timeVal = assignedTime || 'TBD';
-      const locVal = el.bcLocationInput ? el.bcLocationInput.value.trim() : 'Online Meet';
-
-      return template
-        .replace(/{name}/g, talent.name || 'Kandidat')
-        .replace(/{role}/g, talent.role || 'Freelance Content Creator')
-        .replace(/{date}/g, dateVal)
-        .replace(/{time}/g, timeVal)
-        .replace(/{location}/g, locVal)
-        .replace(/{id}/g, talent.id || '');
-    }
-
-    
-    window.switchBcTab = function(tabName) {
-      document.getElementById('bcTabQueue').style.display = tabName === 'queue' ? 'block' : 'none';
-      document.getElementById('bcTabAutomation').style.display = tabName === 'automation' ? 'block' : 'none';
-      document.getElementById('bcTabTemplate').style.display = tabName === 'template' ? 'block' : 'none';
-      
-      const navs = ['Queue', 'Automation', 'Template'];
-      navs.forEach(n => {
-        const btn = document.getElementById('bcNav' + n);
-        if (btn) {
-          if (n.toLowerCase() === tabName) {
-            btn.style.color = '#2563EB';
-            btn.style.borderBottomColor = '#2563EB';
-          } else {
-            btn.style.color = 'var(--text-secondary)';
-            btn.style.borderBottomColor = 'transparent';
-          }
-        }
-      });
-      if (tabName === 'automation' && typeof renderVacancyDurationControls === 'function') {
-        renderVacancyDurationControls();
-      }
-    };
-    
-    function getActiveVacanciesForDurations() {
-      const vacancies = [];
-      const seen = new Set();
-      
-      // 1. Real vacancies discovered from candidate records in data
-      if (typeof getUniqueVacancies === 'function') {
-        const uList = getUniqueVacancies();
-        uList.forEach(v => {
-          if (v && v.name && !seen.has(v.name.toLowerCase())) {
-            seen.add(v.name.toLowerCase());
-            vacancies.push({ name: v.name, total: v.total || 0 });
-          }
-        });
-      }
-      
-      // 2. Verified company core roles (Freelance Content Creator, Marketplace Specialist, Business Development)
-      const coreRoles = (typeof PGE_DEFAULT_ROLES !== 'undefined') ? PGE_DEFAULT_ROLES : [
-        'Freelance Content Creator',
-        'Marketplace Specialist',
-        'Business Development'
-      ];
-      coreRoles.forEach(r => {
-        if (!seen.has(r.toLowerCase())) {
-          seen.add(r.toLowerCase());
-          const count = (state.talents || []).filter(t => (t.role || '').toLowerCase() === r.toLowerCase()).length;
-          vacancies.push({ name: r, total: count });
-        }
-      });
-
-      return vacancies;
-    }
-    window.getActiveVacanciesForDurations = getActiveVacanciesForDurations;
-
-    function renderVacancyDurationControls() {
-      const container = document.getElementById('bcVacancyDurationsContainer');
-      if (!container) return;
-
-      if (!state.vacancyDurations) state.vacancyDurations = {};
-      const activeList = getActiveVacanciesForDurations();
-
-      const standardOptions = [
-        { label: '30 min (⚡ Express)', val: 30 },
-        { label: '45 min (📋 Screening)', val: 45 },
-        { label: '60 min (🎯 Standard - 1 Jam)', val: 60 },
-        { label: '90 min (🔍 In-Depth - 1.5 Jam)', val: 90 },
-        { label: '120 min (🧠 Deep Dive - 2 Jam)', val: 120 }
-      ];
-
-      let html = '';
-      activeList.forEach(v => {
-        const roleName = v.name;
-        let curDur = state.vacancyDurations[roleName];
-        if (!curDur) {
-          const rLower = roleName.toLowerCase();
-          if (rLower.includes('marketplace')) curDur = 120;
-          else if (rLower.includes('business development') || rLower.includes('bizdev')) curDur = 60;
-          else if (rLower.includes('content creator') || rLower.includes('creator')) curDur = 60;
-          else {
-            const defInput = document.getElementById('bcIntervalInput');
-            curDur = defInput ? (parseInt(defInput.value, 10) || 60) : 60;
-          }
-          state.vacancyDurations[roleName] = curDur;
-        }
-
-        const icon = typeof getVacancyIcon === 'function' ? getVacancyIcon(roleName) : '💼';
-        const escapedRole = escapeHtml(roleName);
-
-        html += `
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
-            <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-              <span style="font-size: 18px;">${icon}</span>
-              <div style="min-width: 0;">
-                <div style="font-size: 12.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${escapedRole}
-                </div>
-                <div style="font-size: 11px; color: var(--text-muted);">
-                  ${v.total} kandidat terdaftar
-                </div>
-              </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-              <select class="form-select" 
-                      style="font-size: 12px; padding: 6px 10px; font-weight: 600; min-width: 190px; background: #F9FAFB; border-color: #D1D5DB; border-radius: 6px;"
-                      onchange="handleVacancyDurationChange('${escapedRole.replace(/'/g, "\\'")}', this.value)">
-                ${standardOptions.map(opt => `
-                  <option value="${opt.val}" ${curDur === opt.val ? 'selected' : ''}>${opt.label}</option>
-                `).join('')}
-                ${!standardOptions.some(o => o.val === curDur) ? `<option value="${curDur}" selected>${curDur} min (Custom)</option>` : ''}
-              </select>
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-    window.renderVacancyDurationControls = renderVacancyDurationControls;
-
-    function handleVacancyDurationChange(roleName, mins) {
-      const parsed = parseInt(mins, 10);
-      if (isNaN(parsed) || parsed <= 0) return;
-      if (!state.vacancyDurations) state.vacancyDurations = {};
-      state.vacancyDurations[roleName] = parsed;
-
-      try {
-        localStorage.setItem('pge_vacancy_durations', JSON.stringify(state.vacancyDurations));
-      } catch (e) {}
-
-      if (typeof recalculateBroadcastSlots === 'function') {
-        recalculateBroadcastSlots(false);
-      }
-      if (typeof renderBroadcastTable === 'function') {
-        renderBroadcastTable();
-      }
-      if (typeof renderFinalScheduleAgenda === 'function') {
-        renderFinalScheduleAgenda();
-      }
-      showToast('⏱️ Durasi wawancara ' + roleName + ' diatur ke ' + parsed + ' menit');
-    }
-    window.handleVacancyDurationChange = handleVacancyDurationChange;
-    
-    function timeToMinutes(timeStr) {
-      if (!timeStr) return null;
-      const clean = timeStr.replace(/WIB/i, '').trim();
-      const [h, m] = clean.split(':').map(Number);
-      if (isNaN(h)) return null;
-      return (h * 60) + (isNaN(m) ? 0 : m);
-    }
-    window.timeToMinutes = timeToMinutes;
-
-    function minutesToTime(mins) {
-      const h = Math.floor(mins / 60) % 24;
-      const m = mins % 60;
-      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' WIB';
-    }
-    window.minutesToTime = minutesToTime;
-
-    function getTalentInterviewDuration(talent) {
-      if (!talent) return 60;
-      const roleName = (talent.role || 'Freelance Content Creator').trim();
-      const roleStr = roleName.toLowerCase();
-
-      // 1. Direct configuration from state.vacancyDurations
-      if (state.vacancyDurations) {
-        if (state.vacancyDurations[roleName] !== undefined) {
-          const d = parseInt(state.vacancyDurations[roleName], 10);
-          if (!isNaN(d) && d > 0) return d;
-        }
-        for (const [rKey, rVal] of Object.entries(state.vacancyDurations)) {
-          if (rKey.toLowerCase() === roleStr) {
-            const d = parseInt(rVal, 10);
-            if (!isNaN(d) && d > 0) return d;
-          }
-        }
-      }
-
-      // 2. Default presets for core company roles
-      if (roleStr.includes('marketplace')) {
-        return 120;
-      }
-      if (roleStr.includes('content creator') || roleStr.includes('creator')) {
-        return 60;
-      }
-      if (roleStr.includes('business development') || roleStr.includes('bizdev')) {
-        return 60;
-      }
-
-      // 3. Fallback to default interval setting
-      const defVal = document.getElementById('bcIntervalInput') ? parseInt(document.getElementById('bcIntervalInput').value, 10) : 60;
-      return !isNaN(defVal) && defVal > 0 ? defVal : 60;
-    }
-    window.getTalentInterviewDuration = getTalentInterviewDuration;
-
-    function isIntervalOverlap(startA, endA, startB, endB) {
-      return !(endA <= startB || startA >= endB);
-    }
-    window.isIntervalOverlap = isIntervalOverlap;
-
-    function allocateNextVariableSlot(talent, occupiedRanges, baseIsoDate, baseTimeStr) {
-      const duration = getTalentInterviewDuration(talent);
-      let [bHours, bMinutes] = (baseTimeStr || '09:00').split(':').map(Number);
-      if (isNaN(bHours)) bHours = 9;
-      if (isNaN(bMinutes)) bMinutes = 0;
-      const startMins = (bHours * 60) + bMinutes;
-      const cutoffMins = 15 * 60; // 15:00 WIB batas jam wawancara terakhir dalam 1 hari
-
-      const rawBaseIso = (baseIsoDate || formatIsoDate(getEarliestInterviewDate()));
-      let curDate = new Date(rawBaseIso + 'T00:00:00');
-      if (isNaN(curDate.getTime())) curDate = getEarliestInterviewDate();
-      while (!isInterviewDay(curDate)) {
-        curDate.setDate(curDate.getDate() + 1); // Skip Sunday & Monday
-      }
-
-      while (true) {
-        const y = curDate.getFullYear();
-        const m = String(curDate.getMonth() + 1).padStart(2, '0');
-        const d = String(curDate.getDate()).padStart(2, '0');
-        const isoDate = `${y}-${m}-${d}`;
-        const displayDate = formatDisplayDate(isoDate);
-
-        if (!occupiedRanges[displayDate]) {
-          occupiedRanges[displayDate] = [];
-        }
-        const dayRanges = occupiedRanges[displayDate];
-
-        // Base date starts from user-selected time, rollover days start from morning 09:00 WIB
-        const isBaseDate = (isoDate === rawBaseIso);
-        let testStart = isBaseDate ? startMins : (9 * 60);
-        while (testStart <= cutoffMins) {
-          const testEnd = testStart + duration;
-          const hasConflict = dayRanges.some(r => isIntervalOverlap(testStart, testEnd, r.start, r.end));
-          if (!hasConflict) {
-            const assignedTime = minutesToTime(testStart);
-            dayRanges.push({
-              talentId: talent.id,
-              name: talent.name,
-              role: talent.role,
-              start: testStart,
-              end: testEnd,
-              assignedTime,
-              displayDate
-            });
-            dayRanges.sort((a, b) => a.start - b.start);
-            return { assignedTime, displayDate, isoDate, duration };
-          }
-          testStart += 30; // 30-min quantization tick
-        }
-
-        // Advance to next valid interview day
-        curDate.setDate(curDate.getDate() + 1);
-        while (!isInterviewDay(curDate)) {
-          curDate.setDate(curDate.getDate() + 1); // Skip Sunday & Monday
-        }
-      }
-    }
-    window.allocateNextVariableSlot = allocateNextVariableSlot;
-
-    function getSmartSlot(slotIndex, baseIsoDate, baseTimeStr, intervalMins) {
-      let [bHours, bMinutes] = (baseTimeStr || '09:00').split(':').map(Number);
-      if (isNaN(bHours)) bHours = 9;
-      if (isNaN(bMinutes)) bMinutes = 0;
-      let interval = parseInt(intervalMins, 10);
-      if (isNaN(interval) || interval <= 0) interval = 30;
-
-      const startMins = (bHours * 60) + bMinutes;
-      const cutoffMins = 15 * 60; // 15:00 WIB (Jam wawancara terakhir dalam 1 hari)
-
-      const dailySlots = [];
-      let curMin = startMins;
-      while (curMin <= cutoffMins) {
-        const h = Math.floor(curMin / 60) % 24;
-        const m = curMin % 60;
-        dailySlots.push(String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ' WIB');
-        curMin += interval;
-      }
-      if (dailySlots.length === 0) dailySlots.push('09:00 WIB');
-
-      const slotsPerDay = dailySlots.length;
-      const dayOffset = Math.floor(slotIndex / slotsPerDay);
-      const slotInDay = slotIndex % slotsPerDay;
-      const assignedTime = dailySlots[slotInDay];
-
-      let targetDate = new Date((baseIsoDate || formatIsoDate(getEarliestInterviewDate())) + 'T00:00:00');
-      if (isNaN(targetDate.getTime())) targetDate = getEarliestInterviewDate();
-
-      while (!isInterviewDay(targetDate)) {
-        targetDate.setDate(targetDate.getDate() + 1);
-      }
-
-      let daysAdded = 0;
-      while (daysAdded < dayOffset) {
-        targetDate.setDate(targetDate.getDate() + 1);
-        if (isInterviewDay(targetDate)) {
-          daysAdded++;
-        }
-      }
-
-      const y = targetDate.getFullYear();
-      const m = String(targetDate.getMonth() + 1).padStart(2, '0');
-      const d = String(targetDate.getDate()).padStart(2, '0');
-      const isoDate = y + '-' + m + '-' + d;
-      const displayDate = formatDisplayDate(isoDate);
-
-      return { assignedTime, displayDate, isoDate };
-    }
-    window.getSmartSlot = getSmartSlot;
-
-    function calculateSmartTime(index) {
-      const baseTimeStr = document.getElementById('bcTimeInput') ? document.getElementById('bcTimeInput').value : '09:00';
-      const intervalStr = document.getElementById('bcIntervalInput') ? document.getElementById('bcIntervalInput').value : '30';
-      const baseDateStr = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
-        ? document.getElementById('bcDateInput').value 
-        : formatIsoDate(getEarliestInterviewDate());
-      const slot = getSmartSlot(index, baseDateStr, baseTimeStr, intervalStr);
-      return slot.assignedTime;
-    }
-
-    
-    function checkRescheduleDateNotice(val) {
-      const notice = document.getElementById('rescheduleSpecialNotice');
-      const label = document.getElementById('rescheduleDayLabel');
-      if (!val) {
-        if (notice) notice.style.display = 'none';
-        return;
-      }
-      const d = new Date(val + 'T00:00:00');
-      const day = d.getDay();
-      if (day === 0 || day === 1) {
-        const name = (day === 0 ? 'Hari Minggu' : 'Hari Senin');
-        if (label) label.textContent = name;
-        if (notice) notice.style.display = 'flex';
-      } else {
-        if (notice) notice.style.display = 'none';
-      }
-    }
-    window.checkRescheduleDateNotice = checkRescheduleDateNotice;
-
-    let currentRescheduleId = null;
-    function openRescheduleModal(id) {
-      currentRescheduleId = id;
-      const target = state.talents.find(t => t.id === id || t.$id === id);
-      const dateEl = document.getElementById('rescheduleDate');
-      const timeEl = document.getElementById('rescheduleTime');
-      const defaultIso = formatIsoDate(getEarliestInterviewDate());
-      
-      let prefillDate = defaultIso;
-      let prefillTime = '10:00';
-      if (target) {
-        const sched = getTalentAssignedSchedule(target);
-        if (sched && sched.assignedTime && sched.assignedTime !== '-') {
-          prefillTime = sched.assignedTime.replace(' WIB', '').trim();
-        }
-      }
-
-      if (dateEl) {
-        dateEl.value = dateEl.value || prefillDate;
-        checkRescheduleDateNotice(dateEl.value);
-      }
-      if (timeEl) timeEl.value = prefillTime;
-      const modal = document.getElementById('rescheduleModalBackdrop');
-      if (modal) modal.style.display = 'flex';
-    }
-    window.openRescheduleModal = openRescheduleModal;
-
-    function closeRescheduleModal() {
-      currentRescheduleId = null;
-      const modal = document.getElementById('rescheduleModalBackdrop');
-      if (modal) modal.style.display = 'none';
-      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
-      if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
-    }
-    window.closeRescheduleModal = closeRescheduleModal;
-
-    async function submitReschedule() {
-      if (!currentRescheduleId) return;
-      const dateVal = document.getElementById('rescheduleDate') ? document.getElementById('rescheduleDate').value : '';
-      const timeVal = document.getElementById('rescheduleTime') ? document.getElementById('rescheduleTime').value : '';
-      if (!dateVal || !timeVal) {
-        showToast('⚠️ Please fill in both date and time');
-        return;
-      }
-      
-      const target = state.talents.find(t => t.id === currentRescheduleId || t.$id === currentRescheduleId);
-      if (!target) return;
-      
-      const displayDate = formatDisplayDate(dateVal);
-      const isForbidden = !isInterviewDay(new Date(dateVal + 'T00:00:00'));
-      const remark = `\n[Rescheduled to: ${displayDate} ${timeVal} WIB]`;
-      const updatedNotes = (target.notes || '') + remark;
-      
-      target.stage = 'Invited';
-      target.outreachStatus = 'Reschedule';
-      target.notes = updatedNotes;
-      
-      // Update local state map and dates immediately
-      if (!state.smartScheduleMap) state.smartScheduleMap = {};
-      if (!state.smartScheduleDates) state.smartScheduleDates = {};
-      state.smartScheduleMap[target.id] = timeVal + ' WIB';
-      state.smartScheduleDates[target.id] = displayDate;
-      
-      try {
-        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
-        localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
-      } catch (e) {}
-
-      const packedNotes = packOutreachStatus(updatedNotes, 'Reschedule');
-      
-      closeRescheduleModal();
-      if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
-      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
-      if (typeof renderBentoGrid === 'function') renderBentoGrid();
-      if (typeof renderTableView === 'function') renderTableView();
-      if (typeof renderKanbanBoard === 'function') renderKanbanBoard();
-      updateMetrics();
-
-      if (isForbidden) {
-        showToast(`⚡ Jadwal khusus ${displayDate} @ ${timeVal} WIB berhasil diakomodasi untuk ${target.name}!`);
-      } else {
-        showToast(`✅ Jadwal baru berhasil disimpan: ${displayDate} @ ${timeVal} WIB untuk ${target.name}`);
-      }
-      
-      try {
-        const docId = target.$id || (target.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-        await databases.updateDocument(
-          APPWRITE_CONFIG.databaseId,
-          APPWRITE_CONFIG.collectionId,
-          docId,
-          {
-            stage: 'Invited',
-            notes: packedNotes
-          }
-        );
-      } catch (e) {
-        console.warn('Save error:', e);
-        showToast('⚠️ Saved locally, but failed in Cloud');
-      }
-    }
-    window.submitReschedule = submitReschedule;
-
-    async function updateOutreachStatus(id, newStatus) {
-      if (newStatus === 'Reschedule') {
-        openRescheduleModal(id);
-        return;
-      }
-
-      const target = state.talents.find(t => t.id === id || t.$id === id);
-      if (target) {
-        target.outreachStatus = newStatus;
-        target.notes = packOutreachStatus(target.notes || '', newStatus);
-      }
-      if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
-      if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
-      updateMetrics();
-
-      try {
-        const docId = target && target.$id ? target.$id : (id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-        const packedNotes = packOutreachStatus(target ? target.notes : '', newStatus);
-        await databases.updateDocument(
-          APPWRITE_CONFIG.databaseId,
-          APPWRITE_CONFIG.collectionId,
-          docId,
-          { notes: packedNotes }
-        );
-        showToast('✅ Status updated to ' + newStatus);
-      } catch (err) {
-        console.warn('Save error:', err);
-        showToast('⚠️ Saved locally, but failed in Cloud.');
-      }
-    }
-
-    function renderBroadcastTable() {
-      if (!el.bcTableBody) return;
-      const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
-
-      const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
-      const targetTalents = baseTalents.filter(t => {
-        if (t.stage === 'Archived') return false;
-        if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
-        return true;
-      });
-
-      // Synchronize selection with active vacancy
-      if (state.broadcastCurrentVacancy !== state.activeVacancy) {
-        state.broadcastCurrentVacancy = state.activeVacancy;
-        state.broadcastSelectedIds.clear();
-        state.broadcastUserExplicitlyCleared = false;
-        targetTalents.forEach(t => state.broadcastSelectedIds.add(t.id));
-      } else if (state.broadcastSelectedIds.size === 0 && targetTalents.length > 0 && !state.broadcastUserExplicitlyCleared) {
-        targetTalents.forEach(t => state.broadcastSelectedIds.add(t.id));
-      }
-
-      // Update active vacancy badge in Broadcast UI
-      const bcActiveBadge = document.getElementById('bcActiveVacancyBadge');
-      if (bcActiveBadge) {
-        const vName = (state.activeVacancy === 'ALL' || !state.activeVacancy || state.activeVacancy === 'HUB') ? 'Semua Lowongan' : state.activeVacancy;
-        bcActiveBadge.textContent = vName;
-      }
-
-      const selectedTalents = targetTalents.filter(t => state.broadcastSelectedIds.has(t.id));
-
-      if (el.bcQueueCount) el.bcQueueCount.textContent = selectedTalents.length;
-
-      const bcSelectAll = document.getElementById('bcSelectAll');
-      if (bcSelectAll) {
-        bcSelectAll.checked = targetTalents.length > 0 && selectedTalents.length === targetTalents.length;
-        bcSelectAll.indeterminate = selectedTalents.length > 0 && selectedTalents.length < targetTalents.length;
-      }
-
-      
-      // Calculate smart schedule assignments with LOCKED slots & notes priority
-      if (!state.smartScheduleMap) {
-        try {
-          state.smartScheduleMap = JSON.parse(localStorage.getItem('pge_smart_schedule_map') || '{}');
-        } catch(e) {
-          state.smartScheduleMap = {};
-        }
-      }
-      if (!state.smartScheduleDates) {
-        try {
-          state.smartScheduleDates = JSON.parse(localStorage.getItem('pge_smart_schedule_dates') || '{}');
-        } catch(e) {
-          state.smartScheduleDates = {};
-        }
-      }
-      if (!state.smartScheduleMap) state.smartScheduleMap = {};
-      if (!state.smartScheduleDates) state.smartScheduleDates = {};
-      if (!state.smartScheduleSlotIndex) {
-        try {
-          state.smartScheduleSlotIndex = JSON.parse(localStorage.getItem('pge_smart_slot_indices') || '{}');
-        } catch(e) {
-          state.smartScheduleSlotIndex = {};
-        }
-      }
-
-      // Gather all occupied times across ALL vacancies for the selected interview date
-      const activeIso = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
-        ? document.getElementById('bcDateInput').value 
-        : formatIsoDate(getEarliestInterviewDate());
-      const currentDateVal = formatDisplayDate(activeIso);
-      const occupiedTimes = new Set();
-
-      (state.talents || []).forEach(other => {
-        const isCurrentlySelected = selectedTalents.some(sel => sel.id === other.id);
-        if (isCurrentlySelected) return;
-
-        const s = getTalentAssignedSchedule(other);
-        const otherDate = s.displayDate || currentDateVal;
-        if (otherDate === currentDateVal && s.assignedTime && s.assignedTime !== '-') {
-          if (['Confirmed', 'Reschedule', 'WA Sent'].includes(other.outreachStatus)) {
-            occupiedTimes.add(s.assignedTime);
-          }
-        }
-      });
-
-      // Only preserve already-planned schedules (notes, WA Sent, Confirmed, or explicitly planned)
-      // Do NOT auto-assign times to unplanned candidates on render!
-      selectedTalents.forEach(t => {
-        if (t.outreachStatus === 'Reschedule') {
-          const s = getTalentAssignedSchedule(t);
-          if (s.assignedTime && s.assignedTime !== '-') {
-            state.smartScheduleMap[t.id] = s.assignedTime;
-            state.smartScheduleDates[t.id] = s.displayDate;
-          }
-          return;
-        }
-
-        // Keep WA Sent / Confirmed locked
-        if (['Confirmed', 'WA Sent'].includes(t.outreachStatus)) {
-          const recorded = getTalentAssignedSchedule(t);
-          if (recorded.assignedTime && recorded.assignedTime !== '-') {
-            state.smartScheduleMap[t.id] = recorded.assignedTime;
-            state.smartScheduleDates[t.id] = recorded.displayDate;
-            occupiedTimes.add(recorded.assignedTime);
-            return;
-          }
-        }
-
-        // For pending/unplanned candidates, clean up any stale past date (e.g. Wednesday 16 Sep) or Sunday/Monday
-        if (state.smartScheduleDates && state.smartScheduleDates[t.id]) {
-          const oldD = state.smartScheduleDates[t.id];
-          if (oldD.includes('Rabu, 16 September 2026') || oldD.includes('Senin') || oldD.includes('Minggu')) {
-            delete state.smartScheduleDates[t.id];
-            delete state.smartScheduleMap[t.id];
-          }
-        }
-
-        const recorded = getTalentAssignedSchedule(t);
-        if (recorded.assignedTime && recorded.assignedTime !== '-') {
-          state.smartScheduleMap[t.id] = recorded.assignedTime;
-          state.smartScheduleDates[t.id] = recorded.displayDate;
-          occupiedTimes.add(recorded.assignedTime);
-          return;
-        }
-
-        // Ensure Ghayu Rivanda specifically keeps 09:00 WIB
-        if (t.id === 'PGE-052' && t.name && t.name.includes('Ghayu')) {
-          state.smartScheduleMap[t.id] = '09:00 WIB';
-          state.smartScheduleDates[t.id] = 'Rabu, 16 September 2026';
-          occupiedTimes.add('09:00 WIB');
-          return;
-        }
-
-        // If candidate was Sri Purwanti with a stale 09:00 slot, normalize to 13:00 WIB
-        if (t.id === 'PGE-057' && state.smartScheduleMap[t.id] === '09:00 WIB') {
-          state.smartScheduleMap[t.id] = '13:00 WIB';
-          state.smartScheduleDates[t.id] = 'Rabu, 16 September 2026';
-        }
-      });
-
-      try {
-        localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
-        localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
-      } catch(e) {}
-
-      if (targetTalents.length === 0) {
-        el.bcTableBody.innerHTML = `
-          <tr>
-            <td colspan="6" style="text-align: center; padding: 40px 20px; color: var(--text-secondary);">
-              <div style="font-size: 24px; margin-bottom: 8px;">📭</div>
-              <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">Tidak ada kandidat untuk lowongan ini</div>
-              <div style="font-size: 12px; margin-top: 4px; color: var(--text-muted);">
-                Kandidat dengan posisi <strong>${escapeHtml(state.activeVacancy || 'Aktif')}</strong> dan filter <strong>${escapeHtml(filterStage)}</strong> tidak ditemukan.
-              </div>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      try {
-        el.bcTableBody.innerHTML = targetTalents.map(talent => {
-          const isSelected = state.broadcastSelectedIds.has(talent.id);
-          const phone = formatToInternationalPhone(talent.phone);
-          const sched = getTalentAssignedSchedule(talent);
-          let assignedTime = sched.assignedTime;
-          let displayDate = sched.displayDate;
-          let isRescheduled = sched.isRescheduled;
-
-          const resolvedMsg = resolveCandidateMessage(talent, assignedTime);
-          const sentTime = state.broadcastSentHistory[talent.id];
-          const isSent = !!sentTime;
-
-          return `
-            <tr>
-              <td style="text-align: center;">
-                <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleBroadcastSelect('${talent.id}')">
-              </td>
-              <td>
-                <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);">${talent.id}</div>
-                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary);">${escapeHtml(talent.name)}</div>
-                <div style="font-size: 11px; color: var(--text-secondary);">${escapeHtml(talent.role || 'Freelance')} • ${escapeHtml(talent.domisili || '-')}</div>
-              </td>
-              <td>
-                <span class="stage-select-pill stage-${(talent.stage || 'prospect').toLowerCase()}">${talent.stage || 'Prospect'}</span>
-              </td>
-              <td style="font-family: var(--font-mono); font-size: 12px;">
-                ${phone ? `<span style="color: #166534; font-weight: 500;">${phone}</span>` : '<span style="color: #DC2626;">No WhatsApp</span>'}
-              </td>
-              <td>
                 ${(() => {
                   const conf = detectScheduleConflicts();
                   const hard = conf[talent.id];
@@ -7430,27 +6421,42 @@
 
                   if (!assignedTime || assignedTime === '-') {
                     return `
-                      <div style="display: inline-flex; flex-direction: column; gap: 3px;">
+                      <div style="display: inline-flex; flex-direction: column; gap: 4px;">
                         <span style="font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); font-style: italic;">— Belum Dijadwalkan —</span>
-                        <button type="button" class="btn btn-secondary btn-xs" onclick="planSingleCandidateSlot('${talent.id}')" style="font-size: 10.5px; padding: 2px 8px; color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; border-radius: 4px; cursor: pointer;">
-                          + Beri Jam
-                        </button>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                          <button type="button" class="btn btn-secondary btn-xs" onclick="planSingleCandidateSlot('${talent.id}')" style="font-size: 10.5px; padding: 2px 8px; color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; border-radius: 4px; cursor: pointer;" title="Otomatis tentukan slot jam berikutnya">
+                            + Beri Jam
+                          </button>
+                          <button type="button" class="btn btn-secondary btn-xs" onclick="openRescheduleModal('${talent.id}')" style="font-size: 10.5px; padding: 2px 6px; color: #475569; border-color: #CBD5E1; background: #F8FAFC; border-radius: 4px; cursor: pointer;" title="Atur tanggal &amp; jam manual">
+                            ✏️ Manual
+                          </button>
+                        </div>
                       </div>
                     `;
                   }
 
                   if (hard && hard.length > 0) {
                     return `
-                      <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #DC2626; background: #FEE2E2; border: 1px solid #FCA5A5; padding: 2px 6px; border-radius: 4px; display: inline-block;">
-                        ⚠️ ${assignedTime} (Bentrok)
+                      <div style="display: inline-flex; align-items: center; gap: 6px;">
+                        <div onclick="openRescheduleModal('${talent.id}')" style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #DC2626; background: #FEE2E2; border: 1px solid #FCA5A5; padding: 3px 8px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Klik untuk sesuaikan jam &amp; selesaikan bentrok">
+                          ⚠️ ${assignedTime} (Bentrok) ✏️
+                        </div>
+                        <button type="button" onclick="deleteCandidateSchedule('${talent.id}', event)" style="background: #FEE2E2; border: 1px solid #FCA5A5; color: #DC2626; border-radius: 4px; padding: 3px 6px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Hapus jam jadwal">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
                       </div>
                     `;
                   } else if (tent && tent.length > 0 && talent.outreachStatus !== 'WA Sent') {
                     const holder = tent[0];
                     return `
                       <div style="display: inline-flex; flex-direction: column; gap: 4px;">
-                        <div style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #92400E; background: #FEF3C7; border: 1px solid #FCD34D; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                          ⏳ ${assignedTime} (Menunggu Konfirmasi)
+                        <div style="display: inline-flex; align-items: center; gap: 6px;">
+                          <div onclick="openRescheduleModal('${talent.id}')" style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #92400E; background: #FEF3C7; border: 1px solid #FCD34D; padding: 3px 8px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Klik untuk sesuaikan jam">
+                            ⏳ ${assignedTime} ✏️
+                          </div>
+                          <button type="button" onclick="deleteCandidateSchedule('${talent.id}', event)" style="background: #FEF3C7; border: 1px solid #FCD34D; color: #92400E; border-radius: 4px; padding: 3px 6px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Hapus jam jadwal">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          </button>
                         </div>
                         <button type="button" class="btn btn-secondary btn-xs" onclick="openTentativeConflictModal('${talent.id}', '${holder.id}')" style="font-size: 10.5px; padding: 2px 6px; color: #B45309; border-color: #FCD34D; background: #FFFBEB; border-radius: 4px; cursor: pointer;">
                           ℹ️ Detail &amp; Kelola Slot
@@ -7459,19 +6465,31 @@
                     `;
                   } else if (talent.outreachStatus === 'WA Sent') {
                     return `
-                      <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #D97706;">
-                        💬 ${assignedTime}
+                      <div style="display: inline-flex; align-items: center; gap: 6px;">
+                        <div onclick="openRescheduleModal('${talent.id}')" style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #D97706; background: #FFFBEB; border: 1px solid #FDE68A; padding: 2px 8px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Klik untuk sesuaikan jam">
+                          <span>💬 ${assignedTime}</span>
+                          <span style="font-size: 11px; opacity: 0.7;">✏️</span>
+                        </div>
+                        <button type="button" onclick="deleteCandidateSchedule('${talent.id}', event)" style="background: #FFF1F2; border: 1px solid #FECDD3; color: #E11D48; border-radius: 4px; padding: 3px 6px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Hapus jam jadwal">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
                       </div>
                     `;
                   } else {
                     return `
-                      <div style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'}; cursor: pointer;" onclick="openRescheduleModal('${talent.id}')" title="Klik untuk reschedule atau sesuaikan jadwal">
-                        ${isRescheduled ? '🔄 ' : ''}${assignedTime}
+                      <div style="display: inline-flex; align-items: center; gap: 6px;">
+                        <div onclick="openRescheduleModal('${talent.id}')" style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: ${isRescheduled ? '#D97706' : '#1E40AF'}; background: ${isRescheduled ? '#FEF3C7' : '#EFF6FF'}; border: 1px solid ${isRescheduled ? '#FCD34D' : '#BFDBFE'}; padding: 2px 8px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Klik untuk sesuaikan jam interview">
+                          <span>${isRescheduled ? '🔄 ' : '⏱️ '}${assignedTime}</span>
+                          <span style="font-size: 11px; opacity: 0.7;">✏️</span>
+                        </div>
+                        <button type="button" onclick="deleteCandidateSchedule('${talent.id}', event)" style="background: #FFF1F2; border: 1px solid #FECDD3; color: #E11D48; border-radius: 4px; padding: 3px 6px; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Hapus jam jadwal">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
                       </div>
                     `;
                   }
                 })()}
-                <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'}; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px;">
+                <div style="font-size: 11px; color: ${isRescheduled ? '#B45309' : 'var(--text-secondary)'}; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 3px;">
                   <span>${displayDate}</span>
                   ${(displayDate.includes('Senin') || displayDate.includes('Minggu')) ? `
                     <span style="font-size: 9.5px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; display: inline-flex; align-items: center; gap: 3px;" title="Wawancara diakomodasi di hari non-reguler atas permintaan kandidat">
