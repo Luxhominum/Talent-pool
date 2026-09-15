@@ -8449,12 +8449,7 @@ function renderPentagonMatrixSvg(dimensions) {
         notes: '',
         cvUrl: '',
         portfolioUrl: '',
-        skills: [
-          { name: 'Foto Produk', rating: 4 },
-          { name: 'Video Produk', rating: 4 },
-          { name: 'Video Editing', rating: 4 },
-          { name: 'Content Sense', rating: 4 }
-        ]
+        skills: getDefaultSkillsForRole(defaultRole)
       });
       openDrawer();
     }
@@ -8530,6 +8525,128 @@ function renderPentagonMatrixSvg(dimensions) {
       }
     }
 
+    /* Role-Based Skill Presets Engine */
+    const ROLE_SKILL_PRESETS = {
+      'business development': [
+        'Lead Generation & Market Research',
+        'Sales Pitch & Negotiation',
+        'Client Relationship Management (CRM)',
+        'Communication & Closing'
+      ],
+      'freelance content creator': [
+        'Foto Produk',
+        'Video Produk',
+        'Video Editing',
+        'Content Sense'
+      ],
+      'video editor': [
+        'Video Editing & Pacing',
+        'Color Grading & Audio Mixing',
+        'Motion Graphics & Visual Effects',
+        'Storytelling & Timeline Assembly'
+      ],
+      'graphic designer': [
+        'Visual Branding & Layout',
+        'Typography & Color Theory',
+        'Design Tools (Photoshop/Illustrator/Figma)',
+        'Creative Concepting & Ideation'
+      ],
+      'social media specialist': [
+        'Social Media Strategy & Planning',
+        'Copywriting & Captioning',
+        'Analytics & Trends Insight',
+        'Community Engagement'
+      ],
+      'host live / streamer': [
+        'Public Speaking & Energy',
+        'Product Knowledge & Pitching',
+        'Audience Interaction & Live Q&A',
+        'Live Selling & Flow Management'
+      ],
+      'kol specialist': [
+        'KOL Identification & Outreach',
+        'Rate Card & Deal Negotiation',
+        'Campaign Briefing & Monitoring',
+        'Performance Evaluation & ROI'
+      ],
+      'admin recruitment': [
+        'Administrative & Data Accuracy',
+        'Candidate Sourcing & Screening',
+        'HR Tools & ATS Management',
+        'Coordination & Follow-up'
+      ],
+      'content writer / scriptwriter': [
+        'Copywriting & Scriptwriting',
+        'Research & Fact Checking',
+        'Headline & Hook Mastery',
+        'Tone & Brand Alignment'
+      ],
+      'digital marketing': [
+        'Paid Advertising (Meta/TikTok/Google)',
+        'Funnel Optimization & CRO',
+        'Data Analytics & Performance Reporting',
+        'Campaign Budget Management'
+      ],
+      'talent coordinator': [
+        'Talent Management & Scheduling',
+        'Onboarding & Relationship Building',
+        'Brief Compliance & Quality Control',
+        'Crisis & Conflict Handling'
+      ]
+    };
+
+    function getDefaultSkillsForRole(role) {
+      if (!role) return getGeneralSkills();
+      const normalized = role.toLowerCase().trim();
+      for (const [key, skills] of Object.entries(ROLE_SKILL_PRESETS)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          return skills.map(name => ({ name, rating: 4 }));
+        }
+      }
+      return getGeneralSkills();
+    }
+
+    function getGeneralSkills() {
+      return [
+        { name: 'Keahlian Teknis Posisi', rating: 4 },
+        { name: 'Komunikasi & Kerjasama Tim', rating: 4 },
+        { name: 'Kecepatan & Kualitas Kerja', rating: 4 },
+        { name: 'Problem Solving & Inisiatif', rating: 4 }
+      ];
+    }
+
+    function applyRoleSkillPreset(roleName, force = false) {
+      const container = document.getElementById('skillsBuilderContainer');
+      if (!container) return;
+
+      if (!force) {
+        const currentInputs = Array.from(container.querySelectorAll('.skill-name-input'));
+        const allKnownSkills = Object.values(ROLE_SKILL_PRESETS).flat().map(s => s.toLowerCase());
+        getGeneralSkills().forEach(s => allKnownSkills.push(s.name.toLowerCase()));
+
+        const hasCustomUserSkills = currentInputs.some(inp => {
+          const val = inp.value.trim().toLowerCase();
+          return val && !allKnownSkills.includes(val);
+        });
+
+        if (hasCustomUserSkills) return;
+      }
+
+      const newSkills = getDefaultSkillsForRole(roleName);
+      container.innerHTML = newSkills.map(s => `
+        <div class="skills-builder-row">
+          <input type="text" class="form-input skill-name-input" value="${escapeHtml(s.name)}" placeholder="Skill name" style="flex: 1;" onblur="this.value = toTitleCase(this.value)">
+          <select class="form-select skill-rating-select" style="width: 90px;">
+            <option value="5" ${s.rating === 5 ? 'selected' : ''}>5 ★</option>
+            <option value="4" ${s.rating === 4 ? 'selected' : ''}>4 ★</option>
+            <option value="3" ${s.rating === 3 ? 'selected' : ''}>3 ★</option>
+            <option value="2" ${s.rating === 2 ? 'selected' : ''}>2 ★</option>
+            <option value="1" ${s.rating === 1 ? 'selected' : ''}>1 ★</option>
+          </select>
+          <button type="button" class="btn btn-secondary btn-icon" onclick="this.closest('.skills-builder-row').remove()" style="color: var(--pastel-red-text);">✕</button>
+        </div>`).join('');
+    }
+
     function openRoleDropdown() {
       const menu = document.getElementById('roleDropdownMenu');
       const input = document.getElementById('inputRole');
@@ -8576,13 +8693,16 @@ function renderPentagonMatrixSvg(dimensions) {
         input.dispatchEvent(new Event('input', { bubbles: true }));
       }
       closeRoleDropdown();
+      applyRoleSkillPreset(roleName);
     }
 
     function handleRoleInputBlur(input) {
       if (!input) return;
       setTimeout(() => {
-        input.value = toTitleCase(input.value.trim()) || 'Freelance Content Creator';
+        const val = toTitleCase(input.value.trim()) || 'Business Development';
+        input.value = val;
         closeRoleDropdown();
+        applyRoleSkillPreset(val);
       }, 200);
     }
 
@@ -8668,6 +8788,8 @@ function renderPentagonMatrixSvg(dimensions) {
     window.handleRoleInputBlur = handleRoleInputBlur;
     window.getMasterRoles = getMasterRoles;
     window.saveCustomRole = saveCustomRole;
+    window.applyRoleSkillPreset = applyRoleSkillPreset;
+    window.getDefaultSkillsForRole = getDefaultSkillsForRole;
 
     function renderDrawerForm(data) {
       if (!el.drawerBody) return;
@@ -8675,23 +8797,18 @@ function renderPentagonMatrixSvg(dimensions) {
       el.drawerBody.innerHTML = `
         <form id="talentForm" onsubmit="event.preventDefault(); handleSaveCandidate();">
           <div class="form-group">
-            <label class="form-label">
-              <span>Full Name *</span>
-              <span style="font-size: 10px; color: #2563EB; font-weight: normal;">Auto Title Case</span>
-            </label>
+            <label class="form-label">Full Name *</label>
             <input type="text" id="inputName" class="form-input" value="${escapeHtml(data.name || '')}" placeholder="e.g. Budi Santoso" required onblur="handleNameBlur(this)" oninput="checkDuplicateLive()">
+            <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ℹ️ Otomatis diformat huruf kapital tiap kata (Title Case)</div>
             <div id="duplicateWarningName" class="duplicate-warning-box"></div>
           </div>
 
           <div class="form-row-2">
             <div class="form-group" style="position: relative;" id="roleComboboxGroup">
-              <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>Role / Job Vacancy *</span>
-                <span style="font-size: 10px; color: #2563EB; font-weight: 500;">Pilih atau Ketik Custom</span>
-              </label>
+              <label class="form-label">Role / Job Vacancy *</label>
               <div style="position: relative; display: flex; align-items: center;">
                 <input type="text" id="inputRole" class="form-input" 
-                       value="${escapeHtml(data.role || 'Freelance Content Creator')}" 
+                       value="${escapeHtml(data.role || 'Business Development')}" 
                        placeholder="Pilih dari daftar atau ketik peran..." 
                        autocomplete="off"
                        onfocus="openRoleDropdown()"
@@ -8705,6 +8822,7 @@ function renderPentagonMatrixSvg(dimensions) {
                   ▼
                 </button>
               </div>
+              <div style="font-size: 11px; color: #2563EB; margin-top: 4px;">💡 Pilih lowongan dari daftar ▼ atau ketik peran baru</div>
 
               <!-- Floating Role Dropdown Menu -->
               <div id="roleDropdownMenu" class="custom-dropdown-menu" 
@@ -8719,41 +8837,34 @@ function renderPentagonMatrixSvg(dimensions) {
                 <option value="Senior" ${data.experienceLevel === 'Senior' ? 'selected' : ''}>Senior</option>
                 <option value="Lead" ${data.experienceLevel === 'Lead' ? 'selected' : ''}>Lead / Specialist</option>
               </select>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Pilih tingkat kemahiran &amp; pengalaman kandidat</div>
             </div>
           </div>
 
           <div class="form-row-2">
             <div class="form-group">
-              <label class="form-label">
-                <span>Domisili / Location</span>
-                <span style="font-size: 10px; color: #2563EB; font-weight: normal;">Auto Title Case</span>
-              </label>
+              <label class="form-label">Domisili / Location</label>
               <input type="text" id="inputDomisili" class="form-input" value="${escapeHtml(data.domisili || '')}" placeholder="e.g. Surakarta" onblur="this.value = toTitleCase(this.value)">
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ℹ️ Otomatis Title Case</div>
             </div>
             <div class="form-group">
-              <label class="form-label">
-                <span>Education / Background</span>
-                <span style="font-size: 10px; color: #2563EB; font-weight: normal;">Auto Format</span>
-              </label>
+              <label class="form-label">Education / Background</label>
               <input type="text" id="inputEducation" class="form-input" value="${escapeHtml(data.education || '')}" placeholder="e.g. S1 DKV / SMA" onblur="this.value = cleanEducation(this.value)">
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ℹ️ Otomatis disesuaikan (e.g. S1 DKV / SMA)</div>
             </div>
           </div>
 
           <div class="form-row-2">
             <div class="form-group">
-              <label class="form-label">
-                <span>WhatsApp Number</span>
-                <span style="font-size: 10px; color: #16A34A; font-weight: normal;">Auto +62 Format</span>
-              </label>
+              <label class="form-label">WhatsApp Number</label>
               <input type="text" id="inputPhone" class="form-input" value="${escapeHtml(data.phone || '')}" placeholder="08123456789" onblur="handlePhoneBlur(this)" oninput="checkDuplicateLive()">
+              <div style="font-size: 11px; color: #16A34A; margin-top: 4px;">ℹ️ Otomatis standar format +62</div>
               <div id="duplicateWarningPhone" class="duplicate-warning-box"></div>
             </div>
             <div class="form-group">
-              <label class="form-label">
-                <span>Email Address</span>
-                <span style="font-size: 10px; color: var(--text-muted); font-weight: normal;">Auto Lowercase</span>
-              </label>
+              <label class="form-label">Email Address</label>
               <input type="email" id="inputEmail" class="form-input" value="${escapeHtml(data.email || '')}" placeholder="candidate@example.com" onblur="this.value = cleanEmail(this.value)">
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ℹ️ Otomatis huruf kecil (lowercase)</div>
             </div>
           </div>
 
@@ -8796,10 +8907,14 @@ function renderPentagonMatrixSvg(dimensions) {
 
           <!-- Dynamic Skill Builder -->
           <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
               <label class="form-label" style="margin-bottom: 0;">Skill Ratings</label>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="addSkillRow()" style="padding: 2px 8px; font-size: 11px;">+ Add Skill</button>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="applyRoleSkillPreset(document.getElementById('inputRole')?.value, true)" style="padding: 2px 8px; font-size: 11px; color: #2563EB; border-color: #BFDBFE;" title="Sesuaikan ulang skill sesuai role terpilih">⚡ Reset ke Template Role</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addSkillRow()" style="padding: 2px 8px; font-size: 11px;">+ Add Skill</button>
+              </div>
             </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">💡 Skill otomatis disesuaikan dengan posisi lowongan. Nilai 1-5 bintang untuk tiap kompetensi.</div>
             <div id="skillsBuilderContainer">
               ${(data.skills || []).map(s => `
                 <div class="skills-builder-row">
