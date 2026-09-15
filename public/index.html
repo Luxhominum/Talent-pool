@@ -2289,20 +2289,21 @@
                 </div>
               </div>
 
-              <!-- Vacancy-Specific Durations -->
-              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
-                <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 8px;">
-                  ⏱️ Durasi Wawancara Per Posisi (Quantized Block):
+              <!-- Vacancy-Specific Durations (Dynamic from Real Data) -->
+              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <div>
+                    <div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1E293B;">
+                      ⏱️ Durasi Wawancara Per Posisi (Quantized Slot Block)
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                      Disesuaikan otomatis untuk setiap posisi aktif tanpa peran dummy.
+                    </div>
+                  </div>
+                  <span style="font-size: 10px; font-family: var(--font-mono); background: #E2E8F0; color: #475569; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Otomatis</span>
                 </div>
-                <div class="form-row-2" style="gap: 10px;">
-                  <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label" style="font-size: 11px;">Content Creator (mins):</label>
-                    <input type="number" id="bcDurationCC" class="form-input" value="60" min="15" step="15" oninput="renderBroadcastTable()" placeholder="60 (40m + 20m buffer)">
-                  </div>
-                  <div class="form-group" style="margin-bottom: 0;">
-                    <label class="form-label" style="font-size: 11px;">Marketplace Specialist (mins):</label>
-                    <input type="number" id="bcDurationMS" class="form-input" value="120" min="30" step="30" oninput="renderBroadcastTable()" placeholder="120 (2 jam)">
-                  </div>
+                <div id="bcVacancyDurationsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamically rendered by renderVacancyDurationControls() -->
                 </div>
               </div>
 
@@ -3437,8 +3438,7 @@
         date: el.bcDateInput ? el.bcDateInput.value : '',
         time: el.bcTimeInput ? el.bcTimeInput.value : '',
         interval: el.bcIntervalInput ? el.bcIntervalInput.value : '',
-        durationCC: document.getElementById('bcDurationCC') ? document.getElementById('bcDurationCC').value : '60',
-        durationMS: document.getElementById('bcDurationMS') ? document.getElementById('bcDurationMS').value : '120',
+        vacancyDurations: state.vacancyDurations || {},
         location: el.bcLocationInput ? el.bcLocationInput.value : '',
         template: el.bcTemplateSelect ? el.bcTemplateSelect.value : '',
         customMsg: currentMsg,
@@ -3446,6 +3446,7 @@
       };
       try {
         localStorage.setItem('pge_bc_settings', JSON.stringify(settings));
+        localStorage.setItem('pge_vacancy_durations', JSON.stringify(state.vacancyDurations || {}));
         return true;
       } catch (e) {
         console.warn('Failed to save bc settings:', e);
@@ -3471,6 +3472,14 @@
     window.getEarliestInterviewDate = getEarliestInterviewDate;
 
     function loadBcSettings() {
+      if (!state.vacancyDurations) state.vacancyDurations = {};
+      try {
+        const savedDur = localStorage.getItem('pge_vacancy_durations');
+        if (savedDur) {
+          state.vacancyDurations = Object.assign(state.vacancyDurations, JSON.parse(savedDur));
+        }
+      } catch (e) {}
+
       try {
         const raw = localStorage.getItem('pge_bc_settings');
         const dedicatedMsg = localStorage.getItem('pge_saved_broadcast_custom_template');
@@ -3487,6 +3496,7 @@
 
         if (!raw) {
           if (el.bcDateInput) el.bcDateInput.value = earliestIso;
+          if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
           return !!dedicatedMsg;
         }
         const saved = JSON.parse(raw);
@@ -3506,8 +3516,12 @@
           }
           if (el.bcTimeInput && saved.time) el.bcTimeInput.value = saved.time;
           if (el.bcIntervalInput && saved.interval) el.bcIntervalInput.value = saved.interval;
-          if (document.getElementById('bcDurationCC') && saved.durationCC) document.getElementById('bcDurationCC').value = saved.durationCC;
-          if (document.getElementById('bcDurationMS') && saved.durationMS) document.getElementById('bcDurationMS').value = saved.durationMS;
+          
+          // Migrate legacy duration settings if available
+          if (saved.durationCC) state.vacancyDurations['Freelance Content Creator'] = parseInt(saved.durationCC, 10) || 60;
+          if (saved.durationMS) state.vacancyDurations['Marketplace Specialist'] = parseInt(saved.durationMS, 10) || 120;
+          if (saved.vacancyDurations) Object.assign(state.vacancyDurations, saved.vacancyDurations);
+
           if (el.bcLocationInput && saved.location) el.bcLocationInput.value = saved.location;
           if (el.bcTemplateSelect && saved.template) el.bcTemplateSelect.value = saved.template;
           if (!dedicatedMsg && el.bcCustomMessage && typeof saved.customMsg === 'string' && saved.customMsg.length > 0) {
@@ -3516,12 +3530,15 @@
           if (el.bcAutoUpdateStage && saved.hasOwnProperty('autoUpdate')) {
             el.bcAutoUpdateStage.checked = saved.autoUpdate;
           }
+          if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
           return true;
         }
         if (el.bcDateInput) el.bcDateInput.value = earliestIso;
+        if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
       } catch (e) {
         console.warn('Error reading saved broadcast settings:', e);
         if (el.bcDateInput) el.bcDateInput.value = formatIsoDate(getEarliestInterviewDate());
+        if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
       }
       return false;
     }
@@ -4689,17 +4706,25 @@
         `;
       });
 
-      // Mini Legend
+      // Dynamic Mini Legend
+      const activeVacanciesForLegend = (typeof getActiveVacanciesForDurations === 'function') ? getActiveVacanciesForDurations() : [];
+      const vacancyLegendItems = activeVacanciesForLegend.map(v => {
+        const dur = (state.vacancyDurations && state.vacancyDurations[v.name]) || (v.name.toLowerCase().includes('marketplace') ? 120 : 60);
+        const isMS = v.name.toLowerCase().includes('marketplace');
+        const isBD = v.name.toLowerCase().includes('business development');
+        const bg = isMS ? '#EEF2FF' : (isBD ? '#FEF3C7' : '#F0FDF4');
+        const border = isMS ? '#818CF8' : (isBD ? '#F59E0B' : '#34D399');
+        return `
+          <span style="display: inline-flex; align-items: center; gap: 5px;">
+            <span style="width: 12px; height: 12px; background: ${bg}; border: 1.5px solid ${border}; border-radius: 3px; display: inline-block;"></span>
+            ${escapeHtml(v.name)} (${dur}m)
+          </span>
+        `;
+      }).join('');
+
       html += `
         <div style="display: flex; gap: 14px; align-items: center; font-size: 11px; color: var(--text-secondary); margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6; flex-wrap: wrap;">
-          <span style="display: inline-flex; align-items: center; gap: 5px;">
-            <span style="width: 12px; height: 12px; background: #F0FDF4; border: 1.5px solid #34D399; border-radius: 3px; display: inline-block;"></span>
-            Content Creator (60m)
-          </span>
-          <span style="display: inline-flex; align-items: center; gap: 5px;">
-            <span style="width: 12px; height: 12px; background: #EEF2FF; border: 1.5px solid #818CF8; border-radius: 3px; display: inline-block;"></span>
-            Marketplace Specialist (120m)
-          </span>
+          ${vacancyLegendItems}
           <span style="display: inline-flex; align-items: center; gap: 5px;">
             <span style="width: 12px; height: 12px; background: #FEF3C7; border: 1.5px solid #F59E0B; border-radius: 3px; display: inline-block;"></span>
             Rescheduled
@@ -6564,8 +6589,131 @@
           }
         }
       });
+      if (tabName === 'automation' && typeof renderVacancyDurationControls === 'function') {
+        renderVacancyDurationControls();
+      }
     };
     
+    function getActiveVacanciesForDurations() {
+      const vacancies = [];
+      const seen = new Set();
+      
+      // 1. Real vacancies discovered from candidate records in data
+      if (typeof getUniqueVacancies === 'function') {
+        const uList = getUniqueVacancies();
+        uList.forEach(v => {
+          if (v && v.name && !seen.has(v.name.toLowerCase())) {
+            seen.add(v.name.toLowerCase());
+            vacancies.push({ name: v.name, total: v.total || 0 });
+          }
+        });
+      }
+      
+      // 2. Verified company core roles (Freelance Content Creator, Marketplace Specialist, Business Development)
+      const coreRoles = (typeof PGE_DEFAULT_ROLES !== 'undefined') ? PGE_DEFAULT_ROLES : [
+        'Freelance Content Creator',
+        'Marketplace Specialist',
+        'Business Development'
+      ];
+      coreRoles.forEach(r => {
+        if (!seen.has(r.toLowerCase())) {
+          seen.add(r.toLowerCase());
+          const count = (state.talents || []).filter(t => (t.role || '').toLowerCase() === r.toLowerCase()).length;
+          vacancies.push({ name: r, total: count });
+        }
+      });
+
+      return vacancies;
+    }
+    window.getActiveVacanciesForDurations = getActiveVacanciesForDurations;
+
+    function renderVacancyDurationControls() {
+      const container = document.getElementById('bcVacancyDurationsContainer');
+      if (!container) return;
+
+      if (!state.vacancyDurations) state.vacancyDurations = {};
+      const activeList = getActiveVacanciesForDurations();
+
+      const standardOptions = [
+        { label: '30 min (⚡ Express)', val: 30 },
+        { label: '45 min (📋 Screening)', val: 45 },
+        { label: '60 min (🎯 Standard - 1 Jam)', val: 60 },
+        { label: '90 min (🔍 In-Depth - 1.5 Jam)', val: 90 },
+        { label: '120 min (🧠 Deep Dive - 2 Jam)', val: 120 }
+      ];
+
+      let html = '';
+      activeList.forEach(v => {
+        const roleName = v.name;
+        let curDur = state.vacancyDurations[roleName];
+        if (!curDur) {
+          const rLower = roleName.toLowerCase();
+          if (rLower.includes('marketplace')) curDur = 120;
+          else if (rLower.includes('business development') || rLower.includes('bizdev')) curDur = 60;
+          else if (rLower.includes('content creator') || rLower.includes('creator')) curDur = 60;
+          else {
+            const defInput = document.getElementById('bcIntervalInput');
+            curDur = defInput ? (parseInt(defInput.value, 10) || 60) : 60;
+          }
+          state.vacancyDurations[roleName] = curDur;
+        }
+
+        const icon = typeof getVacancyIcon === 'function' ? getVacancyIcon(roleName) : '💼';
+        const escapedRole = escapeHtml(roleName);
+
+        html += `
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <span style="font-size: 18px;">${icon}</span>
+              <div style="min-width: 0;">
+                <div style="font-size: 12.5px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${escapedRole}
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted);">
+                  ${v.total} kandidat terdaftar
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+              <select class="form-select" 
+                      style="font-size: 12px; padding: 6px 10px; font-weight: 600; min-width: 190px; background: #F9FAFB; border-color: #D1D5DB; border-radius: 6px;"
+                      onchange="handleVacancyDurationChange('${escapedRole.replace(/'/g, "\\'")}', this.value)">
+                ${standardOptions.map(opt => `
+                  <option value="${opt.val}" ${curDur === opt.val ? 'selected' : ''}>${opt.label}</option>
+                `).join('')}
+                ${!standardOptions.some(o => o.val === curDur) ? `<option value="${curDur}" selected>${curDur} min (Custom)</option>` : ''}
+              </select>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+    window.renderVacancyDurationControls = renderVacancyDurationControls;
+
+    function handleVacancyDurationChange(roleName, mins) {
+      const parsed = parseInt(mins, 10);
+      if (isNaN(parsed) || parsed <= 0) return;
+      if (!state.vacancyDurations) state.vacancyDurations = {};
+      state.vacancyDurations[roleName] = parsed;
+
+      try {
+        localStorage.setItem('pge_vacancy_durations', JSON.stringify(state.vacancyDurations));
+      } catch (e) {}
+
+      if (typeof recalculateBroadcastSlots === 'function') {
+        recalculateBroadcastSlots(false);
+      }
+      if (typeof renderBroadcastTable === 'function') {
+        renderBroadcastTable();
+      }
+      if (typeof renderFinalScheduleAgenda === 'function') {
+        renderFinalScheduleAgenda();
+      }
+      showToast('⏱️ Durasi wawancara ' + roleName + ' diatur ke ' + parsed + ' menit');
+    }
+    window.handleVacancyDurationChange = handleVacancyDurationChange;
     
     function timeToMinutes(timeStr) {
       if (!timeStr) return null;
@@ -6585,17 +6733,36 @@
 
     function getTalentInterviewDuration(talent) {
       if (!talent) return 60;
-      const roleStr = (talent.role || '').toLowerCase().trim();
-      const valCC = document.getElementById('bcDurationCC') ? parseInt(document.getElementById('bcDurationCC').value, 10) : 60;
-      const valMS = document.getElementById('bcDurationMS') ? parseInt(document.getElementById('bcDurationMS').value, 10) : 120;
-      const defVal = document.getElementById('bcIntervalInput') ? parseInt(document.getElementById('bcIntervalInput').value, 10) : 60;
+      const roleName = (talent.role || 'Freelance Content Creator').trim();
+      const roleStr = roleName.toLowerCase();
 
+      // 1. Direct configuration from state.vacancyDurations
+      if (state.vacancyDurations) {
+        if (state.vacancyDurations[roleName] !== undefined) {
+          const d = parseInt(state.vacancyDurations[roleName], 10);
+          if (!isNaN(d) && d > 0) return d;
+        }
+        for (const [rKey, rVal] of Object.entries(state.vacancyDurations)) {
+          if (rKey.toLowerCase() === roleStr) {
+            const d = parseInt(rVal, 10);
+            if (!isNaN(d) && d > 0) return d;
+          }
+        }
+      }
+
+      // 2. Default presets for core company roles
       if (roleStr.includes('marketplace')) {
-        return !isNaN(valMS) && valMS > 0 ? valMS : 120;
+        return 120;
       }
       if (roleStr.includes('content creator') || roleStr.includes('creator')) {
-        return !isNaN(valCC) && valCC > 0 ? valCC : 60;
+        return 60;
       }
+      if (roleStr.includes('business development') || roleStr.includes('bizdev')) {
+        return 60;
+      }
+
+      // 3. Fallback to default interval setting
+      const defVal = document.getElementById('bcIntervalInput') ? parseInt(document.getElementById('bcIntervalInput').value, 10) : 60;
       return !isNaN(defVal) && defVal > 0 ? defVal : 60;
     }
     window.getTalentInterviewDuration = getTalentInterviewDuration;
@@ -8676,15 +8843,7 @@ function renderPentagonMatrixSvg(dimensions) {
     const PGE_DEFAULT_ROLES = [
       'Business Development',
       'Freelance Content Creator',
-      'Video Editor',
-      'Graphic Designer',
-      'Social Media Specialist',
-      'Host Live / Streamer',
-      'KOL Specialist',
-      'Admin Recruitment',
-      'Content Writer / Scriptwriter',
-      'Digital Marketing',
-      'Talent Coordinator'
+      'Marketplace Specialist'
     ];
 
     function getMasterRoles() {
