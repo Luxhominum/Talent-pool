@@ -2395,6 +2395,9 @@
                 </div>
               </div>
               <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="bcRoleFilter" class="form-select" onchange="handleBcRoleFilterChange(this.value)" style="font-size: 12px; padding: 6px 10px; font-weight: 500; min-width: 170px;">
+                  <option value="ALL">💼 Semua Lowongan</option>
+                </select>
                 <select id="bcStageFilter" class="form-select" onchange="renderBroadcastTable()" style="font-size: 12px; padding: 6px 10px;">
                   <option value="ALL">All Active Candidates</option>
                   <option value="Screening" selected>Screening Candidates Only</option>
@@ -3673,10 +3676,14 @@
 
     function recalculateBroadcastSlots(notify = true) {
       const filterStage = (el.bcStageFilter && el.bcStageFilter.value) ? el.bcStageFilter.value : 'ALL';
-      const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
-      const targetTalents = baseTalents.filter(t => {
+      const bcRoleSelect = document.getElementById('bcRoleFilter');
+      const selectedRole = (bcRoleSelect && bcRoleSelect.value) ? bcRoleSelect.value : (state.broadcastCurrentVacancy || 'ALL');
+
+      const allTalents = state.talents || [];
+      const targetTalents = allTalents.filter(t => {
         if (t.stage === 'Archived') return false;
         if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
+        if (selectedRole !== 'ALL' && t.role !== selectedRole) return false;
         return true;
       });
       const selectedTalents = targetTalents.filter(t => state.broadcastSelectedIds.has(t.id));
@@ -4630,12 +4637,41 @@
       const bc = document.getElementById('broadcastContainer');
       if (bc) bc.style.display = 'flex';
 
+      populateBcRoleFilter();
       if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
       if (typeof renderVacancyDurationControls === 'function') renderVacancyDurationControls();
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     window.openBroadcastView = openBroadcastView;
+
+    function populateBcRoleFilter() {
+      const select = document.getElementById('bcRoleFilter');
+      if (!select) return;
+      const currentVal = select.value || (state.broadcastCurrentVacancy || (state.activeVacancy && state.activeVacancy !== 'HUB' ? state.activeVacancy : 'ALL'));
+
+      const roleSet = new Set();
+      (typeof PGE_DEFAULT_ROLES !== 'undefined' ? PGE_DEFAULT_ROLES : []).forEach(r => roleSet.add(r));
+      (state.talents || []).forEach(t => {
+        if (t.role && t.role.trim()) roleSet.add(t.role.trim());
+      });
+
+      let opts = '<option value="ALL">💼 Semua Lowongan</option>';
+      Array.from(roleSet).sort().forEach(r => {
+        opts += `<option value="${escapeHtml(r)}" ${r === currentVal ? 'selected' : ''}>${escapeHtml(r)}</option>`;
+      });
+      select.innerHTML = opts;
+      select.value = currentVal;
+    }
+    window.populateBcRoleFilter = populateBcRoleFilter;
+
+    function handleBcRoleFilterChange(newRole) {
+      state.broadcastCurrentVacancy = newRole;
+      state.broadcastSelectedIds.clear();
+      state.broadcastUserExplicitlyCleared = false;
+      renderBroadcastTable();
+    }
+    window.handleBcRoleFilterChange = handleBcRoleFilterChange;
 
     // Backward compatibility redirects
     function openFinalScheduleModal() {
@@ -5549,7 +5585,19 @@
 
       state.talents = items;
       correctCandidateScheduleSequence(state.talents);
-      selectVacancy(state.activeVacancy);
+
+      const bcViewFb = document.getElementById('broadcastPageView');
+      const schedViewFb = document.getElementById('interviewScheduleView');
+      const isBcActiveFb = bcViewFb && bcViewFb.style.display === 'block';
+      const isSchedActiveFb = schedViewFb && schedViewFb.style.display === 'block';
+
+      if (isBcActiveFb) {
+        if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+      } else if (isSchedActiveFb) {
+        if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
+      } else {
+        selectVacancy(state.activeVacancy);
+      }
     // Ghayu Rivanda (09:00) and Sri Purwanti (13:00) persistent slot normalization
     if (state.talents) {
       if (!state.smartScheduleMap) state.smartScheduleMap = {};
@@ -5655,7 +5703,19 @@
 
         state.talents = items;
         correctCandidateScheduleSequence(state.talents);
-        selectVacancy(state.activeVacancy);
+
+        const bcView = document.getElementById('broadcastPageView');
+        const schedView = document.getElementById('interviewScheduleView');
+        const isBcActive = bcView && bcView.style.display === 'block';
+        const isSchedActive = schedView && schedView.style.display === 'block';
+
+        if (isBcActive) {
+          if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
+        } else if (isSchedActive) {
+          if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
+        } else {
+          selectVacancy(state.activeVacancy);
+        }
 
         if (el.syncStatus) {
           const activeCount = state.talents.filter(t => t.stage !== 'Archived').length;
@@ -7332,16 +7392,20 @@
       if (!el.bcTableBody) return;
       const filterStage = el.bcStageFilter ? el.bcStageFilter.value : 'ALL';
 
-      const baseTalents = typeof getVacancyFilteredTalents === 'function' ? getVacancyFilteredTalents() : state.talents;
-      const targetTalents = baseTalents.filter(t => {
+      const bcRoleSelect = document.getElementById('bcRoleFilter');
+      const selectedRole = (bcRoleSelect && bcRoleSelect.value) ? bcRoleSelect.value : (state.broadcastCurrentVacancy || 'ALL');
+
+      const allTalents = state.talents || [];
+      const targetTalents = allTalents.filter(t => {
         if (t.stage === 'Archived') return false;
         if (filterStage !== 'ALL' && t.stage !== filterStage) return false;
+        if (selectedRole !== 'ALL' && t.role !== selectedRole) return false;
         return true;
       });
 
-      // Synchronize selection with active vacancy
-      if (state.broadcastCurrentVacancy !== state.activeVacancy) {
-        state.broadcastCurrentVacancy = state.activeVacancy;
+      // Synchronize selection with active vacancy / role
+      if (state.broadcastCurrentVacancy !== selectedRole) {
+        state.broadcastCurrentVacancy = selectedRole;
         state.broadcastSelectedIds.clear();
         state.broadcastUserExplicitlyCleared = false;
         targetTalents.forEach(t => state.broadcastSelectedIds.add(t.id));
@@ -7352,7 +7416,7 @@
       // Update active vacancy badge in Broadcast UI
       const bcActiveBadge = document.getElementById('bcActiveVacancyBadge');
       if (bcActiveBadge) {
-        const vName = (state.activeVacancy === 'ALL' || !state.activeVacancy || state.activeVacancy === 'HUB') ? 'Semua Lowongan' : state.activeVacancy;
+        const vName = (selectedRole === 'ALL' || !selectedRole) ? 'Semua Lowongan' : selectedRole;
         bcActiveBadge.textContent = vName;
       }
 
