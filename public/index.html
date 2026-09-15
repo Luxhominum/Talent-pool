@@ -2452,19 +2452,21 @@
         <!-- Bottom Row: Weekly Sprint Selector & Day Chips (Senin - Sabtu) -->
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 12px; border-top: 1px solid #F3F4F6;">
           <!-- Week Navigator Bar -->
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); margin-right: 2px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono); margin-right: 2px; white-space: nowrap;">
               🗓️ Siklus:
             </span>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="navigateScheduleWeek(-1)" title="Minggu Sebelumnya" style="padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 6px;">
-              ◀
-            </button>
-            <select id="schedWeekFilter" class="form-select" onchange="handleSchedWeekChange(this.value)" style="font-size: 12px; padding: 6px 12px; font-weight: 600; color: #1E40AF; background: #EFF6FF; border-color: #BFDBFE; min-width: 230px; border-radius: 6px;">
-              <!-- Dynamically populated weeks -->
-            </select>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="navigateScheduleWeek(1)" title="Minggu Berikutnya" style="padding: 5px 10px; font-size: 12px; cursor: pointer; border-radius: 6px;">
-              ▶
-            </button>
+            <div style="display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; white-space: nowrap;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="navigateScheduleWeek(-1)" title="Minggu Sebelumnya" style="padding: 5px 9px; font-size: 11px; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px; min-width: 32px;">
+                ◀
+              </button>
+              <select id="schedWeekFilter" class="form-select" onchange="handleSchedWeekChange(this.value)" style="font-size: 12px; padding: 6px 10px; font-weight: 600; color: #1E40AF; background: #EFF6FF; border-color: #BFDBFE; height: 32px; width: auto; min-width: 190px; border-radius: 6px;">
+                <!-- Dynamically populated weeks -->
+              </select>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="navigateScheduleWeek(1)" title="Minggu Berikutnya" style="padding: 5px 9px; font-size: 11px; cursor: pointer; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; height: 32px; min-width: 32px;">
+                ▶
+              </button>
+            </div>
           </div>
 
           <!-- Interactive Day Chips Filter -->
@@ -4305,7 +4307,7 @@
 
     function navigateScheduleWeek(delta) {
       if (!selectedScheduleWeekMonday || selectedScheduleWeekMonday === 'ALL_WEEKS') {
-        selectedScheduleWeekMonday = '2026-09-14';
+        selectedScheduleWeekMonday = formatIsoDate(getWeekMonday(new Date()));
       }
       const cur = new Date(selectedScheduleWeekMonday + 'T00:00:00');
       cur.setDate(cur.getDate() + (delta * 7));
@@ -4382,8 +4384,14 @@
         roleSelect.innerHTML = roleOptions;
       }
 
+      // Always determine the active (current) week Monday
+      const today = new Date();
+      const currentActiveWeekMonday = formatIsoDate(getWeekMonday(today));
+
       // Collect all available weeks with scheduled candidates
       const weekSet = new Set();
+      weekSet.add(currentActiveWeekMonday); // Ensure the active current week is always present
+
       (state.talents || []).forEach(t => {
         const info = extractCandidateScheduleInfo(t);
         if (info.date !== '-' && info.time !== '-') {
@@ -4396,9 +4404,10 @@
       });
 
       const sortedWeeks = Array.from(weekSet).sort();
-      if (!selectedScheduleWeekMonday || (!sortedWeeks.includes(selectedScheduleWeekMonday) && selectedScheduleWeekMonday !== 'ALL_WEEKS')) {
-        selectedScheduleWeekMonday = sortedWeeks.length > 0 ? sortedWeeks[0] : '2026-09-14';
-      }
+
+      // When opening, ALWAYS go to the active week (current week Monday), never last week or next week
+      selectedScheduleWeekMonday = currentActiveWeekMonday;
+      selectedScheduleDay = 'ALL';
 
       const weekSelect = document.getElementById('schedWeekFilter');
       if (weekSelect) {
