@@ -2154,9 +2154,13 @@
 
         <select class="select-filter" id="filterRating">
           <option value="0">All Ratings</option>
-          <option value="5">5 Stars Only</option>
-          <option value="4">4+ Stars</option>
-          <option value="3">3+ Stars</option>
+          <option value="5">5.0 Stars (Top)</option>
+          <option value="4.5">4.5+ Stars</option>
+          <option value="4">4.0+ Stars</option>
+          <option value="3.5">3.5+ Stars</option>
+          <option value="3">3.0+ Stars</option>
+          <option value="2.5">2.5+ Stars</option>
+          <option value="2">2.0+ Stars</option>
         </select>
 
         <div class="view-switcher">
@@ -2741,11 +2745,15 @@
         <!-- Rating Stars -->
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label" style="font-weight: 600; font-size: 12px; color: var(--text-primary);">Rating Evaluasi Wawancara:</label>
-          <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
             <div id="postInterviewStarRating" style="display: inline-flex; gap: 4px; font-size: 24px; cursor: pointer;">
-              <!-- Dynamically populated stars -->
+              <!-- Dynamically populated stars with half-star click detection -->
             </div>
-            <span id="postInterviewRatingText" style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #1E40AF; margin-left: 6px;">4 / 5</span>
+            <span id="postInterviewRatingText" style="font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #1E40AF; margin-left: 6px;">3.0 / 5</span>
+            <div style="display: inline-flex; gap: 4px; margin-left: 6px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="adjustPostInterviewRating(-0.5)" style="padding: 1px 6px; font-size: 11px; height: 24px;" title="Kurangi 0.5 Bintang">-0.5</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="adjustPostInterviewRating(0.5)" style="padding: 1px 6px; font-size: 11px; height: 24px;" title="Tambah 0.5 Bintang">+0.5</button>
+            </div>
           </div>
         </div>
 
@@ -4975,22 +4983,43 @@
     /* ---------------------------------------------------- */
     let currentPostInterviewTalentId = null;
     let currentPostInterviewStage = 'Shortlisted';
-    let currentPostInterviewRating = 4;
+    let currentPostInterviewRating = 3;
 
     function renderStarPicker(selectedRating) {
       const container = document.getElementById('postInterviewStarRating');
       const text = document.getElementById('postInterviewRatingText');
       if (!container) return;
-      currentPostInterviewRating = selectedRating;
+      currentPostInterviewRating = Math.min(5, Math.max(1, Math.round((Number(selectedRating) || 3) * 2) / 2));
 
       let html = '';
       for (let i = 1; i <= 5; i++) {
-        const isFilled = i <= selectedRating;
-        html += '<span onclick="setPostInterviewRating(' + i + ')" style="color: ' + (isFilled ? '#F59E0B' : '#D1D5DB') + '; transition: transform 0.1s;">★</span>';
+        if (currentPostInterviewRating >= i) {
+          html += `<span onclick="handleStarPickerClick(event, ${i})" title="${i} Bintang" style="color: #F59E0B; transition: transform 0.1s; user-select: none; display: inline-block;">★</span>`;
+        } else if (currentPostInterviewRating >= i - 0.5) {
+          html += `<span onclick="handleStarPickerClick(event, ${i})" title="${i - 0.5} Bintang" style="background: linear-gradient(90deg, #F59E0B 50%, #D1D5DB 50%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: transform 0.1s; user-select: none; display: inline-block;">★</span>`;
+        } else {
+          html += `<span onclick="handleStarPickerClick(event, ${i})" title="${i} Bintang" style="color: #D1D5DB; transition: transform 0.1s; user-select: none; display: inline-block;">★</span>`;
+        }
       }
       container.innerHTML = html;
-      if (text) text.textContent = selectedRating + ' / 5 Bintang';
+      if (text) text.textContent = currentPostInterviewRating.toFixed(1).replace(/\.0$/, '') + ' / 5 Bintang';
     }
+
+    function handleStarPickerClick(e, starIndex) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const isLeftHalf = clickX < (rect.width / 2);
+      const rating = isLeftHalf ? (starIndex - 0.5) : starIndex;
+      setPostInterviewRating(rating);
+    }
+    window.handleStarPickerClick = handleStarPickerClick;
+
+    function adjustPostInterviewRating(delta) {
+      const current = Number(currentPostInterviewRating) || 3;
+      const next = Math.min(5, Math.max(1, Math.round((current + delta) * 2) / 2));
+      setPostInterviewRating(next);
+    }
+    window.adjustPostInterviewRating = adjustPostInterviewRating;
 
     function setPostInterviewRating(rating) {
       renderStarPicker(rating);
@@ -5066,7 +5095,7 @@
       selectPostInterviewStage(defaultStage);
 
       // Set current rating
-      const rating = Number(talent.overallRating) || 4;
+      const rating = Number(talent.overallRating) || 3;
       renderStarPicker(rating);
 
       // Set notes and salary (PRE-FILL, DO NOT WIPE OUT!)
@@ -5106,7 +5135,7 @@
       const salary = (document.getElementById('postInterviewSalary') ? document.getElementById('postInterviewSalary').value : '').trim();
       const attendance = (document.getElementById('postInterviewAttendance') ? document.getElementById('postInterviewAttendance').value : 'Confirmed');
       let newStage = currentPostInterviewStage || 'Shortlisted';
-      const newRating = currentPostInterviewRating || 4;
+      const newRating = currentPostInterviewRating || 3;
 
       if (attendance === 'Tidak Hadir') {
         talent.outreachStatus = 'Tidak Hadir';
@@ -5227,10 +5256,10 @@
           skills = item.skills;
         } else if (item.skills && typeof item.skills === 'object') {
           skills = [
-            { name: 'Foto Produk', rating: item.skills.foto || 4 },
-            { name: 'Video Produk', rating: item.skills.video || 4 },
-            { name: 'Video Editing', rating: item.skills.editing || 4 },
-            { name: 'Content Sense', rating: item.skills.sense || 4 }
+            { name: 'Foto Produk', rating: item.skills.foto || 3 },
+            { name: 'Video Produk', rating: item.skills.video || 3 },
+            { name: 'Video Editing', rating: item.skills.editing || 3 },
+            { name: 'Content Sense', rating: item.skills.sense || 3 }
           ];
         } else if (item.skillsJson) {
           try { skills = JSON.parse(item.skillsJson); } catch (e) {}
@@ -5256,7 +5285,7 @@
           phone: formatToInternationalPhone(item.phone || ''),
           email: cleanEmail(item.email || ''),
           experienceLevel: item.experienceLevel || 'Junior',
-          overallRating: Number(item.overallRating) || 4,
+          overallRating: Number(item.overallRating) || 3,
           stage: item.stage || (parsedNotes.status === 'Reschedule' ? 'Interviewed' : (parsedNotes.status === 'Tidak Hadir' ? 'Archived' : 'Prospect')),
           expectedSalary: item.expectedSalary || 'Standard Uang Saku',
           domisili: toTitleCase(item.domisili || ''),
@@ -5355,7 +5384,7 @@
             phone: formatToInternationalPhone(doc.phone || ''),
             email: cleanEmail(doc.email || ''),
             experienceLevel: doc.experienceLevel || 'Junior',
-            overallRating: Number(doc.overallRating) || 4,
+            overallRating: Number(doc.overallRating) || 3,
             stage: doc.stage || (parsedNotes.status === 'Reschedule' ? 'Interviewed' : (parsedNotes.status === 'Tidak Hadir' ? 'Archived' : 'Prospect')),
             expectedSalary: doc.expectedSalary || 'Standard Uang Saku',
             domisili: toTitleCase(doc.domisili || ''),
@@ -5816,8 +5845,9 @@
         }
 
         if (rating > 0) {
-          if (rating === 5 && talent.overallRating !== 5) return false;
-          if (rating < 5 && talent.overallRating < rating) return false;
+          const tRating = Number(talent.overallRating) || 3;
+          if (rating >= 5 && tRating < 5) return false;
+          if (rating < 5 && tRating < rating) return false;
         }
         if (q) {
           const matchName = (talent.name || '').toLowerCase().includes(q);
@@ -5896,16 +5926,17 @@
 
       const ratingsContainer = document.getElementById('analyticsRatingsContainer');
       if (ratingsContainer) {
-        const starCounts = [5, 4, 3, 2, 1].map(stars => ({
+        const ratingSteps = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
+        const starCounts = ratingSteps.map(stars => ({
           stars,
-          count: activeTalents.filter(t => t.overallRating === stars).length
-        }));
+          count: activeTalents.filter(t => Math.round((Number(t.overallRating) || 3) * 2) / 2 === stars).length
+        })).filter(x => x.count > 0 || [5, 4, 3, 2, 1].includes(x.stars));
         ratingsContainer.innerHTML = starCounts.map(({ stars, count }) => {
           const pct = Math.round((count / total) * 100);
           return `
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 2px;">
-                <span>${stars} Stars (${'★'.repeat(stars)})</span>
+                <span>${stars} Stars (${renderStarGlyphs(stars)})</span>
                 <span style="font-family: var(--font-mono); font-weight: 500;">${count} (${pct}%)</span>
               </div>
               <div style="background: rgba(0,0,0,0.06); height: 6px; border-radius: 3px; overflow: hidden;">
@@ -5990,7 +6021,7 @@
       if (!el.bentoContainer) return;
       el.bentoContainer.innerHTML = state.filteredTalents.map(talent => {
         const stageClass = 'stage-' + (talent.stage || 'prospect').toLowerCase();
-        const skillsHtml = (talent.skills || []).map(s => `<span class="skill-tag">${escapeHtml(s.name)} ${'★'.repeat(s.rating)}</span>`).join('');
+        const skillsHtml = (talent.skills || []).map(s => `<span class="skill-tag">${escapeHtml(s.name)} ${renderStarGlyphs(s.rating)}</span>`).join('');
         const isCompared = state.comparedTalentIds.has(talent.id);
 
         const phoneClean = formatToInternationalPhone(talent.phone);
@@ -6047,7 +6078,7 @@
                   <div class="talent-name">${escapeHtml(talent.name)}</div>
                   <div class="talent-role">${escapeHtml(talent.role || 'Freelance Content Creator')}</div>
                 </div>
-                <div class="rating-badge">★ ${(talent.overallRating || 4).toFixed(1)}</div>
+                <div class="rating-badge">★ ${(talent.overallRating || 3).toFixed(1)}</div>
               </div>
 
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
@@ -6135,7 +6166,7 @@
             </td>
             <td>${stageSelectTableHtml}</td>
             <td>${talent.experienceLevel || 'Junior'}</td>
-            <td><span class="rating-badge">★ ${(talent.overallRating || 4).toFixed(1)}</span></td>
+            <td><span class="rating-badge">★ ${(talent.overallRating || 3).toFixed(1)}</span></td>
             <td>
               <div class="doc-badges">
                 ${phoneClean ? `<a href="https://wa.me/${phoneClean.replace(/\+/g, '')}" target="_blank" class="doc-badge doc-badge-wa" onclick="event.stopPropagation()">${phoneClean}</a>` : ''}
@@ -6169,7 +6200,7 @@
           <div class="kanban-card" onclick="handleCandidateCardClick('${t.id}')">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
               <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);">${t.id}</span>
-              <span class="rating-badge" style="font-size: 9px; padding: 2px 5px;">★ ${(t.overallRating || 4).toFixed(1)}</span>
+              <span class="rating-badge" style="font-size: 9px; padding: 2px 5px;">★ ${(t.overallRating || 3).toFixed(1)}</span>
             </div>
             <div style="font-weight: 600; font-size: 13px;">${escapeHtml(t.name)}</div>
             <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(t.role || 'Content Creator')}</div>
@@ -8054,7 +8085,7 @@ function renderPentagonMatrixSvg(dimensions) {
       if (avatarEl) avatarEl.textContent = initials;
       if (idEl) idEl.textContent = talent.id;
       if (nameEl) nameEl.textContent = talent.name;
-      if (ratingStarsEl) ratingStarsEl.textContent = '★'.repeat(talent.overallRating || 4);
+      if (ratingStarsEl) ratingStarsEl.textContent = renderStarGlyphs(talent.overallRating || 3);
 
       if (stageBadgeEl) {
         stageBadgeEl.textContent = talent.stage || 'Prospect';
@@ -8068,12 +8099,7 @@ function renderPentagonMatrixSvg(dimensions) {
       // Left Column: Details & Skill Matrix & WhatsApp
       const phoneClean = formatToInternationalPhone(talent.phone);
       const emailClean = cleanEmail(talent.email);
-      const skills = talent.skills && talent.skills.length > 0 ? talent.skills : [
-        { name: 'Foto', rating: 4 },
-        { name: 'Video', rating: 4 },
-        { name: 'Editing', rating: 4 },
-        { name: 'Sense', rating: 4 }
-      ];
+      const skills = talent.skills && talent.skills.length > 0 ? talent.skills : getDefaultSkillsForRole(talent.role);
 
       const skillsHtml = skills.map(s => {
         const pct = Math.round((Number(s.rating || 0) / 5) * 100);
@@ -8441,7 +8467,7 @@ function renderPentagonMatrixSvg(dimensions) {
         phone: '',
         email: '',
         experienceLevel: 'Junior',
-        overallRating: 4,
+        overallRating: 3,
         stage: 'Prospect',
         expectedSalary: 'Standard Uang Saku',
         domisili: '',
@@ -8595,12 +8621,48 @@ function renderPentagonMatrixSvg(dimensions) {
       ]
     };
 
+    function renderSkillRatingOptions(selectedRating) {
+      const current = Number(selectedRating) || 3;
+      const options = [5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1];
+      return options.map(val => {
+        const isSel = Math.abs(val - current) < 0.1;
+        const text = Number.isInteger(val) ? `${val}.0 ★` : `${val} ★`;
+        return `<option value="${val}" ${isSel ? 'selected' : ''}>${text}</option>`;
+      }).join('');
+    }
+
+    function renderOverallRatingOptions(selectedRating) {
+      const current = Number(selectedRating) || 3;
+      const options = [
+        { val: 5, label: '5.0 - Exceptional ★★★★★' },
+        { val: 4.5, label: '4.5 - Superior ★★★★½' },
+        { val: 4, label: '4.0 - Proficient ★★★★☆' },
+        { val: 3.5, label: '3.5 - Competent ★★★½☆' },
+        { val: 3, label: '3.0 - Standard ★★★☆☆' },
+        { val: 2.5, label: '2.5 - Promising ★★½☆☆' },
+        { val: 2, label: '2.0 - Developing ★★☆☆☆' },
+        { val: 1.5, label: '1.5 - Basic ★½☆☆☆' },
+        { val: 1, label: '1.0 - Novice ★☆☆☆☆' }
+      ];
+      return options.map(opt => {
+        const isSel = Math.abs(opt.val - current) < 0.1;
+        return `<option value="${opt.val}" ${isSel ? 'selected' : ''}>${opt.label}</option>`;
+      }).join('');
+    }
+
+    function renderStarGlyphs(rating) {
+      const num = Math.min(5, Math.max(0, Number(rating) || 0));
+      const full = Math.floor(num);
+      const hasHalf = (num % 1) >= 0.25;
+      return '★'.repeat(full) + (hasHalf ? '½' : '');
+    }
+
     function getDefaultSkillsForRole(role) {
       if (!role) return getGeneralSkills();
       const normalized = role.toLowerCase().trim();
       for (const [key, skills] of Object.entries(ROLE_SKILL_PRESETS)) {
         if (normalized.includes(key) || key.includes(normalized)) {
-          return skills.map(name => ({ name, rating: 4 }));
+          return skills.map(name => ({ name, rating: 3 }));
         }
       }
       return getGeneralSkills();
@@ -8608,10 +8670,10 @@ function renderPentagonMatrixSvg(dimensions) {
 
     function getGeneralSkills() {
       return [
-        { name: 'Keahlian Teknis Posisi', rating: 4 },
-        { name: 'Komunikasi & Kerjasama Tim', rating: 4 },
-        { name: 'Kecepatan & Kualitas Kerja', rating: 4 },
-        { name: 'Problem Solving & Inisiatif', rating: 4 }
+        { name: 'Keahlian Teknis Posisi', rating: 3 },
+        { name: 'Komunikasi & Kerjasama Tim', rating: 3 },
+        { name: 'Kecepatan & Kualitas Kerja', rating: 3 },
+        { name: 'Problem Solving & Inisiatif', rating: 3 }
       ];
     }
 
@@ -8636,12 +8698,8 @@ function renderPentagonMatrixSvg(dimensions) {
       container.innerHTML = newSkills.map(s => `
         <div class="skills-builder-row">
           <input type="text" class="form-input skill-name-input" value="${escapeHtml(s.name)}" placeholder="Skill name" style="flex: 1;" onblur="this.value = toTitleCase(this.value)">
-          <select class="form-select skill-rating-select" style="width: 90px;">
-            <option value="5" ${s.rating === 5 ? 'selected' : ''}>5 ★</option>
-            <option value="4" ${s.rating === 4 ? 'selected' : ''}>4 ★</option>
-            <option value="3" ${s.rating === 3 ? 'selected' : ''}>3 ★</option>
-            <option value="2" ${s.rating === 2 ? 'selected' : ''}>2 ★</option>
-            <option value="1" ${s.rating === 1 ? 'selected' : ''}>1 ★</option>
+          <select class="form-select skill-rating-select" style="width: 105px;">
+            ${renderSkillRatingOptions(s.rating || 3)}
           </select>
           <button type="button" class="btn btn-secondary btn-icon" onclick="this.closest('.skills-builder-row').remove()" style="color: var(--pastel-red-text);">✕</button>
         </div>`).join('');
@@ -8872,11 +8930,7 @@ function renderPentagonMatrixSvg(dimensions) {
             <div class="form-group">
               <label class="form-label">Overall Rating (1-5)</label>
               <select id="inputOverallRating" class="form-select">
-                <option value="5" ${data.overallRating === 5 ? 'selected' : ''}>5 - Exceptional ★★★★★</option>
-                <option value="4" ${data.overallRating === 4 ? 'selected' : ''}>4 - Proficient ★★★★☆</option>
-                <option value="3" ${data.overallRating === 3 ? 'selected' : ''}>3 - Standard ★★★☆☆</option>
-                <option value="2" ${data.overallRating === 2 ? 'selected' : ''}>2 - Developing ★★☆☆☆</option>
-                <option value="1" ${data.overallRating === 1 ? 'selected' : ''}>1 - Novice ★☆☆☆☆</option>
+                ${renderOverallRatingOptions(data.overallRating || 3)}
               </select>
             </div>
             <div class="form-group">
@@ -8919,12 +8973,8 @@ function renderPentagonMatrixSvg(dimensions) {
               ${(data.skills || []).map(s => `
                 <div class="skills-builder-row">
                   <input type="text" class="form-input skill-name-input" value="${escapeHtml(s.name)}" placeholder="Skill name" style="flex: 1;" onblur="this.value = toTitleCase(this.value)">
-                  <select class="form-select skill-rating-select" style="width: 90px;">
-                    <option value="5" ${s.rating === 5 ? 'selected' : ''}>5 ★</option>
-                    <option value="4" ${s.rating === 4 ? 'selected' : ''}>4 ★</option>
-                    <option value="3" ${s.rating === 3 ? 'selected' : ''}>3 ★</option>
-                    <option value="2" ${s.rating === 2 ? 'selected' : ''}>2 ★</option>
-                    <option value="1" ${s.rating === 1 ? 'selected' : ''}>1 ★</option>
+                  <select class="form-select skill-rating-select" style="width: 105px;">
+                    ${renderSkillRatingOptions(s.rating || 3)}
                   </select>
                   <button type="button" class="btn btn-secondary btn-icon" onclick="this.closest('.skills-builder-row').remove()" style="color: var(--pastel-red-text);">✕</button>
                 </div>`).join('')}
@@ -9085,10 +9135,8 @@ function renderPentagonMatrixSvg(dimensions) {
       row.className = 'skills-builder-row';
       row.innerHTML = `
         <input type="text" class="form-input skill-name-input" value="${escapeHtml(tagName)}" style="flex: 1;">
-        <select class="form-select skill-rating-select" style="width: 90px;">
-          <option value="5" selected>5 ★</option>
-          <option value="4">4 ★</option>
-          <option value="3">3 ★</option>
+        <select class="form-select skill-rating-select" style="width: 105px;">
+          ${renderSkillRatingOptions(3)}
         </select>
         <button type="button" class="btn btn-secondary btn-icon" onclick="this.closest('.skills-builder-row').remove()" style="color: var(--pastel-red-text);">✕</button>`;
       container.appendChild(row);
@@ -9150,7 +9198,7 @@ function renderPentagonMatrixSvg(dimensions) {
             <tbody>
               <tr>
                 <td style="font-weight: 600; background: #F9FAFB;">Overall Rating</td>
-                ${talents.map(t => `<td style="text-align: center; border-left: 1px solid var(--border-light);"><span class="rating-badge">★ ${(t.overallRating || 4).toFixed(1)}</span></td>`).join('')}
+                ${talents.map(t => `<td style="text-align: center; border-left: 1px solid var(--border-light);"><span class="rating-badge">★ ${(t.overallRating || 3).toFixed(1)}</span></td>`).join('')}
               </tr>
               <tr>
                 <td style="font-weight: 600; background: #F9FAFB;">Pipeline Stage</td>
@@ -10241,12 +10289,8 @@ function renderPentagonMatrixSvg(dimensions) {
       row.className = 'skills-builder-row';
       row.innerHTML = `
         <input type="text" class="form-input skill-name-input" placeholder="Skill name (e.g. Motion Graphics)" style="flex: 1;" onblur="this.value = toTitleCase(this.value)">
-        <select class="form-select skill-rating-select" style="width: 90px;">
-          <option value="5">5 ★</option>
-          <option value="4" selected>4 ★</option>
-          <option value="3">3 ★</option>
-          <option value="2">2 ★</option>
-          <option value="1">1 ★</option>
+        <select class="form-select skill-rating-select" style="width: 105px;">
+          ${renderSkillRatingOptions(3)}
         </select>
         <button type="button" class="btn btn-secondary btn-icon" onclick="this.closest('.skills-builder-row').remove()" style="color: var(--pastel-red-text);">✕</button>`;
       container.appendChild(row);
