@@ -598,10 +598,14 @@
       border-radius: 12px;
     }
 
-    .stage-screening { background: #FEF3C7; color: #92400E; }
-    .stage-interview { background: #E0E7FF; color: #3730A3; }
-    .stage-prospect { background: #F3F4F6; color: #374151; }
-    .stage-offered { background: #DCFCE7; color: #15803D; }
+    .stage-prospect { background: #F3F4F6; color: #374151; border: 1px solid #E5E7EB; }
+    .stage-screening { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .stage-invited { background: #E0E7FF; color: #3730A3; border: 1px solid #C7D2FE; }
+    .stage-interview, .stage-interviewed { background: #EDE9FE; color: #6D28D9; border: 1px solid #DDD6FE; }
+    .stage-shortlisted { background: #D1FAE5; color: #047857; border: 1px solid #A7F3D0; }
+    .stage-offered { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .stage-hired { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .stage-archived { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
 
     .candidate-meta {
       font-size: 12.5px;
@@ -1316,6 +1320,7 @@
             <option value="" selected>🌐 Semua Tahapan Aktif</option>
             <option value="Prospect">Tahap Prospect</option>
             <option value="Screening">Tahap Screening</option>
+            <option value="Invited">Tahap Invited (Terundang)</option>
             <option value="Interviewed">Tahap Interviewed</option>
             <option value="Shortlisted">Tahap Shortlisted</option>
             <option value="Offered">Tahap Offered</option>
@@ -2306,9 +2311,13 @@ if (state.resultsViewLayout === 'table') {
                           <div style="display: flex; align-items: center; gap: 6px; background: #F8FAFC; border: 1px solid #CBD5E1; padding: 4px 8px; border-radius: 6px;">
                             <span style="font-size: 11px; font-weight: 700; color: #475569;">Tahap:</span>
                             <select onchange="AssessmentExtensions.updateCandidateStageDirectly('${talent.id}', this.value, event)" style="border: none; background: transparent; font-size: 11.5px; font-weight: 700; color: #0F172A; cursor: pointer; outline: none;">
+                              <option value="Prospect" ${talent.stage === 'Prospect' ? 'selected' : ''}>🌱 Prospect</option>
                               <option value="Screening" ${talent.stage === 'Screening' ? 'selected' : ''}>🔍 Screening</option>
-                              <option value="Interview" ${talent.stage === 'Interview' ? 'selected' : ''}>🎙️ Interview</option>
+                              <option value="Invited" ${talent.stage === 'Invited' ? 'selected' : ''}>📩 Invited</option>
+                              <option value="Interviewed" ${talent.stage === 'Interviewed' || talent.stage === 'Interview' ? 'selected' : ''}>🎙️ Interviewed</option>
+                              <option value="Shortlisted" ${talent.stage === 'Shortlisted' ? 'selected' : ''}>⭐ Shortlisted</option>
                               <option value="Offered" ${talent.stage === 'Offered' ? 'selected' : ''}>🎉 Offered</option>
+                              <option value="Hired" ${talent.stage === 'Hired' ? 'selected' : ''}>🤝 Hired</option>
                               <option value="Archived" ${talent.stage === 'Archived' ? 'selected' : ''}>📁 Arsipkan</option>
                             </select>
                           </div>
@@ -2724,9 +2733,15 @@ if (state.resultsViewLayout === 'table') {
         const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'NA');
 
         let stageClass = 'stage-prospect';
+        const stLower = (talent.stage || '').toLowerCase();
         if (talent.stage === 'Screening') stageClass = 'stage-screening';
-        else if (talent.stage === 'Interview') stageClass = 'stage-interview';
+        else if (talent.stage === 'Invited') stageClass = 'stage-invited';
+        else if (talent.stage === 'Interviewed' || talent.stage === 'Interview') stageClass = 'stage-interviewed';
+        else if (talent.stage === 'Shortlisted') stageClass = 'stage-shortlisted';
         else if (talent.stage === 'Offered') stageClass = 'stage-offered';
+        else if (talent.stage === 'Hired') stageClass = 'stage-hired';
+        else if (talent.stage === 'Archived') stageClass = 'stage-archived';
+        else if (stLower) stageClass = 'stage-' + stLower;
 
         let actionAreaHtml = '';
         let scorePanelHtml = '';
@@ -2854,8 +2869,36 @@ if (state.resultsViewLayout === 'table') {
     }
 
         /* ---------------------------------------------------- */
-    /* 7. Realtime Firebase RTDB Listeners                  */
+    /* 7. Realtime Firebase RTDB & Appwrite Cloud Listeners  */
     /* ---------------------------------------------------- */
+    function extractOutreachStatus(notes) {
+      if (typeof notes !== 'string' || !notes) return { text: '', status: 'Pending' };
+      const match = notes.match(/\[Status:\s*([^\]]+)\]/i);
+      if (match) {
+        const status = match[1].trim();
+        const cleanNotes = notes.replace(/\[Status:\s*[^\]]+\]/gi, '').trim();
+        return { text: cleanNotes, status: status };
+      }
+      return { text: notes, status: 'Pending' };
+    }
+
+    function resolveTalentStage(doc) {
+      const notes = doc.notes || '';
+      const parsedNotes = extractOutreachStatus(notes);
+      const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
+      const fullNotes = parsedNotes.text || notes;
+      let stage = doc.stage;
+
+      if (outreach === 'Tidak Hadir') return 'Archived';
+      if (stage === 'Interviewed' && !fullNotes.includes('[Interview Result')) {
+        return 'Invited';
+      }
+      if ((!stage || stage === 'Prospect') && (fullNotes.includes('[Interview Scheduled:') || fullNotes.includes('[Rescheduled to:') || outreach === 'WA Sent' || outreach === 'Reschedule')) {
+        return 'Invited';
+      }
+      return stage || 'Prospect';
+    }
+
     async function loadAppwriteCandidatesDirect() {
       try {
         const response = await databases.listDocuments(
@@ -2864,23 +2907,30 @@ if (state.resultsViewLayout === 'table') {
           [Appwrite.Query.limit(100)]
         );
         if (response && response.documents && response.documents.length > 0) {
-          const list = response.documents.map(doc => ({
-            id: doc.talentId || doc.$id,
-            appwriteId: doc.$id,
-            name: doc.name || '',
-            role: doc.role || 'Freelance Content Creator',
-            phone: doc.phone || '',
-            email: doc.email || '',
-            domisili: doc.domisili || '',
-            education: doc.education || '',
-            stage: doc.stage || 'Prospect',
-            overallRating: Number(doc.overallRating) || 4,
-            expectedSalary: doc.expectedSalary || 'Standard Uang Saku',
-            cvUrl: doc.cvUrl || '',
-            portfolioUrl: doc.portfolioUrl || '',
-            notes: doc.notes || '',
-            outreachStatus: doc.outreachStatus || 'Pending'
-          }));
+          const list = response.documents.map(doc => {
+            const parsedNotes = extractOutreachStatus(doc.notes || '');
+            const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
+            const fullNotes = parsedNotes.text || doc.notes || '';
+            const resolvedStage = resolveTalentStage(doc);
+
+            return {
+              id: doc.talentId || doc.$id,
+              appwriteId: doc.$id,
+              name: doc.name || '',
+              role: doc.role || 'Freelance Content Creator',
+              phone: doc.phone || '',
+              email: doc.email || '',
+              domisili: doc.domisili || '',
+              education: doc.education || '',
+              stage: resolvedStage,
+              overallRating: Number(doc.overallRating) || 4,
+              expectedSalary: doc.expectedSalary || 'Standard Uang Saku',
+              cvUrl: doc.cvUrl || '',
+              portfolioUrl: doc.portfolioUrl || '',
+              notes: fullNotes,
+              outreachStatus: outreach
+            };
+          });
 
           list.sort((a, b) => {
             const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
@@ -2907,7 +2957,19 @@ if (state.resultsViewLayout === 'table') {
         const list = [];
         Object.keys(data).forEach(k => {
           if (data[k] && typeof data[k] === 'object') {
-            list.push({ ...data[k], id: k });
+            const doc = data[k];
+            const parsedNotes = extractOutreachStatus(doc.notes || '');
+            const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
+            const fullNotes = parsedNotes.text || doc.notes || '';
+            const resolvedStage = resolveTalentStage(doc);
+
+            list.push({
+              ...doc,
+              id: k,
+              stage: resolvedStage,
+              notes: fullNotes,
+              outreachStatus: outreach
+            });
           }
         });
 

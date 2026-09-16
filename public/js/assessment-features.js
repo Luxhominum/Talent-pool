@@ -894,6 +894,16 @@
         window.renderCandidates();
       }
     }
+
+    // Direct Appwrite Cloud sync
+    if (typeof databases !== 'undefined' && typeof APPWRITE_CONFIG !== 'undefined') {
+      const docId = (talent && (talent.appwriteId || talent.$id)) || (talentId || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      databases.updateDocument(APPWRITE_CONFIG.databaseId, APPWRITE_CONFIG.collectionId, docId, {
+        stage: newStage
+      }).catch(err => {
+        console.warn('Appwrite direct stage sync warning:', err);
+      });
+    }
   }
 
   /* ---------------------------------------------------- */

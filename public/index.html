@@ -5550,7 +5550,11 @@
         const outreach = item.outreachStatus || parsedNotes.status || 'Pending';
         const fullNotes = parsedNotes.text || item.notes || '';
         let resolvedStage = item.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Prospect'));
-        if (resolvedStage === 'Interviewed' && (outreach === 'WA Sent' || outreach === 'Reschedule') && !fullNotes.includes('[Interview Result')) {
+        if (outreach === 'Tidak Hadir') {
+          resolvedStage = 'Archived';
+        } else if (resolvedStage === 'Interviewed' && !fullNotes.includes('[Interview Result')) {
+          resolvedStage = 'Invited';
+        } else if ((!resolvedStage || resolvedStage === 'Prospect') && (fullNotes.includes('[Interview Scheduled:') || fullNotes.includes('[Rescheduled to:') || outreach === 'WA Sent' || outreach === 'Reschedule')) {
           resolvedStage = 'Invited';
         }
 
@@ -5668,7 +5672,11 @@
           const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
           const fullNotes = parsedNotes.text || doc.notes || '';
           let resolvedStage = doc.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Prospect'));
-          if (resolvedStage === 'Interviewed' && (outreach === 'WA Sent' || outreach === 'Reschedule') && !fullNotes.includes('[Interview Result')) {
+          if (outreach === 'Tidak Hadir') {
+            resolvedStage = 'Archived';
+          } else if (resolvedStage === 'Interviewed' && !fullNotes.includes('[Interview Result')) {
+            resolvedStage = 'Invited';
+          } else if ((!resolvedStage || resolvedStage === 'Prospect') && (fullNotes.includes('[Interview Scheduled:') || fullNotes.includes('[Rescheduled to:') || outreach === 'WA Sent' || outreach === 'Reschedule')) {
             resolvedStage = 'Invited';
           }
 
