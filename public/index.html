@@ -6889,11 +6889,12 @@
       return { assignedTime, displayDate, isRescheduled };
     }
 
-    function resolveCandidateMessage(talent, assignedTime) {
+    function resolveCandidateMessage(talent, assignedTime, assignedDate) {
       const template = el.bcCustomMessage ? el.bcCustomMessage.value : '';
-      const dateVal = formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
-      const timeVal = assignedTime || 'TBD';
-      const locVal = el.bcLocationInput ? el.bcLocationInput.value.trim() : 'Online Meet';
+      const sched = (talent && (!assignedTime || !assignedDate)) ? getTalentAssignedSchedule(talent) : null;
+      const dateVal = assignedDate || (sched ? sched.displayDate : '') || formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
+      const timeVal = assignedTime || (sched ? sched.assignedTime : '') || 'TBD';
+      const locVal = (el.bcLocationInput && el.bcLocationInput.value.trim()) ? el.bcLocationInput.value.trim() : 's.id/lokasipge';
 
       return template
         .replace(/{name}/g, talent.name || 'Kandidat')
@@ -7642,7 +7643,7 @@
           let displayDate = sched.displayDate;
           let isRescheduled = sched.isRescheduled;
 
-          const resolvedMsg = resolveCandidateMessage(talent, assignedTime);
+          const resolvedMsg = resolveCandidateMessage(talent, assignedTime, displayDate);
           const sentTime = state.broadcastSentHistory[talent.id];
           const isSent = !!sentTime;
 
@@ -7975,31 +7976,49 @@
       if (autoUpdate) {
         const dateVal = assignedDate || formatDisplayDate(el.bcDateInput ? el.bcDateInput.value : '');
         const timeVal = assignedTime || 'TBD';
-        const locVal = el.bcLocationInput ? el.bcLocationInput.value.trim() : 'Online Meet';
+        const locVal = (el.bcLocationInput && el.bcLocationInput.value.trim()) ? el.bcLocationInput.value.trim() : 's.id/lokasipge';
         
+        let cleanNotes = (talent.notes || '')
+          .replace(/\[Rescheduled to:.*?\]/g, '')
+          .replace(/\[Interview Scheduled:.*?\]/g, '')
+          .trim();
+
         const scheduleRemark = `\n[Interview Scheduled: ${dateVal} ${timeVal} @ ${locVal}]`;
-        const updatedNotes = (talent.notes || '') + scheduleRemark;
+        const updatedNotes = cleanNotes ? (cleanNotes + scheduleRemark) : scheduleRemark.trim();
 
         talent.stage = 'Invited';
         talent.notes = updatedNotes;
+        talent.outreachStatus = 'WA Sent';
 
         try {
           const docId = talent.$id || (talent.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
           const packedNotes = packOutreachStatus(updatedNotes, 'WA Sent');
-          talent.outreachStatus = 'WA Sent';
-          await databases.updateDocument(
-            APPWRITE_CONFIG.databaseId,
-            APPWRITE_CONFIG.collectionId,
-            docId,
-            {
-              stage: 'Invited',
-              notes: packedNotes
-            }
-          );
-          showToast(`✅ Sent & Recorded Schedule for ${talent.name} in Appwrite!`);
+          if (typeof databases !== 'undefined' && typeof APPWRITE_CONFIG !== 'undefined') {
+            await databases.updateDocument(
+              APPWRITE_CONFIG.databaseId,
+              APPWRITE_CONFIG.collectionId,
+              docId,
+              {
+                stage: 'Invited',
+                notes: packedNotes
+              }
+            );
+          }
         } catch (err) {
-          console.warn('Auto-save schedule error:', err);
+          console.warn('Auto-save schedule error in Appwrite:', err);
         }
+
+        try {
+          if (typeof firebase !== 'undefined' && firebase.database) {
+            firebase.database().ref('/talents/' + talent.id).update({
+              stage: 'Invited',
+              notes: talent.notes,
+              outreachStatus: 'WA Sent'
+            }).catch(err => console.warn('Firebase RTDB auto-save warning:', err));
+          }
+        } catch (err) {}
+
+        showToast(`✅ Terkirim & Jadwal ${talent.name} tercatat (${dateVal} @ ${timeVal})`);
       } else {
         showToast(`Opening WhatsApp for ${talent.name}...`);
       }
