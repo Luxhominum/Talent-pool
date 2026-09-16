@@ -3371,6 +3371,12 @@
       broadcastCurrentVacancy: null,
       broadcastUserExplicitlyCleared: false,
       broadcastSentHistory: {},
+      smartScheduleMap: (() => {
+        try { return JSON.parse(localStorage.getItem('pge_smart_schedule_map') || '{}'); } catch(e) { return {}; }
+      })(),
+      smartScheduleDates: (() => {
+        try { return JSON.parse(localStorage.getItem('pge_smart_schedule_dates') || '{}'); } catch(e) { return {}; }
+      })(),
       candidateDiscussions: {},
       candidateCommentCounts: {},
       activeProfileTalentId: null,
@@ -3643,12 +3649,16 @@
       return occupiedRanges;
     }
 
-    function planSingleCandidateSlot(talentId, notify = true) {
+    async function planSingleCandidateSlot(talentId, notify = true) {
       const talent = state.talents.find(t => t.id === talentId || t.$id === talentId);
       if (!talent) return '-';
 
-      if (!state.smartScheduleMap) state.smartScheduleMap = {};
-      if (!state.smartScheduleDates) state.smartScheduleDates = {};
+      if (!state.smartScheduleMap) {
+        try { state.smartScheduleMap = JSON.parse(localStorage.getItem('pge_smart_schedule_map') || '{}'); } catch(e) { state.smartScheduleMap = {}; }
+      }
+      if (!state.smartScheduleDates) {
+        try { state.smartScheduleDates = JSON.parse(localStorage.getItem('pge_smart_schedule_dates') || '{}'); } catch(e) { state.smartScheduleDates = {}; }
+      }
 
       const baseIsoDate = (document.getElementById('bcDateInput') && document.getElementById('bcDateInput').value) 
         ? document.getElementById('bcDateInput').value 
@@ -3666,9 +3676,53 @@
         localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
       } catch(e) {}
 
+      // Persist schedule into talent.notes and cloud databases
+      const locVal = (document.getElementById('bcLocationInput') && document.getElementById('bcLocationInput').value.trim()) 
+        ? document.getElementById('bcLocationInput').value.trim() 
+        : 's.id/lokasipge';
+      
+      let cleanNotes = (talent.notes || '')
+        .replace(/\[Rescheduled to:.*?\]/g, '')
+        .replace(/\[Interview Scheduled:.*?\]/g, '')
+        .trim();
+      
+      const scheduleTag = `\n[Interview Scheduled: ${slot.displayDate} ${slot.assignedTime} @ ${locVal}]`;
+      talent.notes = (cleanNotes ? cleanNotes + scheduleTag : scheduleTag.trim());
+      talent.stage = 'Invited';
+
+      // Sync to Appwrite Cloud
+      try {
+        const docId = talent.$id || (talent.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        if (typeof databases !== 'undefined' && typeof APPWRITE_CONFIG !== 'undefined') {
+          databases.updateDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            docId,
+            {
+              notes: talent.notes,
+              stage: 'Invited'
+            }
+          ).catch(err => console.warn('Appwrite plan schedule sync error:', err));
+        }
+      } catch (err) {
+        console.warn('Appwrite plan schedule sync error:', err);
+      }
+
+      // Sync to Firebase RTDB
+      try {
+        if (typeof firebase !== 'undefined' && firebase.database) {
+          firebase.database().ref('/talents/' + talent.id).update({
+            notes: talent.notes,
+            stage: 'Invited'
+          }).catch(err => console.warn('Firebase RTDB plan schedule sync error:', err));
+        }
+      } catch (err) {
+        console.warn('Firebase RTDB plan schedule sync error:', err);
+      }
+
       if (notify) {
         renderBroadcastTable();
-        showToast('✅ Jadwal ' + slot.displayDate + ' @ ' + slot.assignedTime + ' (' + slot.duration + 'm) berhasil direncanakan untuk ' + talent.name);
+        showToast('✅ Jadwal ' + slot.displayDate + ' @ ' + slot.assignedTime + ' (' + slot.duration + 'm) tersimpan untuk ' + talent.name);
       }
       return slot.assignedTime;
     }
@@ -4295,17 +4349,24 @@
     window.handleSaveTemplateSettings = handleSaveTemplateSettings;
 
     function correctCandidateScheduleSequence(talents) {
-      if (!state.smartScheduleMap) state.smartScheduleMap = {};
+      if (!state.smartScheduleMap) {
+        try { state.smartScheduleMap = JSON.parse(localStorage.getItem('pge_smart_schedule_map') || '{}'); } catch(e) { state.smartScheduleMap = {}; }
+      }
+      if (!state.smartScheduleDates) {
+        try { state.smartScheduleDates = JSON.parse(localStorage.getItem('pge_smart_schedule_dates') || '{}'); } catch(e) { state.smartScheduleDates = {}; }
+      }
 
       talents.forEach(t => {
         const sched = getTalentAssignedSchedule(t);
         if (sched.assignedTime && sched.assignedTime !== '-') {
           state.smartScheduleMap[t.id] = sched.assignedTime;
+          if (sched.displayDate) state.smartScheduleDates[t.id] = sched.displayDate;
         }
       });
 
       try {
         localStorage.setItem('pge_smart_schedule_map', JSON.stringify(state.smartScheduleMap));
+        localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
       } catch (e) {}
     }
 
@@ -6775,8 +6836,8 @@
       let isRescheduled = false;
 
       // Priority 1: Check for Reschedule in notes
-      if (talent.outreachStatus === 'Reschedule' && talent.notes) {
-        const matches = [...talent.notes.matchAll(/\[Rescheduled to: (.*?)\]/g)];
+      if (talent.notes && (talent.outreachStatus === 'Reschedule' || talent.notes.includes('[Rescheduled to:'))) {
+        const matches = [...talent.notes.matchAll(/\[Rescheduled to:\s*(.*?)\]/g)];
         if (matches.length > 0) {
           const lastMatch = matches[matches.length - 1][1];
           const parts = lastMatch.split(' ');
@@ -6797,7 +6858,7 @@
 
       // Priority 2: Check for permanently recorded [Interview Scheduled: ...] in notes
       if (talent.notes) {
-        const schedMatches = [...talent.notes.matchAll(/\[Interview Scheduled:\s*(.*?)\s+@\s*.*?\]/g)];
+        const schedMatches = [...talent.notes.matchAll(/\[Interview Scheduled:\s*(.*?)(?:\s+@\s*.*?)?\]/g)];
         if (schedMatches.length > 0) {
           const lastSched = schedMatches[schedMatches.length - 1][1];
           const parts = lastSched.split(' ');
@@ -7287,6 +7348,13 @@
         console.warn('Cloud sync error on delete schedule:', e);
       }
 
+      if (typeof firebase !== 'undefined' && firebase.database) {
+        firebase.database().ref('/talents/' + target.id).update({
+          notes: target.notes || '',
+          stage: target.stage || 'Screening'
+        }).catch(err => console.warn('Firebase RTDB delete sync error:', err));
+      }
+
       // 4. Update UI
       if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
       if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
@@ -7313,11 +7381,19 @@
       
       const displayDate = formatDisplayDate(dateVal);
       const isForbidden = !isInterviewDay(new Date(dateVal + 'T00:00:00'));
-      const remark = `\n[Rescheduled to: ${displayDate} ${timeVal} WIB]`;
-      const updatedNotes = (target.notes || '') + remark;
+      const locVal = (document.getElementById('bcLocationInput') && document.getElementById('bcLocationInput').value.trim()) 
+        ? document.getElementById('bcLocationInput').value.trim() 
+        : 's.id/lokasipge';
+      
+      let cleanNotes = (target.notes || '')
+        .replace(/\[Rescheduled to:.*?\]/g, '')
+        .replace(/\[Interview Scheduled:.*?\]/g, '')
+        .trim();
+      
+      const remark = `\n[Interview Scheduled: ${displayDate} ${timeVal} WIB @ ${locVal}]`;
+      const updatedNotes = cleanNotes ? (cleanNotes + remark) : remark.trim();
       
       target.stage = 'Invited';
-      target.outreachStatus = 'Reschedule';
       target.notes = updatedNotes;
       
       // Update local state map and dates immediately
@@ -7331,8 +7407,6 @@
         localStorage.setItem('pge_smart_schedule_dates', JSON.stringify(state.smartScheduleDates));
       } catch (e) {}
 
-      const packedNotes = packOutreachStatus(updatedNotes, 'Reschedule');
-      
       closeRescheduleModal();
       if (typeof renderFinalScheduleAgenda === 'function') renderFinalScheduleAgenda();
       if (typeof renderBroadcastTable === 'function') renderBroadcastTable();
@@ -7349,18 +7423,27 @@
       
       try {
         const docId = target.$id || (target.id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
-        await databases.updateDocument(
-          APPWRITE_CONFIG.databaseId,
-          APPWRITE_CONFIG.collectionId,
-          docId,
-          {
-            stage: 'Invited',
-            notes: packedNotes
-          }
-        );
+        if (typeof databases !== 'undefined' && typeof APPWRITE_CONFIG !== 'undefined') {
+          await databases.updateDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            docId,
+            {
+              stage: 'Invited',
+              notes: target.notes
+            }
+          );
+        }
       } catch (e) {
         console.warn('Save error:', e);
         showToast('⚠️ Saved locally, but failed in Cloud');
+      }
+
+      if (typeof firebase !== 'undefined' && firebase.database) {
+        firebase.database().ref('/talents/' + target.id).update({
+          stage: 'Invited',
+          notes: target.notes
+        }).catch(err => console.warn('Firebase RTDB schedule update error:', err));
       }
     }
     window.submitReschedule = submitReschedule;
@@ -7504,15 +7587,6 @@
             state.smartScheduleDates[t.id] = recorded.displayDate;
             occupiedTimes.add(recorded.assignedTime);
             return;
-          }
-        }
-
-        // For pending/unplanned candidates, clean up any stale past date (e.g. Wednesday 16 Sep) or Sunday/Monday
-        if (state.smartScheduleDates && state.smartScheduleDates[t.id]) {
-          const oldD = state.smartScheduleDates[t.id];
-          if (oldD.includes('Rabu, 16 September 2026') || oldD.includes('Senin') || oldD.includes('Minggu')) {
-            delete state.smartScheduleDates[t.id];
-            delete state.smartScheduleMap[t.id];
           }
         }
 
