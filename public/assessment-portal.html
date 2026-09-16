@@ -2954,25 +2954,37 @@ if (state.resultsViewLayout === 'table') {
       // 2. Listen to /talents in Firebase RTDB as live sync
       rtdb.ref('/talents').on('value', (snapshot) => {
         const data = snapshot.val() || {};
-        const list = [];
+        const existingMap = new Map((state.talents || []).map(t => [t.id, t]));
+
         Object.keys(data).forEach(k => {
           if (data[k] && typeof data[k] === 'object') {
             const doc = data[k];
-            const parsedNotes = extractOutreachStatus(doc.notes || '');
-            const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
-            const fullNotes = parsedNotes.text || doc.notes || '';
-            const resolvedStage = resolveTalentStage(doc);
+            const existing = existingMap.get(k) || {};
+            const parsedNotes = extractOutreachStatus(doc.notes || existing.notes || '');
+            const outreach = doc.outreachStatus || existing.outreachStatus || parsedNotes.status || 'Pending';
+            const fullNotes = parsedNotes.text || doc.notes || existing.notes || '';
+            const resolvedStage = resolveTalentStage({ ...existing, ...doc, stage: doc.stage || existing.stage, notes: fullNotes });
 
-            list.push({
+            const merged = {
+              ...existing,
               ...doc,
               id: k,
+              appwriteId: existing.appwriteId || doc.appwriteId || k.toLowerCase().replace(/[^a-z0-9_-]/g, '_'),
+              name: (doc.name && doc.name.trim()) ? doc.name : (existing.name || ''),
+              role: (doc.role && doc.role.trim()) ? doc.role : (existing.role || 'Freelance Content Creator'),
+              phone: doc.phone || existing.phone || '',
+              email: doc.email || existing.email || '',
+              domisili: doc.domisili || existing.domisili || '',
+              education: doc.education || existing.education || '',
               stage: resolvedStage,
               notes: fullNotes,
               outreachStatus: outreach
-            });
+            };
+            existingMap.set(k, merged);
           }
         });
 
+        const list = Array.from(existingMap.values());
         if (list.length > 0) {
           list.sort((a, b) => {
             const numA = parseInt((a.id || '').replace(/\D/g, ''), 10) || 0;
