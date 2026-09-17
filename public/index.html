@@ -190,6 +190,71 @@
       padding: 3px 8px; border-radius: var(--radius-pill); font-weight: 500;
     }
 
+    /* Clean Minimalist Status Light Indicator */
+    .status-light-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      min-width: 10px;
+      min-height: 10px;
+      border-radius: 50%;
+      background-color: #10B981;
+      border: 1.5px solid #059669;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+      transition: all 0.3s ease;
+      cursor: help;
+      flex-shrink: 0;
+    }
+    .status-light-indicator.pulse {
+      animation: status-green-pulse 2.2s infinite;
+    }
+    @keyframes status-green-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7), 0 0 6px rgba(16, 185, 129, 0.6);
+      }
+      70% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0), 0 0 4px rgba(16, 185, 129, 0.3);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0), 0 0 6px rgba(16, 185, 129, 0.6);
+      }
+    }
+    .status-light-indicator.loading {
+      background-color: #F59E0B;
+      border-color: #D97706;
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+      animation: status-amber-pulse 1.5s infinite;
+    }
+    @keyframes status-amber-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+      70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+    /* Expanded warning / error badge when connection is abnormal */
+    .status-light-error {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      line-height: 1.2;
+    }
+    .status-light-error.fallback {
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+    }
+    .status-light-error.danger {
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1px solid #FCA5A5;
+    }
+
     .nav-actions { display: flex; align-items: center; gap: 8px; }
     .nav-cluster { display: flex; align-items: center; gap: 6px; }
     .nav-btn-group {
@@ -1931,7 +1996,7 @@
                 <div class="sidebar-brand-sub">Recruitment OS</div>
               </div>
             </a>
-            <span class="brand-badge" id="syncStatus" title="Appwrite Real-time Status" style="font-size: 10px; padding: 2px 7px;">● Live</span>
+            <span class="status-light-indicator pulse" id="syncStatus" title="Appwrite Real-time: Menghubungkan..." style="margin-right: 4px;"></span>
           </div>
         </div>
 
@@ -2273,7 +2338,7 @@
               <option value="ALL">💼 Semua Lowongan</option>
             </select>
 
-            <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; font-weight: 500; color: #166534; background: #F0FDF4; border-color: #BBF7D0;">
+            <select id="schedAttendanceFilter" class="form-select" onchange="renderFinalScheduleAgenda()" style="font-size: 12px; padding: 7px 12px; font-weight: 500;">
               <option value="CONFIRMED_ONLY" selected>✅ Hanya Konfirmasi Hadir (Confirmed &amp; Reschedule)</option>
               <option value="ALL">Semua Sesi Wawancara (Termasuk WA Sent)</option>
               <option value="TIDAK_HADIR">❌ Tidak Hadir / Batal</option>
@@ -5026,8 +5091,8 @@
           const totalWeekCount = candidatesInActiveWeek.length;
           let chipsHtml = `
             <button type="button" class="btn btn-sm" onclick="selectScheduleDayChip('ALL')"
-                    style="font-size: 11.5px; padding: 4px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.1s; ${selectedScheduleDay === 'ALL' ? 'background: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; box-shadow: 0 1px 2px rgba(37,99,235,0.2);' : 'background: #FFFFFF; color: var(--text-primary); border: 1px solid var(--border-light);'}">
-              Semua Hari <span style="font-size: 10px; margin-left: 3px; padding: 1px 5px; border-radius: 4px; background: ${selectedScheduleDay === 'ALL' ? 'rgba(255,255,255,0.25)' : '#F3F4F6'}; color: ${selectedScheduleDay === 'ALL' ? '#FFFFFF' : '#374151'};">${totalWeekCount}</span>
+                    style="font-size: 11.5px; padding: 4px 10px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.1s; ${selectedScheduleDay === 'ALL' ? 'background: #0F172A; color: #FFFFFF; border: 1px solid #0F172A;' : 'background: #FFFFFF; color: #475569; border: 1px solid var(--border-light);'}">
+              Semua Hari <span style="font-size: 10px; margin-left: 3px; padding: 1px 5px; border-radius: 4px; background: ${selectedScheduleDay === 'ALL' ? 'rgba(255,255,255,0.2)' : '#F1F5F9'}; color: ${selectedScheduleDay === 'ALL' ? '#FFFFFF' : '#475569'};">${totalWeekCount}</span>
             </button>
           `;
 
@@ -5035,15 +5100,15 @@
             const count = candidatesInActiveWeek.filter(item => item.date === day.displayDate || item.isoDate === day.iso || item.date.toLowerCase().includes(day.dayName.toLowerCase())).length;
             const isChipActive = (selectedScheduleDay === day.displayDate || selectedScheduleDay === day.iso);
 
-            let chipStyle = 'background: #FFFFFF; color: var(--text-secondary); border: 1px solid var(--border-light);';
-            let pillStyle = 'background: #F3F4F6; color: #4B5563;';
+            let chipStyle = 'background: #FFFFFF; color: #475569; border: 1px solid var(--border-light);';
+            let pillStyle = 'background: #F1F5F9; color: #475569;';
 
             if (isChipActive) {
-              chipStyle = 'background: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; font-weight: 600; box-shadow: 0 1px 2px rgba(37,99,235,0.2);';
-              pillStyle = 'background: rgba(255,255,255,0.25); color: #FFFFFF;';
+              chipStyle = 'background: #0F172A; color: #FFFFFF; border: 1px solid #0F172A; font-weight: 600;';
+              pillStyle = 'background: rgba(255,255,255,0.2); color: #FFFFFF;';
             } else if (count > 0) {
-              chipStyle = 'background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; font-weight: 600;';
-              pillStyle = 'background: #DBEAFE; color: #1E40AF;';
+              chipStyle = 'background: #F8FAFC; color: #0F172A; border: 1px solid #CBD5E1; font-weight: 600;';
+              pillStyle = 'background: #E2E8F0; color: #0F172A;';
             }
 
             chipsHtml += `
@@ -5057,8 +5122,8 @@
           dayChipsWrap.innerHTML = chipsHtml;
         } else {
           dayChipsWrap.innerHTML = `
-            <span style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); padding: 4px 8px; background: #F3F4F6; border-radius: 5px;">
-              🌐 Menampilkan Seluruh Siklus Mingguan
+            <span style="font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); padding: 4px 8px; background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 5px;">
+              🌐 Seluruh Siklus Mingguan
             </span>
           `;
         }
@@ -5088,7 +5153,7 @@
         return true;
       });
 
-      // 5. Compute Statistics & Badges
+      // 5. Compute Statistics & Badges (Clean Minimalist Micro-Metrics)
       const totalCount = filtered.length;
       const confirmedCount = filtered.filter(x => x.talent.outreachStatus === 'Confirmed').length;
       const waSentCount = filtered.filter(x => x.talent.outreachStatus === 'WA Sent').length;
@@ -5097,11 +5162,11 @@
 
       if (badgesContainer) {
         badgesContainer.innerHTML = `
-          <span style="background: #EFF6FF; color: #1E40AF; padding: 4px 10px; border-radius: 6px; border: 1px solid #BFDBFE; font-weight: 600;">Total: ${totalCount} Sesi</span>
-          <span style="background: #DCFCE7; color: #166534; padding: 4px 10px; border-radius: 6px; border: 1px solid #BBF7D0;">✅ Confirmed: ${confirmedCount}</span>
-          <span style="background: #FEF3C7; color: #B45309; padding: 4px 10px; border-radius: 6px; border: 1px solid #FDE68A;">🔄 Rescheduled: ${rescheduleCount}</span>
-          ${tidakHadirCount > 0 ? `<span style="background: #FEE2E2; color: #991B1B; padding: 4px 10px; border-radius: 6px; border: 1px solid #FECACA;">❌ Tidak Hadir: ${tidakHadirCount}</span>` : ''}
-          ${attendanceFilter === 'ALL' ? `<span style="background: #DBEAFE; color: #1D4ED8; padding: 4px 10px; border-radius: 6px; border: 1px solid #BFDBFE;">💬 WA Sent: ${waSentCount}</span>` : ''}
+          <span style="background: #F8FAFC; color: #334155; padding: 4px 9px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600;">Total: ${totalCount} Sesi</span>
+          <span style="background: #F8FAFC; color: #166534; padding: 4px 9px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 500;"><span style="color: #16A34A;">●</span> Confirmed: ${confirmedCount}</span>
+          ${rescheduleCount > 0 ? `<span style="background: #F8FAFC; color: #B45309; padding: 4px 9px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 500;"><span style="color: #D97706;">●</span> Rescheduled: ${rescheduleCount}</span>` : ''}
+          ${tidakHadirCount > 0 ? `<span style="background: #F8FAFC; color: #991B1B; padding: 4px 9px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 500;"><span style="color: #DC2626;">●</span> Tidak Hadir: ${tidakHadirCount}</span>` : ''}
+          ${attendanceFilter === 'ALL' ? `<span style="background: #F8FAFC; color: #475569; padding: 4px 9px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 500;"><span style="color: #3B82F6;">●</span> WA Sent: ${waSentCount}</span>` : ''}
         `;
       }
 
@@ -5133,9 +5198,9 @@
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 48px 20px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; color: var(--text-muted);">
-            <div style="font-size: 36px; margin-bottom: 10px;">📅</div>
-            <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">Tidak ada jadwal interview untuk minggu / hari yang dipilih.</div>
-            <div style="font-size: 13px; margin-top: 4px;">Gunakan navigasi [◀] [▶] untuk melihat minggu lain atau klik tombol reset di bawah.</div>
+            <div style="font-size: 32px; margin-bottom: 8px;">📅</div>
+            <div style="font-size: 14.5px; font-weight: 600; color: #0F172A;">Tidak ada jadwal interview untuk minggu / hari yang dipilih.</div>
+            <div style="font-size: 12.5px; margin-top: 4px; color: #64748B;">Gunakan navigasi [◀] [▶] untuk melihat minggu lain atau klik tombol reset di bawah.</div>
             <button type="button" class="btn btn-secondary btn-sm" onclick="selectedScheduleDay='ALL'; document.getElementById('schedSearchInput').value=''; document.getElementById('schedRoleFilter').value='ALL'; renderFinalScheduleAgenda();" style="margin-top: 14px; cursor: pointer;">
               Tampilkan Seluruh Hari Minggu Ini
             </button>
@@ -5149,16 +5214,17 @@
         const items = groups[date];
         htmlContent += `
           <div style="margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #EEF2FF; border-left: 4px solid #4F46E5; border-radius: 8px; margin-bottom: 12px;">
-              <div style="font-weight: 700; font-size: 13.5px; color: #3730A3; display: flex; align-items: center; gap: 8px;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <!-- Minimalist Date Section Header -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0 8px 0; border-bottom: 1px solid #E2E8F0; margin-bottom: 12px;">
+              <div style="font-weight: 700; font-size: 14px; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 ${escapeHtml(date)}
               </div>
-              <span style="font-size: 11px; font-family: var(--font-mono); color: #4338CA; font-weight: 600; background: #E0E7FF; padding: 3px 10px; border-radius: 5px;">
+              <span style="font-size: 11px; font-family: var(--font-mono); color: #64748B; font-weight: 600; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 2px 8px; border-radius: 4px;">
                 ${items.length} Kandidat
               </span>
             </div>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
         `;
 
         items.forEach(item => {
@@ -5169,52 +5235,57 @@
           const phone = formatToInternationalPhone(t.phone);
           const status = t.outreachStatus || 'Pending';
           const cleanLoc = (item.location || 's.id/lokasipge').replace(/^https?:\/\//, '');
-          const isMarketplace = (t.role || '').toLowerCase().includes('marketplace');
 
           htmlContent += `
-            <div style="display: grid; grid-template-columns: 170px 1fr auto; align-items: center; gap: 18px; padding: 14px 18px; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 9px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: transform 0.15s ease, box-shadow 0.15s ease;"
-                 onmouseenter="this.style.boxShadow='0 3px 8px rgba(0,0,0,0.04)';"
-                 onmouseleave="this.style.boxShadow='0 1px 2px rgba(0,0,0,0.02)';">
+            <div style="display: grid; grid-template-columns: 160px 1fr auto; align-items: center; gap: 16px; padding: 12px 16px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: all 0.15s ease;"
+                 onmouseenter="this.style.borderColor='#CBD5E1'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.03)';"
+                 onmouseleave="this.style.borderColor='#E2E8F0'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.02)';">
               
-              <!-- Time & Duration Pill -->
+              <!-- Time Column (Clean Neutral Mono) -->
               <div>
                 ${hasConflict ? `
                   <div style="display: inline-flex; flex-direction: column; gap: 2px;">
-                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 6px 10px; border-radius: 6px; background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;" title="Jadwal bentrok dengan: ${conflictWithNames}">
-                      ⚠️ ${escapeHtml(item.timeRangeStr)}
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 700; padding: 5px 8px; border-radius: 6px; background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA;" title="Jadwal bentrok dengan: ${conflictWithNames}">
+                      ⚠️ ${escapeHtml(item.startStr)} – ${escapeHtml(item.endStr)}
                     </span>
                     <span style="font-size: 10px; color: #DC2626; font-weight: 600;">Jadwal Bentrok</span>
                   </div>
                 ` : `
-                  <span style="display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 6px; background: ${item.isRescheduled ? '#FEF3C7' : (isMarketplace ? '#EEF2FF' : '#F0FDF4')}; color: ${item.isRescheduled ? '#B45309' : (isMarketplace ? '#312E81' : '#166534')}; border: 1px solid ${item.isRescheduled ? '#FDE68A' : (isMarketplace ? '#C7D2FE' : '#BBF7D0')};">
-                    ${item.isRescheduled ? '🔄 ' : (isMarketplace ? '💼 ' : '⏰ ')}${escapeHtml(item.timeRangeStr)}
-                  </span>
+                  <div style="display: inline-flex; align-items: baseline; gap: 6px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: #1E293B; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 5px 9px; border-radius: 6px;">
+                    <span>${escapeHtml(item.startStr)} – ${escapeHtml(item.endStr)}</span>
+                    <span style="font-size: 10.5px; color: #64748B; font-weight: 400;">${item.duration}m</span>
+                  </div>
                 `}
               </div>
 
-              <!-- Candidate Info & Location -->
+              <!-- Candidate Info & Metadata (Typographic Hierarchy) -->
               <div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                  <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); background: #F3F4F6; padding: 2px 6px; border-radius: 4px; flex-shrink: 0;">${t.id}</span>
-                  <span style="font-size: 14.5px; font-weight: 600; color: var(--text-primary); cursor: pointer; text-decoration: underline;" onclick="openCandidateProfileModal('${t.id}')">
+                  <span style="font-family: var(--font-mono); font-size: 11px; color: #64748B; font-weight: 500;">${t.id}</span>
+                  <span style="font-size: 14.5px; font-weight: 600; color: #0F172A; cursor: pointer;"
+                        onmouseenter="this.style.textDecoration='underline';"
+                        onmouseleave="this.style.textDecoration='none';"
+                        onclick="openCandidateProfileModal('${t.id}')">
                     ${escapeHtml(t.name)}
                   </span>
-                  <span class="stage-select-pill stage-${(t.stage || 'invited').toLowerCase()}" style="font-size: 10px; padding: 2px 7px; flex-shrink: 0;">${t.stage || 'Invited'}</span>
-                  ${item.isRescheduled ? '<span style="font-size: 10px; font-weight: 600; background: #FEF3C7; color: #B45309; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; white-space: nowrap;">Rescheduled</span>' : ''}
+                  <span style="font-size: 10.5px; font-weight: 500; color: #475569; background: #F1F5F9; border: 1px solid #E2E8F0; padding: 1px 6px; border-radius: 4px;">
+                    ${t.stage || 'Invited'}
+                  </span>
+                  ${item.isRescheduled ? '<span style="font-size: 10px; font-weight: 600; color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A; padding: 1px 6px; border-radius: 4px;">Rescheduled</span>' : ''}
                 </div>
                 ${hasConflict ? `<div style="font-size: 11px; color: #DC2626; font-weight: 600; margin-top: 3px;">⚠️ Jadwal bertabrakan dengan: ${conflictWithNames}</div>` : ''}
-                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                  <span style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;">${escapeHtml(t.role || 'Freelance')}</span>
+                <div style="font-size: 12px; color: #64748B; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span style="color: #334155; font-weight: 500;">${escapeHtml(t.role || 'Freelance')}</span>
                   <span>•</span>
-                  <span>📍 <a href="https://${escapeHtml(cleanLoc)}" target="_blank" style="color: #2563EB; font-weight: 500; text-decoration: underline;">${escapeHtml(cleanLoc)}</a></span>
+                  <span>📍 <a href="https://${escapeHtml(cleanLoc)}" target="_blank" style="color: #2563EB; text-decoration: underline;">${escapeHtml(cleanLoc)}</a></span>
                   <span>•</span>
                   <span>🏠 ${escapeHtml(t.domisili || '-')}</span>
                 </div>
               </div>
 
-              <!-- Status Dropdown & Actions -->
+              <!-- Status Dropdown & Minimalist Actions -->
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-                <select class="outreach-status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${t.id}', this.value); setTimeout(renderFinalScheduleAgenda, 100);" style="font-size: 11px; padding: 5px 18px 5px 10px; border-radius: 6px;">
+                <select class="outreach-status-pill status-${status.toLowerCase().replace(/\s+/g, '-')}" onchange="updateOutreachStatus('${t.id}', this.value); setTimeout(renderFinalScheduleAgenda, 100);" style="font-size: 11.5px; padding: 5px 10px; border-radius: 6px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #334155; font-weight: 500;">
                   <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
                   <option value="WA Sent" ${status === 'WA Sent' ? 'selected' : ''}>💬 WA Sent</option>
                   <option value="Confirmed" ${status === 'Confirmed' ? 'selected' : ''}>✅ Confirmed</option>
@@ -5224,14 +5295,14 @@
                 </select>
 
                 ${phone ? `
-                  <a href="https://wa.me/${phone.replace(/\+/g, '')}" target="_blank" class="btn btn-secondary btn-sm" title="Buka WhatsApp" style="padding: 5px 9px; display: inline-flex; align-items: center; gap: 4px; color: #16A34A; font-weight: 500; text-decoration: none; border-radius: 6px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  <a href="https://wa.me/${phone.replace(/\+/g, '')}" target="_blank" class="btn btn-secondary btn-sm" title="Buka WhatsApp" style="padding: 5px 9px; font-size: 11.5px; display: inline-flex; align-items: center; gap: 4px; color: #334155; border: 1px solid #E2E8F0; background: #FFFFFF; font-weight: 500; text-decoration: none; border-radius: 6px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     Chat ↗
                   </a>
                 ` : ''}
 
-                <button type="button" class="btn btn-primary btn-sm" onclick="openPostInterviewModal('${t.id}')" title="Evaluasi & sesuaikan kandidat pasca-interview" style="padding: 5px 11px; font-size: 11.5px; background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; border-radius: 6px;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <button type="button" class="btn btn-sm" onclick="openPostInterviewModal('${t.id}')" title="Evaluasi & sesuaikan kandidat pasca-interview" style="padding: 5px 12px; font-size: 11.5px; background: #0F172A; border: 1px solid #0F172A; color: #FFFFFF; font-weight: 500; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; border-radius: 6px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                   Evaluasi
                 </button>
               </div>
@@ -5704,11 +5775,12 @@
     async function loadAppwriteTalents(isSilent = false) {
       if (!state.currentUser) return;
 
-      // Only show loading indicator on initial cold load, not during background syncs
+      // Only show subtle loading indicator on initial cold load, not during background syncs
       if (el.syncStatus && !isSilent && (!state.talents || state.talents.length === 0)) {
-        el.syncStatus.textContent = 'Loading Appwrite... ⏳';
-        el.syncStatus.style.background = 'var(--pastel-yellow-bg)';
-        el.syncStatus.style.color = 'var(--pastel-yellow-text)';
+        el.syncStatus.className = 'status-light-indicator loading';
+        el.syncStatus.textContent = '';
+        el.syncStatus.removeAttribute('style');
+        el.syncStatus.title = 'Menghubungkan ke Appwrite Cloud... ⏳';
       }
 
       try {
@@ -5788,11 +5860,10 @@
 
         if (el.syncStatus) {
           const activeCount = state.talents.filter(t => t.stage !== 'Archived').length;
-          el.syncStatus.textContent = `● Appwrite Cloud (${activeCount} Active / ${state.talents.length} Total)`;
-          el.syncStatus.style.background = 'var(--pastel-green-bg)';
-          el.syncStatus.style.color = 'var(--pastel-green-text)';
-          el.syncStatus.style.borderColor = 'var(--pastel-green-border)';
-          el.syncStatus.title = 'Terhubung langsung ke Appwrite Cloud Database';
+          el.syncStatus.className = 'status-light-indicator pulse';
+          el.syncStatus.textContent = '';
+          el.syncStatus.removeAttribute('style');
+          el.syncStatus.title = `Appwrite Cloud: Normal (${activeCount} Active / ${state.talents.length} Total)`;
         }
 
         // Cancel retry interval if back online
@@ -5815,10 +5886,9 @@
           await loadFirebaseTalentsFallback();
           if (el.syncStatus) {
             const activeCount = state.talents.filter(t => t.stage !== 'Archived').length;
+            el.syncStatus.className = 'status-light-error fallback';
+            el.syncStatus.removeAttribute('style');
             el.syncStatus.innerHTML = `⚠️ Firebase Fallback (${activeCount} Active)`;
-            el.syncStatus.style.background = '#FEF3C7';
-            el.syncStatus.style.color = '#B45309';
-            el.syncStatus.style.borderColor = '#FDE68A';
             el.syncStatus.title = isPaused
               ? 'Appwrite Cloud dijeda karena tidak ada aktivitas. Klik banner untuk memulihkan di Appwrite Console.'
               : 'Gagal menghubungi Appwrite Cloud. Berjalan di cadangan Firebase RTDB.';
@@ -5826,9 +5896,12 @@
         } catch (fbErr) {
           console.error('Firebase fallback load error:', fbErr);
           if (el.syncStatus) {
-            el.syncStatus.textContent = isPaused ? '⚠️ Appwrite Paused' : 'Connection Error';
-            el.syncStatus.style.background = 'var(--pastel-red-bg)';
-            el.syncStatus.style.color = 'var(--pastel-red-text)';
+            el.syncStatus.className = 'status-light-error danger';
+            el.syncStatus.removeAttribute('style');
+            el.syncStatus.innerHTML = isPaused ? '⚠️ Appwrite Paused' : '❌ Connection Error';
+            el.syncStatus.title = isPaused
+              ? 'Appwrite Cloud sedang dijeda. Buka Appwrite Console untuk melanjutkan.'
+              : 'Koneksi gagal ke server Appwrite maupun Firebase.';
           }
         }
 
