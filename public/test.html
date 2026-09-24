@@ -1976,14 +1976,92 @@
         }
         if (data.tabViolations) state.tabViolations = data.tabViolations;
 
-        // Update token state to in_progress
+        // Merge with offline LocalStorage mirror if exists
+        try {
+          const localSaved = localStorage.getItem('pge_assessment_' + token);
+          if (localSaved) {
+            const parsed = JSON.parse(localSaved);
+            if (parsed && parsed.answers) {
+              if (parsed.answers.bigFive) state.answers.bigFive = { ...parsed.answers.bigFive, ...state.answers.bigFive };
+              if (parsed.answers.disc) state.answers.disc = { ...parsed.answers.disc, ...state.answers.disc };
+              if (parsed.answers.cognitive) state.answers.cognitive = { ...parsed.answers.cognitive, ...state.answers.cognitive };
+            }
+            if (parsed && parsed.tabViolations && parsed.tabViolations > state.tabViolations) {
+              state.tabViolations = parsed.tabViolations;
+            }
+          }
+        } catch (e) {
+          console.warn('Local backup read error:', e);
+        }
+
+        // Update token state to in_progress in cloud
         rtdb.ref('/assessmentTokens/' + token + '/status').set('in_progress');
 
-        renderWelcomeScreen();
+        // Check if there is existing progress to auto-resume seamlessly
+        const b5Count = Object.keys(state.answers.bigFive || {}).length;
+        const discCount = Object.keys(state.answers.disc || {}).length;
+        const cogCount = Object.keys(state.answers.cognitive || {}).length;
+        const hasProgress = (b5Count > 0 || discCount > 0 || cogCount > 0);
+
+        if (hasProgress) {
+          autoResumeSession(b5Count, discCount, cogCount);
+        } else {
+          renderWelcomeScreen();
+        }
       }).catch(err => {
         console.error('Validation error:', err);
         renderOtpScreen('Terjadi kendala koneksi ke server. Silakan coba lagi.');
       });
+    }
+
+    function saveLocalBackup() {
+      try {
+        if (state.token) {
+          localStorage.setItem('pge_assessment_' + state.token, JSON.stringify({
+            answers: state.answers,
+            tabViolations: state.tabViolations,
+            updatedAt: Date.now()
+          }));
+        }
+      } catch (e) {
+        console.warn('LocalStorage save error:', e);
+      }
+    }
+
+    function autoResumeSession(b5Count, discCount, cogCount) {
+      if (b5Count < QUESTIONS.length) {
+        startBigFive();
+        showAutoResumeBanner('Bagian 1A: Karakter Kerja (Big Five)', b5Count, QUESTIONS.length);
+      } else if (discCount < DISC_QUESTIONS.length) {
+        startDisc();
+        showAutoResumeBanner('Bagian 1B: Gaya Kolaborasi (DISC)', discCount, DISC_QUESTIONS.length);
+      } else if (cogCount < COGNITIVE_QUESTIONS.length) {
+        startCognitive();
+        showAutoResumeBanner('Bagian 2: Penalaran Logika & Analisis', cogCount, COGNITIVE_QUESTIONS.length);
+      } else {
+        submitAllAssessments();
+      }
+    }
+
+    function showAutoResumeBanner(sectionTitle, answered, total) {
+      setTimeout(() => {
+        const card = document.querySelector('.portal-card');
+        if (!card) return;
+        const banner = document.createElement('div');
+        banner.style.cssText = 'background: rgba(16, 185, 129, 0.12); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #34D399; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; animation: fadeIn 0.3s ease;';
+        banner.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">🔄</span>
+            <div>
+              <strong>Melanjutkan Sesi:</strong> Jawaban sebelumnya tersimpan otomatis.
+              <div style="font-size: 11px; opacity: 0.85;">${escapeHtml(sectionTitle)} — ${answered}/${total} terjawab</div>
+            </div>
+          </div>
+          <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#34D399;font-size:16px;cursor:pointer;padding:0 4px;" title="Tutup">&times;</button>
+        `;
+        card.insertBefore(banner, card.firstChild);
+        setTimeout(() => { if (banner && banner.parentElement) banner.remove(); }, 6000);
+      }, 50);
     }
 
     function renderAlreadyCompletedScreen(data) {
@@ -2127,6 +2205,7 @@
 
     function selectBigFiveAnswer(qid, val) {
       state.answers.bigFive[qid] = val;
+      saveLocalBackup();
       // Realtime Autosave
       if (state.token) {
         rtdb.ref('/assessmentTokens/' + state.token + '/answers/bigFive/' + qid).set(val);
@@ -2264,7 +2343,8 @@
         }
       }
 
-      // Sync to cloud
+      // Sync to cloud & local backup
+      saveLocalBackup();
       if (state.token) {
         rtdb.ref('/assessmentTokens/' + state.token + '/answers/disc/' + qid).set(cur);
       }
@@ -2316,7 +2396,15 @@
     /* ---------------------------------------------------- */
     function startCognitive() {
       state.currentStage = 'cognitive';
-      state.currentIndex = 0;
+      // Find first unanswered cognitive question or 0
+      let nextIdx = 0;
+      for (let i = 0; i < COGNITIVE_QUESTIONS.length; i++) {
+        if (state.answers.cognitive[COGNITIVE_QUESTIONS[i].id] === undefined) {
+          nextIdx = i;
+          break;
+        }
+      }
+      state.currentIndex = nextIdx;
       renderCognitiveQuestion();
     }
 
@@ -2389,6 +2477,7 @@
     function selectCognitiveAnswer(qid, optValue) {
       if (state.timerInterval) clearInterval(state.timerInterval);
       state.answers.cognitive[qid] = optValue;
+      saveLocalBackup();
 
       // Sync to cloud
       if (state.token) {
@@ -2447,6 +2536,9 @@
           tabViolations: state.tabViolations || 0
         });
       }).then(() => {
+        try {
+          if (state.token) localStorage.removeItem('pge_assessment_' + state.token);
+        } catch (e) {}
         renderThankYouScreen(bigFiveResults, discResults);
       }).catch(err => {
         console.error('Submit error:', err);
