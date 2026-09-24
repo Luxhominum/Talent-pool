@@ -255,6 +255,33 @@
       border: 1px solid #FCA5A5;
     }
 
+    /* Multi-Job Application Awareness Badge */
+    .multi-job-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      text-decoration: none;
+      line-height: 1.2;
+    }
+    .multi-job-badge:hover {
+      background: #DBEAFE;
+      border-color: #93C5FD;
+      color: #1E40AF;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+    }
+
     .nav-actions { display: flex; align-items: center; gap: 8px; }
     .nav-cluster { display: flex; align-items: center; gap: 6px; }
     .nav-btn-group {
@@ -3520,6 +3547,75 @@
       return str.toLowerCase().trim();
     }
 
+    /* Multi-Job Application Resolver */
+    function getCandidateApplications(talent) {
+      if (!talent) return [];
+      const normPhone = formatToInternationalPhone(talent.phone);
+      const normEmail = cleanEmail(talent.email);
+      const hasPhone = Boolean(normPhone && normPhone.length > 7);
+      const hasEmail = Boolean(normEmail && normEmail.length > 4);
+
+      if (!hasPhone && !hasEmail) {
+        return [talent];
+      }
+
+      const related = (state.talents || []).filter(other => {
+        if (other.id === talent.id) return true;
+        const oPhone = formatToInternationalPhone(other.phone);
+        const oEmail = cleanEmail(other.email);
+        if (hasPhone && oPhone && normPhone === oPhone) return true;
+        if (hasEmail && oEmail && normEmail === oEmail) return true;
+        return false;
+      });
+
+      return related.length > 0 ? related : [talent];
+    }
+    window.getCandidateApplications = getCandidateApplications;
+
+    function prefillCandidateFromExisting(existingId) {
+      const existing = (state.talents || []).find(t => t.id === existingId || t.$id === existingId);
+      if (!existing) return;
+
+      const nameInput = document.getElementById('inputName');
+      const emailInput = document.getElementById('inputEmail');
+      const domInput = document.getElementById('inputDomisili');
+      const eduInput = document.getElementById('inputEducation');
+      const salaryInput = document.getElementById('inputSalary');
+      const cvInput = document.getElementById('inputCvUrl');
+
+      if (nameInput && !nameInput.value.trim()) nameInput.value = existing.name || '';
+      if (emailInput && !emailInput.value.trim()) emailInput.value = existing.email || '';
+      if (domInput && !domInput.value.trim()) domInput.value = existing.domisili || '';
+      if (eduInput && !eduInput.value.trim()) eduInput.value = existing.education || '';
+      if (salaryInput && (!salaryInput.value.trim() || salaryInput.value === 'Standard Uang Saku')) {
+        salaryInput.value = existing.expectedSalary || 'Standard Uang Saku';
+      }
+
+      // Copy CV URL if present
+      if (existing.cvUrl && cvInput && !cvInput.value.trim()) {
+        cvInput.value = existing.cvUrl;
+        if (typeof renderAttachedCvCard === 'function') {
+          renderAttachedCvCard(existing.cvUrl);
+        }
+      }
+
+      // Copy Portfolio items if present
+      if (existing.portfolioItems && existing.portfolioItems.length > 0 && state.stagedPortfolioItems.length === 0) {
+        state.stagedPortfolioItems = JSON.parse(JSON.stringify(existing.portfolioItems));
+        if (typeof renderPortfolioChips === 'function') {
+          renderPortfolioChips();
+        }
+      } else if (existing.portfolioUrl && state.stagedPortfolioItems.length === 0) {
+        state.stagedPortfolioItems = [{ name: 'Existing Portfolio', url: existing.portfolioUrl, type: 'document' }];
+        if (typeof renderPortfolioChips === 'function') {
+          renderPortfolioChips();
+        }
+      }
+
+      showToast(`📋 Berhasil menyalin profil & portofolio dari [${existing.id}] ${existing.name}!`);
+    }
+    window.prefillCandidateFromExisting = prefillCandidateFromExisting;
+
     function normalizeExternalUrl(rawUrl) {
       if (!rawUrl || typeof rawUrl !== 'string') return '';
       let url = rawUrl.trim();
@@ -6522,6 +6618,16 @@
           </select>
         `;
 
+        const relatedApps = getCandidateApplications(talent);
+        const hasMultipleJobs = relatedApps.length > 1;
+        const otherApps = relatedApps.filter(a => a.id !== talent.id);
+        const multiJobTooltip = hasMultipleJobs 
+          ? `Kandidat ini juga melamar untuk: ${otherApps.map(a => a.role + ' [' + (a.stage || 'Prospect') + ']').join(', ')}` 
+          : '';
+        const multiJobBadge = hasMultipleJobs 
+          ? `<span class="multi-job-badge" onclick="event.stopPropagation(); openCandidateProfileModal('${talent.id}', 'applications')" title="${escapeHtml(multiJobTooltip)}">🔗 ${relatedApps.length} Posisi</span>` 
+          : '';
+
         return `
           <div class="talent-card ${isCompared ? 'selected-compare' : ''}" onclick="handleCandidateCardClick('${talent.id}')">
             <div>
@@ -6529,7 +6635,10 @@
                 <div>
                   <div class="talent-id">${talent.id}</div>
                   <div class="talent-name">${escapeHtml(talent.name)}</div>
-                  <div class="talent-role">${escapeHtml(talent.role || 'Freelance Content Creator')}</div>
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                    <span class="talent-role">${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
+                    ${multiJobBadge}
+                  </div>
                 </div>
                 <div class="rating-badge">★ ${(talent.overallRating || 3).toFixed(1)}</div>
               </div>
@@ -6597,6 +6706,7 @@
         const discussCount = state.candidateCommentCounts[talent.id] || 0;
         const discussTableHtml = `<span class="doc-badge doc-badge-discuss ${discussCount > 0 ? 'has-comments' : ''}" onclick="event.stopPropagation(); openCandidateDiscussion('${talent.id}')">💬 ${discussCount > 0 ? discussCount : 'Diskusi'}</span>`;
 
+        // Interactive stage selector
         const stageSelectTableHtml = `
           <select class="stage-select-pill ${stageClass}" 
                   onchange="updateCandidateStage('${talent.id}', this.value, event)" 
@@ -6604,6 +6714,16 @@
             ${STAGES.map(st => `<option value="${st}" ${(talent.stage || 'Prospect') === st ? 'selected' : ''}>${st}</option>`).join('')}
           </select>
         `;
+
+        const relatedApps = getCandidateApplications(talent);
+        const hasMultipleJobs = relatedApps.length > 1;
+        const otherApps = relatedApps.filter(a => a.id !== talent.id);
+        const multiJobTooltip = hasMultipleJobs 
+          ? `Kandidat ini juga melamar untuk: ${otherApps.map(a => a.role + ' [' + (a.stage || 'Prospect') + ']').join(', ')}` 
+          : '';
+        const multiJobBadge = hasMultipleJobs 
+          ? `<span class="multi-job-badge" onclick="event.stopPropagation(); openCandidateProfileModal('${talent.id}', 'applications')" title="${escapeHtml(multiJobTooltip)}">🔗 ${relatedApps.length} Posisi</span>` 
+          : '';
 
         return `
           <tr onclick="handleCandidateCardClick('${talent.id}')" style="cursor: pointer;" class="${isCompared ? 'selected-compare' : ''}">
@@ -6613,7 +6733,10 @@
             <td style="font-family: var(--font-mono); font-weight: 500;">${talent.id}</td>
             <td>
               <div style="font-weight: 600;">${escapeHtml(talent.name)}</div>
-              <div style="font-size: 12px; color: var(--text-secondary);">${escapeHtml(talent.role || 'Freelance')}</div>
+              <div style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px;">
+                <span>${escapeHtml(talent.role || 'Freelance')}</span>
+                ${multiJobBadge}
+              </div>
             </td>
             <td>${stageSelectTableHtml}</td>
             <td>${talent.experienceLevel || 'Junior'}</td>
@@ -6647,6 +6770,16 @@
         const stageTalents = state.filteredTalents.filter(t => t.stage === stage);
         const cardsHtml = stageTalents.map(t => {
           const discussCount = state.candidateCommentCounts[t.id] || 0;
+          const relatedApps = getCandidateApplications(t);
+          const hasMultipleJobs = relatedApps.length > 1;
+          const otherApps = relatedApps.filter(a => a.id !== t.id);
+          const multiJobTooltip = hasMultipleJobs 
+            ? `Kandidat ini juga melamar untuk: ${otherApps.map(a => a.role + ' [' + (a.stage || 'Prospect') + ']').join(', ')}` 
+            : '';
+          const multiJobBadge = hasMultipleJobs 
+            ? `<span class="multi-job-badge" style="font-size: 9px; padding: 1px 5px;" onclick="event.stopPropagation(); openCandidateProfileModal('${t.id}', 'applications')" title="${escapeHtml(multiJobTooltip)}">🔗 ${relatedApps.length}</span>` 
+            : '';
+
           return `
           <div class="kanban-card" onclick="handleCandidateCardClick('${t.id}')">
             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
@@ -6654,7 +6787,10 @@
               <span class="rating-badge" style="font-size: 9px; padding: 2px 5px;">★ ${(t.overallRating || 3).toFixed(1)}</span>
             </div>
             <div style="font-weight: 600; font-size: 13px;">${escapeHtml(t.name)}</div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(t.role || 'Content Creator')}</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(t.role || 'Content Creator')}</span>
+              ${multiJobBadge}
+            </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 6px;">
               <select class="stage-select-pill stage-${(t.stage || 'prospect').toLowerCase()}" 
                       style="flex: 1; font-size: 10px; padding: 2px 18px 2px 6px;"
@@ -8118,16 +8254,20 @@
       const btnPorto = document.getElementById('profTabBtnPorto');
       const btnDiscuss = document.getElementById('profTabBtnDiscuss');
       const btnAssess = document.getElementById('profTabBtnAssess');
+      const btnApps = document.getElementById('profTabBtnApps');
       const contentPorto = document.getElementById('profTabPortoContent');
       const contentDiscuss = document.getElementById('profTabDiscussContent');
       const contentAssess = document.getElementById('profTabAssessContent');
+      const contentApps = document.getElementById('profTabAppsContent');
 
       if (btnPorto) btnPorto.classList.toggle('active', tabName === 'portfolio');
       if (btnDiscuss) btnDiscuss.classList.toggle('active', tabName === 'discussion');
       if (btnAssess) btnAssess.classList.toggle('active', tabName === 'assessment');
+      if (btnApps) btnApps.classList.toggle('active', tabName === 'applications');
 
       if (contentPorto) contentPorto.style.display = tabName === 'portfolio' ? 'flex' : 'none';
       if (contentAssess) contentAssess.style.display = tabName === 'assessment' ? 'flex' : 'none';
+      if (contentApps) contentApps.style.display = tabName === 'applications' ? 'flex' : 'none';
 
       if (contentDiscuss) {
         contentDiscuss.style.display = tabName === 'discussion' ? 'flex' : 'none';
@@ -9021,6 +9161,9 @@ function renderPentagonMatrixSvg(dimensions) {
           </div>`;
       }).join('');
 
+      const relatedApps = getCandidateApplications(talent);
+      const hasMultipleJobs = relatedApps.length > 1;
+
       leftCol.innerHTML = `
         <div>
           <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">
@@ -9030,6 +9173,26 @@ function renderPentagonMatrixSvg(dimensions) {
             <span>💼 <strong>Role:</strong></span>
             <span>${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
           </div>
+          ${hasMultipleJobs ? `
+            <div style="margin-top: 6px; margin-bottom: 6px; padding: 10px 12px; background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 8px;">
+              <div style="font-size: 11px; font-weight: 700; color: #1E40AF; display: flex; align-items: center; justify-content: space-between;">
+                <span style="display: flex; align-items: center; gap: 4px;"><span>🔗</span> Melamar ${relatedApps.length} Posisi:</span>
+                <span style="font-family: var(--font-mono); font-size: 9.5px; background: #DBEAFE; color: #1D4ED8; font-weight: 700; padding: 1px 6px; border-radius: 4px;">Multi-Job</span>
+              </div>
+              <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 5px;">
+                ${relatedApps.map(app => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; padding: 4px 8px; background: ${app.id === talent.id ? '#DBEAFE' : '#FFFFFF'}; border-radius: 6px; border: 1px solid ${app.id === talent.id ? '#93C5FD' : '#E2E8F0'}; cursor: pointer;" onclick="openCandidateProfileModal('${app.id}', 'applications')" title="Beralih ke lamaran ${escapeHtml(app.role)}">
+                    <span style="font-weight: 600; color: ${app.id === talent.id ? '#1E40AF' : '#374151'};">
+                      ${app.id === talent.id ? '▶ ' : ''}${escapeHtml(app.role || 'Role')} (${app.id})
+                    </span>
+                    <span class="stage-badge stage-${(app.stage || 'prospect').toLowerCase()}" style="font-size: 9px; padding: 1px 6px;">
+                      ${app.stage || 'Prospect'}
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
           <div class="profile-meta-item">
             <span>📈 <strong>Level:</strong></span>
             <span>${escapeHtml(talent.experienceLevel || 'Junior')}</span>
@@ -9211,6 +9374,9 @@ function renderPentagonMatrixSvg(dimensions) {
           <button type="button" id="profTabBtnDiscuss" class="profile-tab-btn ${state.activeProfileTab === 'discussion' ? 'active' : ''}" onclick="switchProfileTab('discussion')">
             💬 Tim Diskusi &amp; Evaluasi (<span id="profModalDiscussCount">${commentCount}</span>)
           </button>
+          <button type="button" id="profTabBtnApps" class="profile-tab-btn ${state.activeProfileTab === 'applications' ? 'active' : ''}" onclick="switchProfileTab('applications')">
+            🔗 Posisi &amp; Lamaran (${relatedApps.length})
+          </button>
         </div>
 
         <!-- Tab 1: Portfolio & CV Content -->
@@ -9239,7 +9405,7 @@ function renderPentagonMatrixSvg(dimensions) {
           ${renderAssessmentReportDashboardHtml(talent, assessment)}
         </div>
 
-        <!-- Tab 2: Candidate Discussion & Team Evaluation Content -->
+        <!-- Tab 3: Candidate Discussion & Team Evaluation Content -->
         <div id="profTabDiscussContent" class="discussion-container" style="display: ${state.activeProfileTab === 'discussion' ? 'flex' : 'none'};">
           <!-- Preset Quick Decision Pills Bar -->
           <div>
@@ -9268,6 +9434,62 @@ function renderPentagonMatrixSvg(dimensions) {
               </button>
             </div>
           </form>
+        </div>
+
+        <!-- Tab 4: Multi-Job Applications Content -->
+        <div id="profTabAppsContent" style="display: ${state.activeProfileTab === 'applications' ? 'flex' : 'none'}; flex-direction: column; gap: 16px;">
+          <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 10px; padding: 14px 16px;">
+            <div style="font-size: 13px; font-weight: 700; color: #1E40AF; display: flex; align-items: center; gap: 6px;">
+              <span>👥</span> 360° Multi-Job Application History
+            </div>
+            <div style="font-size: 12px; color: #1E3A8A; margin-top: 4px; line-height: 1.5;">
+              Kandidat ini memiliki <strong>${relatedApps.length} berkas lamaran</strong> terdaftar dengan WhatsApp <strong>${formatToInternationalPhone(talent.phone) || '-'}</strong> ${talent.email ? `atau email <strong>${talent.email}</strong>` : ''}. Seluruh berkas (CV &amp; Portofolio) tersinkronisasi, sedangkan tahapan seleksi (Stage) dievaluasi independen per posisi.
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            ${relatedApps.map(app => {
+              const isCurrent = app.id === talent.id;
+              const sched = (typeof getTalentAssignedSchedule === 'function') ? getTalentAssignedSchedule(app) : null;
+              const schedTime = (sched && sched.assignedTime && sched.assignedTime !== '-') ? `${sched.displayDate} @ ${sched.assignedTime}` : null;
+              return `
+                <div style="background: ${isCurrent ? '#F8FAFC' : '#FFFFFF'}; border: 1.5px solid ${isCurrent ? '#3B82F6' : '#E2E8F0'}; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #2563EB;">${app.id}</span>
+                        <span style="font-size: 15px; font-weight: 700; color: var(--text-primary);">${escapeHtml(app.role || 'Role')}</span>
+                        ${isCurrent ? '<span style="font-size: 10px; background: #DBEAFE; color: #1E40AF; font-weight: 700; padding: 2px 7px; border-radius: 4px;">Sedang Dilihat</span>' : ''}
+                      </div>
+                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">
+                        Rating: ★ ${(app.overallRating || 3).toFixed(1)} • Gaji Ekspektasi: ${escapeHtml(app.expectedSalary || 'Standard Uang Saku')}
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span class="stage-badge stage-${(app.stage || 'prospect').toLowerCase()}">${app.stage || 'Prospect'}</span>
+                      ${!isCurrent ? `
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openCandidateProfileModal('${app.id}', 'applications')" style="font-size: 11px; padding: 4px 10px; font-weight: 600;">
+                          Buka Berkas Ini ↗
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+
+                  ${schedTime ? `
+                    <div style="margin-top: 10px; padding: 6px 10px; background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 6px; font-size: 11px; color: #92400E; display: flex; align-items: center; gap: 6px;">
+                      <span>🗓️</span> <strong>Jadwal Interview:</strong> ${schedTime}
+                    </div>
+                  ` : ''}
+
+                  ${app.notes ? `
+                    <div style="margin-top: 10px; padding: 8px 10px; background: #F1F5F9; border-radius: 6px; font-size: 11px; color: #334155; line-height: 1.45;">
+                      <strong>Catatan Tim / Interviewer:</strong><br>${escapeHtml(app.notes)}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
         </div>
       `;
 
@@ -9819,7 +10041,7 @@ function renderPentagonMatrixSvg(dimensions) {
             </div>
             <div class="form-group">
               <label class="form-label">Email Address</label>
-              <input type="email" id="inputEmail" class="form-input" value="${escapeHtml(data.email || '')}" placeholder="candidate@example.com" onblur="this.value = cleanEmail(this.value)">
+              <input type="email" id="inputEmail" class="form-input" value="${escapeHtml(data.email || '')}" placeholder="candidate@example.com" onblur="this.value = cleanEmail(this.value)" oninput="checkDuplicateLive()">
               <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">ℹ️ Otomatis huruf kecil (lowercase)</div>
             </div>
           </div>
@@ -9985,39 +10207,85 @@ function renderPentagonMatrixSvg(dimensions) {
       }
     }
 
-    /* Smart Duplicate Checker */
+    /* Smart Duplicate & Multi-Job Candidate Checker */
     function checkDuplicateLive() {
       const nameInput = document.getElementById('inputName');
       const phoneInput = document.getElementById('inputPhone');
+      const emailInput = document.getElementById('inputEmail');
       const warnName = document.getElementById('duplicateWarningName');
       const warnPhone = document.getElementById('duplicateWarningPhone');
 
       const curName = (nameInput ? nameInput.value.trim().toLowerCase() : '');
       const curPhone = (phoneInput ? formatToInternationalPhone(phoneInput.value.trim()) : '');
+      const curEmail = (emailInput ? cleanEmail(emailInput.value.trim()) : '');
       const curId = state.selectedTalent ? state.selectedTalent.id : null;
 
-      if (curPhone && curPhone.length > 7 && warnPhone) {
-        const matchPh = state.talents.find(t => t.id !== curId && t.phone && formatToInternationalPhone(t.phone) === curPhone);
-        if (matchPh) {
-          warnPhone.style.display = 'flex';
-          warnPhone.innerHTML = `⚠️ Duplicate Phone! Already belongs to <strong>[${matchPh.id}] ${escapeHtml(matchPh.name)}</strong>`;
-        } else {
-          warnPhone.style.display = 'none';
-        }
-      } else if (warnPhone) {
-        warnPhone.style.display = 'none';
+      let matchedTalent = null;
+      let matchSource = '';
+
+      if (curPhone && curPhone.length > 7) {
+        matchedTalent = (state.talents || []).find(t => t.id !== curId && t.phone && formatToInternationalPhone(t.phone) === curPhone);
+        if (matchedTalent) matchSource = 'Nomor WhatsApp (' + curPhone + ')';
       }
 
-      if (curName && curName.length > 3 && warnName) {
-        const matchNm = state.talents.find(t => t.id !== curId && t.name && t.name.toLowerCase() === curName);
+      if (!matchedTalent && curEmail && curEmail.length > 4) {
+        matchedTalent = (state.talents || []).find(t => t.id !== curId && t.email && cleanEmail(t.email) === curEmail);
+        if (matchedTalent) matchSource = 'Email (' + curEmail + ')';
+      }
+
+      if (warnPhone) {
+        if (matchedTalent) {
+          const relatedApps = getCandidateApplications(matchedTalent);
+          const rolesSummary = relatedApps.map(a => `<span style="font-weight: 700; color: #1E40AF;">${escapeHtml(a.role)}</span> <span class="stage-badge stage-${(a.stage || 'prospect').toLowerCase()}" style="font-size: 8.5px; padding: 1px 5px;">${a.stage || 'Prospect'}</span>`).join(', ');
+
+          warnPhone.style.display = 'block';
+          warnPhone.innerHTML = `
+            <div style="background: #EFF6FF; border: 1.5px solid #93C5FD; border-radius: 8px; padding: 10px 12px; margin-top: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                <div>
+                  <div style="font-weight: 700; color: #1E40AF; font-size: 12px; display: flex; align-items: center; gap: 4px;">
+                    <span>⚡</span> Kandidat Sudah Terdaftar via ${matchSource}
+                  </div>
+                  <div style="font-size: 11.5px; color: #1E3A8A; margin-top: 3px; line-height: 1.45;">
+                    <strong>[${matchedTalent.id}] ${escapeHtml(matchedTalent.name)}</strong> telah mendaftar di: ${rolesSummary}
+                  </div>
+                  <div style="font-size: 10.5px; color: #2563EB; margin-top: 3px;">
+                    💡 Melamar untuk lowongan lain? Anda dapat membuat berkas lamaran kedua ini dengan menyalin bio &amp; portofolio secara instan.
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openCandidateProfileModal('${matchedTalent.id}', 'applications')" style="font-size: 11px; padding: 3px 8px; background: #FFFFFF; color: #1E40AF; border-color: #BFDBFE;">
+                  👁️ Buka Profil [${matchedTalent.id}] ↗
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="prefillCandidateFromExisting('${matchedTalent.id}')" style="font-size: 11px; padding: 3px 10px; background: #2563EB; border-color: #2563EB;">
+                  📋 Salin Bio, CV &amp; Porto
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          warnPhone.style.display = 'none';
+          warnPhone.innerHTML = '';
+        }
+      }
+
+      if (curName && curName.length > 3 && warnName && !matchedTalent) {
+        const matchNm = (state.talents || []).find(t => t.id !== curId && t.name && t.name.toLowerCase() === curName);
         if (matchNm) {
-          warnName.style.display = 'flex';
-          warnName.innerHTML = `⚠️ Duplicate Name! Candidate <strong>[${matchNm.id}] ${escapeHtml(matchNm.name)}</strong> already exists.`;
+          warnName.style.display = 'block';
+          warnName.innerHTML = `
+            <div style="background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 6px; padding: 6px 10px; margin-top: 4px; font-size: 11px; color: #92400E;">
+              ⚠️ Nama mirip dengan <strong>[${matchNm.id}] ${escapeHtml(matchNm.name)}</strong> (${escapeHtml(matchNm.role)}). Pastikan nomor WhatsApp berbeda jika ini adalah orang yang berbeda.
+            </div>
+          `;
         } else {
           warnName.style.display = 'none';
+          warnName.innerHTML = '';
         }
       } else if (warnName) {
         warnName.style.display = 'none';
+        warnName.innerHTML = '';
       }
     }
 
@@ -11901,6 +12169,8 @@ function renderPentagonMatrixSvg(dimensions) {
     window.handleNameBlur = handleNameBlur;
     window.handlePhoneBlur = handlePhoneBlur;
     window.checkDuplicateLive = checkDuplicateLive;
+    window.getCandidateApplications = getCandidateApplications;
+    window.prefillCandidateFromExisting = prefillCandidateFromExisting;
     window.addQuickTag = addQuickTag;
     window.toTitleCase = toTitleCase;
     window.cleanEducation = cleanEducation;
