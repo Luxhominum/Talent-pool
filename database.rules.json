@@ -27,6 +27,10 @@
     "authorizedUsers": {
       ".read": true,
       ".write": true
+    },
+    "assessmentTokens": {
+      ".read": true,
+      ".write": true
     }
   }
 }
