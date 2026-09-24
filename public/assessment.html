@@ -16,6 +16,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
+  <!-- PAS frexor Aptitude Test Data & Engine -->
+  <script src="/js/frexor-data.js"></script>
+
   <style>
     :root {
       --bg-canvas: #F8F9FA;
@@ -813,6 +816,253 @@
       opacity: 0.7;
     }
 
+    /* Stage Stepper Bar (Multi-Stage Wizard) */
+    .stage-stepper-bar {
+      position: sticky;
+      top: 69px;
+      z-index: 45;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 10px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .stage-stepper-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 2px 4px;
+      scrollbar-width: none;
+    }
+
+    .stage-stepper-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .stage-step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .stage-step-pill.active {
+      color: #0F172A;
+      background: #FFFFFF;
+      border-color: #0F172A;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08);
+      font-weight: 700;
+    }
+
+    .stage-step-pill.completed {
+      color: #065F46;
+      background: #ECFDF5;
+      border-color: #A7F3D0;
+    }
+
+    .stage-step-pill .step-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #CBD5E1;
+      color: #FFFFFF;
+      font-size: 10.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .stage-step-pill.active .step-circle {
+      background: #0F172A;
+      color: #FFFFFF;
+    }
+
+    .stage-step-pill.completed .step-circle {
+      background: #10B981;
+      color: #FFFFFF;
+    }
+
+    .stage-step-arrow {
+      color: #CBD5E1;
+      font-size: 11px;
+    }
+
+    /* Stage Navigation Bar at Bottom */
+    .stage-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .btn-stage-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      color: #334155;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-stage-back:hover {
+      background: #F8FAFC;
+      border-color: #94A3B8;
+      color: #0F172A;
+    }
+
+    .btn-stage-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: #0F172A;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+    }
+
+    .btn-stage-next:hover {
+      background: #1E293B;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2);
+    }
+
+    .stage-status-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* Frexor Pre-Test Intermission Card */
+    .frexor-intermission-card {
+      background: #FFFFFF;
+      border: 2px solid #C7D2FE;
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      max-width: 760px;
+      margin: 20px auto;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .frexor-intermission-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EEF2FF;
+      color: #4338CA;
+      border: 1px solid #C7D2FE;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+    }
+
+    .frexor-intermission-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1E1B4B;
+      margin-bottom: 8px;
+    }
+
+    .frexor-intermission-subtitle {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .frexor-rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .frexor-rule-item {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 14px 16px;
+      border-radius: 10px;
+    }
+
+    .frexor-rule-item-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .frexor-rule-item-desc {
+      font-size: 11.5px;
+      color: #64748B;
+      line-height: 1.4;
+    }
+
+    .btn-start-frexor {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #4338CA;
+      color: #FFFFFF;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(67, 56, 202, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-start-frexor:hover {
+      background: #3730A3;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(67, 56, 202, 0.4);
+    }
+
     /* Unanswered Floating Warning Banner */
     .unanswered-banner {
       display: none;
@@ -986,12 +1236,24 @@
     </div>
 
     <div class="progress-section">
+      <div id="frexorTimerWrap" style="display: none; align-items: center; gap: 8px; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 4px 10px; border-radius: 8px; transition: all 0.3s ease;">
+        <span style="font-size: 13px;">⏱️</span>
+        <div style="display: flex; flex-direction: column;">
+          <span style="font-size: 9.5px; font-weight: 700; color: #4338CA; text-transform: uppercase; letter-spacing: 0.5px;">Waktu Frexor [IQ]</span>
+          <span id="frexorCountdown" style="font-family: var(--font-mono); font-size: 13.5px; font-weight: 700; color: #312E81;">30:00</span>
+        </div>
+      </div>
       <div class="progress-track">
         <div class="progress-bar" id="progressBar"></div>
       </div>
       <div class="progress-counter" id="progressText">0 / 50 (0%)</div>
     </div>
   </header>
+
+  <!-- Stage Stepper Bar (Multi-Stage Wizard Navigation) -->
+  <nav class="stage-stepper-bar" id="stageStepperBar" style="display: none;">
+    <div class="stage-stepper-inner" id="stageStepperInner"></div>
+  </nav>
 
   <!-- Main Test Form Container -->
   <main class="container" id="mainContainer" style="display: none;">
@@ -1006,16 +1268,16 @@
       </div>
     </section>
 
-    <!-- Questions Feed -->
+    <!-- Questions Feed (Current Stage) -->
     <div class="questions-list" id="questionsList"></div>
 
-    <!-- Submit Section -->
-    <section class="submit-section">
+    <!-- Submit & Stage Navigation Section -->
+    <section class="submit-section" id="submitSection">
       <!-- Incomplete Warning -->
       <div class="unanswered-banner" id="unansweredBanner">
         <div class="unanswered-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span id="unansweredTitleText">Masih ada pertanyaan yang belum diisi</span>
+          <span id="unansweredTitleText">Masih ada pertanyaan yang belum diisi pada tahap ini</span>
         </div>
         <div style="font-size: 11.5px; color: #7F1D1D; margin-bottom: 8px;">
           Klik nomor pertanyaan di bawah ini untuk langsung menuju soal:
@@ -1024,13 +1286,31 @@
       </div>
 
       <div class="submit-status-text" id="submitStatusText">
-        Pastikan seluruh 50 pernyataan telah terisi sebelum mengirim jawaban.
+        Lengkapi seluruh pertanyaan pada tahap ini untuk melanjutkan.
       </div>
 
-      <button type="button" class="btn-submit" id="submitBtn" onclick="handleVerifyAndSubmit()">
-        <span>Kirim Jawaban Asesmen</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
+      <!-- Stage Navigation Bar -->
+      <div class="stage-nav-bar" id="stageNavBar">
+        <button type="button" class="btn-stage-back" id="btnStagePrev" onclick="navigateStage(-1)" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span id="btnStagePrevText">Kembali</span>
+        </button>
+
+        <div class="stage-status-meta" id="stageStatusMeta">
+          <span id="stageCounterText" style="color: var(--text-primary); font-weight: 700;">Tahap 1</span>
+          <span id="stageProgressSummary" style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">0 / 0 Terjawab</span>
+        </div>
+
+        <button type="button" class="btn-stage-next" id="btnStageNext" onclick="handleStageNext()" style="display: none;">
+          <span id="btnStageNextText">Lanjut ke Tahap Berikutnya</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+
+        <button type="button" class="btn-submit" id="submitBtn" onclick="handleVerifyAndSubmit()" style="display: none;">
+          <span>Kirim Jawaban Asesmen</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
     </section>
 
   </main>
@@ -1072,56 +1352,56 @@
 
     // 2. Standard 50-Item IPIP Big Five Questionnaire Data
     const QUESTIONS = [
-      { "id": "E1", "dimension": "Extraversion", "text": "Menghidupkan suasana dalam suatu acara", "scoring_key": "positive" },
-      { "id": "A2", "dimension": "Agreeableness", "text": "Tidak terlalu memedulikan orang lain", "scoring_key": "negative" },
-      { "id": "C3", "dimension": "Conscientiousness", "text": "Selalu mempersiapkan segala hal", "scoring_key": "positive" },
-      { "id": "EM4", "dimension": "Emotional Stability", "text": "Mudah merasa tertekan", "scoring_key": "negative" },
-      { "id": "I5", "dimension": "Intellect", "text": "Menguasai banyak kosakata", "scoring_key": "positive" },
-      { "id": "E6", "dimension": "Extraversion", "text": "Tidak banyak berbicara", "scoring_key": "negative" },
-      { "id": "A7", "dimension": "Agreeableness", "text": "Peduli dengan orang lain", "scoring_key": "positive" },
-      { "id": "C8", "dimension": "Conscientiousness", "text": "Meninggalkan barang pribadi di sembarang tempat", "scoring_key": "negative" },
-      { "id": "EM9", "dimension": "Emotional Stability", "text": "Merasa tenang hampir setiap saat", "scoring_key": "positive" },
       { "id": "I10", "dimension": "Intellect", "text": "Kesulitan memahami ide yang bersifat abstrak", "scoring_key": "negative" },
-      { "id": "E11", "dimension": "Extraversion", "text": "Merasa nyaman di sekitar orang lain", "scoring_key": "positive" },
-      { "id": "A12", "dimension": "Agreeableness", "text": "Bersikap kasar pada orang lain", "scoring_key": "negative" },
-      { "id": "C13", "dimension": "Conscientiousness", "text": "Memperhatikan hal-hal secara rinci", "scoring_key": "positive" },
-      { "id": "EM14", "dimension": "Emotional Stability", "text": "Mudah khawatir", "scoring_key": "negative" },
-      { "id": "I15", "dimension": "Intellect", "text": "Memiliki imajinasi yang sangat kuat", "scoring_key": "positive" },
-      { "id": "E16", "dimension": "Extraversion", "text": "Lebih suka bekerja di belakang layar", "scoring_key": "negative" },
       { "id": "A17", "dimension": "Agreeableness", "text": "Bersimpati dengan perasaan orang lain", "scoring_key": "positive" },
-      { "id": "C18", "dimension": "Conscientiousness", "text": "Mengacaukan banyak hal", "scoring_key": "negative" },
-      { "id": "EM19", "dimension": "Emotional Stability", "text": "Jarang merasa sedih", "scoring_key": "positive" },
-      { "id": "I20", "dimension": "Intellect", "text": "Tidak tertarik dengan ide-ide abstrak", "scoring_key": "negative" },
-      { "id": "E21", "dimension": "Extraversion", "text": "Memulai suatu percakapan", "scoring_key": "positive" },
-      { "id": "A22", "dimension": "Agreeableness", "text": "Tidak tertarik dengan masalah orang lain", "scoring_key": "negative" },
-      { "id": "C23", "dimension": "Conscientiousness", "text": "Tidak menunda pekerjaan", "scoring_key": "positive" },
-      { "id": "EM24", "dimension": "Emotional Stability", "text": "Mudah merasa terganggu", "scoring_key": "negative" },
-      { "id": "I25", "dimension": "Intellect", "text": "Memiliki ide-ide yang cemerlang", "scoring_key": "positive" },
-      { "id": "E26", "dimension": "Extraversion", "text": "Sedikit berkata", "scoring_key": "negative" },
-      { "id": "A27", "dimension": "Agreeableness", "text": "Lemah lembut", "scoring_key": "positive" },
-      { "id": "C28", "dimension": "Conscientiousness", "text": "Sering lupa meletakkan barang kembali pada tempatnya", "scoring_key": "negative" },
-      { "id": "EM29", "dimension": "Emotional Stability", "text": "Mudah merasa kesal", "scoring_key": "negative" },
-      { "id": "I30", "dimension": "Intellect", "text": "Tidak memiliki imajinasi yang baik", "scoring_key": "negative" },
-      { "id": "E31", "dimension": "Extraversion", "text": "Berinteraksi dengan banyak orang dalam suatu acara", "scoring_key": "positive" },
-      { "id": "A32", "dimension": "Agreeableness", "text": "Tidak terlalu tertarik dengan orang lain", "scoring_key": "negative" },
-      { "id": "C33", "dimension": "Conscientiousness", "text": "Menyukai keteraturan", "scoring_key": "positive" },
-      { "id": "EM34", "dimension": "Emotional Stability", "text": "Memiliki perasaan yang berubah-ubah", "scoring_key": "negative" },
-      { "id": "I35", "dimension": "Intellect", "text": "Cepat dalam memahami sesuatu", "scoring_key": "positive" },
-      { "id": "E36", "dimension": "Extraversion", "text": "Tidak suka menjadi pusat perhatian", "scoring_key": "negative" },
-      { "id": "A37", "dimension": "Agreeableness", "text": "Meluangkan waktu untuk orang lain", "scoring_key": "positive" },
-      { "id": "C38", "dimension": "Conscientiousness", "text": "Mengabaikan tugas-tugas saya", "scoring_key": "negative" },
-      { "id": "EM39", "dimension": "Emotional Stability", "text": "Memiliki suasana hati yang sering berubah-ubah", "scoring_key": "negative" },
-      { "id": "I40", "dimension": "Intellect", "text": "Menggunakan istilah-istilah yang sulit", "scoring_key": "positive" },
-      { "id": "E41", "dimension": "Extraversion", "text": "Tidak keberatan menjadi pusat perhatian", "scoring_key": "positive" },
-      { "id": "A42", "dimension": "Agreeableness", "text": "Memahami perasaan orang lain", "scoring_key": "positive" },
-      { "id": "C43", "dimension": "Conscientiousness", "text": "Melakukan aktivitas sesuai jadwal atau agenda", "scoring_key": "positive" },
-      { "id": "EM44", "dimension": "Emotional Stability", "text": "Mudah merasa jengkel", "scoring_key": "negative" },
-      { "id": "I45", "dimension": "Intellect", "text": "Meluangkan waktu untuk merefleksikan berbagai hal", "scoring_key": "positive" },
       { "id": "E46", "dimension": "Extraversion", "text": "Tidak banyak berbicara pada orang yang tidak dikenal", "scoring_key": "negative" },
-      { "id": "A47", "dimension": "Agreeableness", "text": "Membuat orang lain merasa nyaman", "scoring_key": "positive" },
+      { "id": "EM34", "dimension": "Emotional Stability", "text": "Memiliki perasaan yang berubah-ubah", "scoring_key": "negative" },
+      { "id": "A37", "dimension": "Agreeableness", "text": "Meluangkan waktu untuk orang lain", "scoring_key": "positive" },
+      { "id": "EM24", "dimension": "Emotional Stability", "text": "Mudah merasa terganggu", "scoring_key": "negative" },
       { "id": "C48", "dimension": "Conscientiousness", "text": "Telaten dalam mengerjakan tugas", "scoring_key": "positive" },
+      { "id": "A42", "dimension": "Agreeableness", "text": "Memahami perasaan orang lain", "scoring_key": "positive" },
+      { "id": "EM44", "dimension": "Emotional Stability", "text": "Mudah merasa jengkel", "scoring_key": "negative" },
+      { "id": "E36", "dimension": "Extraversion", "text": "Tidak suka menjadi pusat perhatian", "scoring_key": "negative" },
+      { "id": "A32", "dimension": "Agreeableness", "text": "Tidak terlalu tertarik dengan orang lain", "scoring_key": "negative" },
+      { "id": "EM9", "dimension": "Emotional Stability", "text": "Merasa tenang hampir setiap saat", "scoring_key": "positive" },
+      { "id": "C13", "dimension": "Conscientiousness", "text": "Memperhatikan hal-hal secara rinci", "scoring_key": "positive" },
+      { "id": "A47", "dimension": "Agreeableness", "text": "Membuat orang lain merasa nyaman", "scoring_key": "positive" },
+      { "id": "E1", "dimension": "Extraversion", "text": "Menghidupkan suasana dalam suatu acara", "scoring_key": "positive" },
+      { "id": "EM29", "dimension": "Emotional Stability", "text": "Mudah merasa kesal", "scoring_key": "negative" },
+      { "id": "I20", "dimension": "Intellect", "text": "Tidak tertarik dengan ide-ide abstrak", "scoring_key": "negative" },
+      { "id": "C33", "dimension": "Conscientiousness", "text": "Menyukai keteraturan", "scoring_key": "positive" },
+      { "id": "I5", "dimension": "Intellect", "text": "Menguasai banyak kosakata", "scoring_key": "positive" },
+      { "id": "EM14", "dimension": "Emotional Stability", "text": "Mudah khawatir", "scoring_key": "negative" },
+      { "id": "E26", "dimension": "Extraversion", "text": "Sedikit berkata", "scoring_key": "negative" },
+      { "id": "C18", "dimension": "Conscientiousness", "text": "Mengacaukan banyak hal", "scoring_key": "negative" },
+      { "id": "I15", "dimension": "Intellect", "text": "Memiliki imajinasi yang sangat kuat", "scoring_key": "positive" },
+      { "id": "E6", "dimension": "Extraversion", "text": "Tidak banyak berbicara", "scoring_key": "negative" },
+      { "id": "C23", "dimension": "Conscientiousness", "text": "Tidak menunda pekerjaan", "scoring_key": "positive" },
+      { "id": "EM39", "dimension": "Emotional Stability", "text": "Memiliki suasana hati yang sering berubah-ubah", "scoring_key": "negative" },
+      { "id": "E11", "dimension": "Extraversion", "text": "Merasa nyaman di sekitar orang lain", "scoring_key": "positive" },
+      { "id": "I50", "dimension": "Intellect", "text": "Memiliki banyak ide", "scoring_key": "positive" },
+      { "id": "E21", "dimension": "Extraversion", "text": "Memulai suatu percakapan", "scoring_key": "positive" },
+      { "id": "C28", "dimension": "Conscientiousness", "text": "Sering lupa meletakkan barang kembali pada tempatnya", "scoring_key": "negative" },
+      { "id": "I40", "dimension": "Intellect", "text": "Menggunakan istilah-istilah yang sulit", "scoring_key": "positive" },
+      { "id": "A2", "dimension": "Agreeableness", "text": "Tidak terlalu memedulikan orang lain", "scoring_key": "negative" },
+      { "id": "I30", "dimension": "Intellect", "text": "Tidak memiliki imajinasi yang baik", "scoring_key": "negative" },
+      { "id": "C3", "dimension": "Conscientiousness", "text": "Selalu mempersiapkan segala hal", "scoring_key": "positive" },
+      { "id": "A7", "dimension": "Agreeableness", "text": "Peduli dengan orang lain", "scoring_key": "positive" },
+      { "id": "I25", "dimension": "Intellect", "text": "Memiliki ide-ide yang cemerlang", "scoring_key": "positive" },
+      { "id": "E31", "dimension": "Extraversion", "text": "Berinteraksi dengan banyak orang dalam suatu acara", "scoring_key": "positive" },
+      { "id": "A12", "dimension": "Agreeableness", "text": "Bersikap kasar pada orang lain", "scoring_key": "negative" },
       { "id": "EM49", "dimension": "Emotional Stability", "text": "Sering merasa sedih", "scoring_key": "negative" },
-      { "id": "I50", "dimension": "Intellect", "text": "Memiliki banyak ide", "scoring_key": "positive" }
+      { "id": "C38", "dimension": "Conscientiousness", "text": "Mengabaikan tugas-tugas saya", "scoring_key": "negative" },
+      { "id": "A27", "dimension": "Agreeableness", "text": "Lemah lembut", "scoring_key": "positive" },
+      { "id": "EM19", "dimension": "Emotional Stability", "text": "Jarang merasa sedih", "scoring_key": "positive" },
+      { "id": "C8", "dimension": "Conscientiousness", "text": "Meninggalkan barang pribadi di sembarang tempat", "scoring_key": "negative" },
+      { "id": "I35", "dimension": "Intellect", "text": "Cepat dalam memahami sesuatu", "scoring_key": "positive" },
+      { "id": "C43", "dimension": "Conscientiousness", "text": "Melakukan aktivitas sesuai jadwal atau agenda", "scoring_key": "positive" },
+      { "id": "EM4", "dimension": "Emotional Stability", "text": "Mudah merasa tertekan", "scoring_key": "negative" },
+      { "id": "E16", "dimension": "Extraversion", "text": "Lebih suka bekerja di belakang layar", "scoring_key": "negative" },
+      { "id": "I45", "dimension": "Intellect", "text": "Meluangkan waktu untuk merefleksikan berbagai hal", "scoring_key": "positive" },
+      { "id": "E41", "dimension": "Extraversion", "text": "Tidak keberatan menjadi pusat perhatian", "scoring_key": "positive" },
+      { "id": "A22", "dimension": "Agreeableness", "text": "Tidak tertarik dengan masalah orang lain", "scoring_key": "negative" }
     ];
 
     
@@ -1780,40 +2060,30 @@
     "id": "DISC_01",
     "options": [
       {
-        "text": "Cepat mengambil keputusan, berani, tegas",
-        "most": "D",
-        "least": "D"
-      },
-      {
         "text": "Ramah, lincah, memikat hati orang lain",
         "most": "I",
         "least": "I"
       },
       {
-        "text": "Tenang, sabar, pendengar yang baik",
-        "most": "S",
-        "least": "S"
+        "text": "Cepat mengambil keputusan, berani, tegas",
+        "most": "D",
+        "least": "D"
       },
       {
         "text": "Cermat, teliti, rapi dan sistematis",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Tenang, sabar, pendengar yang baik",
+        "most": "S",
+        "least": "S"
       }
     ]
   },
   {
     "id": "DISC_02",
     "options": [
-      {
-        "text": "Berorientasi pada hasil akhir, pantang menyerah",
-        "most": "D",
-        "least": "D"
-      },
-      {
-        "text": "Ceria, persuasif, membangkitkan semangat",
-        "most": "I",
-        "least": "I"
-      },
       {
         "text": "Setia kawan, mudah bekerja sama, penurut",
         "most": "S",
@@ -1823,6 +2093,16 @@
         "text": "Disiplin, mematuhi aturan, berpikir logis",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Berorientasi pada hasil akhir, pantang menyerah",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Ceria, persuasif, membangkitkan semangat",
+        "most": "I",
+        "least": "I"
       }
     ]
   },
@@ -1830,9 +2110,9 @@
     "id": "DISC_03",
     "options": [
       {
-        "text": "Suka tantangan baru, kompetitif, mandiri",
-        "most": "D",
-        "least": "D"
+        "text": "Akurat, berhati-hati, standar tinggi",
+        "most": "C",
+        "least": "C"
       },
       {
         "text": "Supel, pandai bergaul, banyak bicara",
@@ -1845,9 +2125,9 @@
         "least": "S"
       },
       {
-        "text": "Akurat, berhati-hati, standar tinggi",
-        "most": "C",
-        "least": "C"
+        "text": "Suka tantangan baru, kompetitif, mandiri",
+        "most": "D",
+        "least": "D"
       }
     ]
   },
@@ -1860,14 +2140,14 @@
         "least": "D"
       },
       {
-        "text": "Ekspresif, optimis, memotivasi orang lain",
-        "most": "I",
-        "least": "I"
-      },
-      {
         "text": "Dapat diandalkan, stabil, loyal",
         "most": "S",
         "least": "S"
+      },
+      {
+        "text": "Ekspresif, optimis, memotivasi orang lain",
+        "most": "I",
+        "least": "I"
       },
       {
         "text": "Analitis, kritis, memperhatikan detail kecil",
@@ -1880,24 +2160,24 @@
     "id": "DISC_05",
     "options": [
       {
-        "text": "Memegang kendali, percaya diri tinggi",
-        "most": "D",
-        "least": "D"
-      },
-      {
         "text": "Hangat, humoris, mudah berteman",
         "most": "I",
         "least": "I"
       },
       {
-        "text": "Rela berkorban, sabar menghadapi orang lain",
-        "most": "S",
-        "least": "S"
-      },
-      {
         "text": "Teratur, metodis, taat pada prosedur",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Memegang kendali, percaya diri tinggi",
+        "most": "D",
+        "least": "D"
+      },
+      {
+        "text": "Rela berkorban, sabar menghadapi orang lain",
+        "most": "S",
+        "least": "S"
       }
     ]
   },
@@ -1905,24 +2185,24 @@
     "id": "DISC_06",
     "options": [
       {
-        "text": "Menuntut pencapaian, bergerak cepat",
-        "most": "D",
-        "least": "D"
-      },
-      {
-        "text": "Populer, menyukai perhatian, kreatif",
-        "most": "I",
-        "least": "I"
-      },
-      {
         "text": "Mudah puas, toleran, tidak banyak menuntut",
         "most": "S",
         "least": "S"
       },
       {
+        "text": "Menuntut pencapaian, bergerak cepat",
+        "most": "D",
+        "least": "D"
+      },
+      {
         "text": "Kritis terhadap kesalahan, perfeksionis",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Populer, menyukai perhatian, kreatif",
+        "most": "I",
+        "least": "I"
       }
     ]
   },
@@ -1930,14 +2210,9 @@
     "id": "DISC_07",
     "options": [
       {
-        "text": "Fokus pada tujuan, gigih menyelesaikan tugas",
-        "most": "D",
-        "least": "D"
-      },
-      {
-        "text": "Pandai meyakinkan orang, antusias",
-        "most": "I",
-        "least": "I"
+        "text": "Mengecek fakta, mendasarkan keputusan pada data",
+        "most": "C",
+        "least": "C"
       },
       {
         "text": "Mendukung rekan kerja, pendamai saat ribut",
@@ -1945,9 +2220,14 @@
         "least": "S"
       },
       {
-        "text": "Mengecek fakta, mendasarkan keputusan pada data",
-        "most": "C",
-        "least": "C"
+        "text": "Pandai meyakinkan orang, antusias",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Fokus pada tujuan, gigih menyelesaikan tugas",
+        "most": "D",
+        "least": "D"
       }
     ]
   },
@@ -1980,11 +2260,6 @@
     "id": "DISC_09",
     "options": [
       {
-        "text": "Optimis terhadap hasil, tekad baja",
-        "most": "D",
-        "least": "D"
-      },
-      {
         "text": "Suka berkolaborasi dalam tim besar",
         "most": "I",
         "least": "I"
@@ -1998,6 +2273,11 @@
         "text": "Mengikuti instruksi tertulis, teliti tanpa cela",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Optimis terhadap hasil, tekad baja",
+        "most": "D",
+        "least": "D"
       }
     ]
   },
@@ -2005,9 +2285,9 @@
     "id": "DISC_10",
     "options": [
       {
-        "text": "Menyukai kekuasaan/tanggung jawab penuh",
-        "most": "D",
-        "least": "D"
+        "text": "Pendiam, setia pada tugas rutin, tekun",
+        "most": "S",
+        "least": "S"
       },
       {
         "text": "Inspiratif, pandai menarik minat pendengar",
@@ -2015,9 +2295,9 @@
         "least": "I"
       },
       {
-        "text": "Pendiam, setia pada tugas rutin, tekun",
-        "most": "S",
-        "least": "S"
+        "text": "Menyukai kekuasaan/tanggung jawab penuh",
+        "most": "D",
+        "least": "D"
       },
       {
         "text": "Tegas pada standar etika dan kepatuhan aturan",
@@ -2029,6 +2309,11 @@
   {
     "id": "DISC_11",
     "options": [
+      {
+        "text": "Berhati-hati dalam berbicara, objektif",
+        "most": "C",
+        "least": "C"
+      },
       {
         "text": "Ambisius, tanggap menghadapi krisis darurat",
         "most": "D",
@@ -2043,11 +2328,6 @@
         "text": "Rendah hati, bersahabat, menghindari pamer",
         "most": "S",
         "least": "S"
-      },
-      {
-        "text": "Berhati-hati dalam berbicara, objektif",
-        "most": "C",
-        "least": "C"
       }
     ]
   },
@@ -2060,9 +2340,9 @@
         "least": "D"
       },
       {
-        "text": "Membangun hubungan sosial dengan cepat",
-        "most": "I",
-        "least": "I"
+        "text": "Skeptis sebelum melihat bukti konkret",
+        "most": "C",
+        "least": "C"
       },
       {
         "text": "Ketenangan dalam menghadapi perubahan mendadak",
@@ -2070,9 +2350,9 @@
         "least": "S"
       },
       {
-        "text": "Skeptis sebelum melihat bukti konkret",
-        "most": "C",
-        "least": "C"
+        "text": "Membangun hubungan sosial dengan cepat",
+        "most": "I",
+        "least": "I"
       }
     ]
   },
@@ -2080,14 +2360,14 @@
     "id": "DISC_13",
     "options": [
       {
-        "text": "Mampu bersikap tegas meski tidak disukai",
-        "most": "D",
-        "least": "D"
-      },
-      {
         "text": "Menyukai pujian dan apresiasi sosial",
         "most": "I",
         "least": "I"
+      },
+      {
+        "text": "Mampu bersikap tegas meski tidak disukai",
+        "most": "D",
+        "least": "D"
       },
       {
         "text": "Menghindari pergantian rutinitas mendadak",
@@ -2105,16 +2385,6 @@
     "id": "DISC_14",
     "options": [
       {
-        "text": "Fokus mengejar target tanpa terganggu emosi",
-        "most": "D",
-        "least": "D"
-      },
-      {
-        "text": "Pandai mencairkan suasana yang kaku",
-        "most": "I",
-        "least": "I"
-      },
-      {
         "text": "Menjaga keharmonisan dan kebersamaan tim",
         "most": "S",
         "least": "S"
@@ -2123,6 +2393,16 @@
         "text": "Rapi dalam dokumentasi dan tata kelola arsip",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Pandai mencairkan suasana yang kaku",
+        "most": "I",
+        "least": "I"
+      },
+      {
+        "text": "Fokus mengejar target tanpa terganggu emosi",
+        "most": "D",
+        "least": "D"
       }
     ]
   },
@@ -2130,9 +2410,9 @@
     "id": "DISC_15",
     "options": [
       {
-        "text": "Berani melawan arus jika yakin benar",
-        "most": "D",
-        "least": "D"
+        "text": "Menghitung segala kemungkinan risiko",
+        "most": "C",
+        "least": "C"
       },
       {
         "text": "Berbakat membujuk dan mempromosikan ide",
@@ -2140,14 +2420,14 @@
         "least": "I"
       },
       {
+        "text": "Berani melawan arus jika yakin benar",
+        "most": "D",
+        "least": "D"
+      },
+      {
         "text": "Pendengar yang tulus dan tidak menghakimi",
         "most": "S",
         "least": "S"
-      },
-      {
-        "text": "Menghitung segala kemungkinan risiko",
-        "most": "C",
-        "least": "C"
       }
     ]
   },
@@ -2160,11 +2440,6 @@
         "least": "D"
       },
       {
-        "text": "Mudah bergaul dengan orang yang baru dikenal",
-        "most": "I",
-        "least": "I"
-      },
-      {
         "text": "Penuh pengertian dan menjaga perasaan rekan",
         "most": "S",
         "least": "S"
@@ -2173,6 +2448,11 @@
         "text": "Menyukai kejelasan pedoman dan batasan kerja",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Mudah bergaul dengan orang yang baru dikenal",
+        "most": "I",
+        "least": "I"
       }
     ]
   },
@@ -2180,14 +2460,14 @@
     "id": "DISC_17",
     "options": [
       {
-        "text": "Percaya diri mengatasi masalah rumit",
-        "most": "D",
-        "least": "D"
-      },
-      {
         "text": "Kreatif memunculkan ide-ide segar",
         "most": "I",
         "least": "I"
+      },
+      {
+        "text": "Memastikan tidak ada kekeliruan sekecil apapun",
+        "most": "C",
+        "least": "C"
       },
       {
         "text": "Setia pada komitmen jangka panjang",
@@ -2195,15 +2475,20 @@
         "least": "S"
       },
       {
-        "text": "Memastikan tidak ada kekeliruan sekecil apapun",
-        "most": "C",
-        "least": "C"
+        "text": "Percaya diri mengatasi masalah rumit",
+        "most": "D",
+        "least": "D"
       }
     ]
   },
   {
     "id": "DISC_18",
     "options": [
+      {
+        "text": "Mampu bekerja dalam ketenangan dan kestabilan",
+        "most": "S",
+        "least": "S"
+      },
       {
         "text": "Tegas menolak hal yang menghambat kemajuan",
         "most": "D",
@@ -2213,11 +2498,6 @@
         "text": "Menghidupkan suasana kelompok",
         "most": "I",
         "least": "I"
-      },
-      {
-        "text": "Mampu bekerja dalam ketenangan dan kestabilan",
-        "most": "S",
-        "least": "S"
       },
       {
         "text": "Berpikir berdasarkan logika fakta teruji",
@@ -2230,6 +2510,16 @@
     "id": "DISC_19",
     "options": [
       {
+        "text": "Kritis terhadap ide yang tidak realistis",
+        "most": "C",
+        "least": "C"
+      },
+      {
+        "text": "Rela mengalah demi kebaikan bersama",
+        "most": "S",
+        "least": "S"
+      },
+      {
         "text": "Berinisiatif tinggi tanpa menunggu arahan",
         "most": "D",
         "least": "D"
@@ -2238,16 +2528,6 @@
         "text": "Pandai membawa diri di berbagai kalangan",
         "most": "I",
         "least": "I"
-      },
-      {
-        "text": "Rela mengalah demi kebaikan bersama",
-        "most": "S",
-        "least": "S"
-      },
-      {
-        "text": "Kritis terhadap ide yang tidak realistis",
-        "most": "C",
-        "least": "C"
       }
     ]
   },
@@ -2265,25 +2545,20 @@
         "least": "I"
       },
       {
-        "text": "Sabar menemani proses kerja bertahap",
-        "most": "S",
-        "least": "S"
-      },
-      {
         "text": "Mempersiapkan segala hal secara sistematis",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Sabar menemani proses kerja bertahap",
+        "most": "S",
+        "least": "S"
       }
     ]
   },
   {
     "id": "DISC_21",
     "options": [
-      {
-        "text": "Fokus pada kemenangan dan kepemimpinan",
-        "most": "D",
-        "least": "D"
-      },
       {
         "text": "Suka berdiskusi terbuka dan bertukar cerita",
         "most": "I",
@@ -2293,6 +2568,11 @@
         "text": "Mudah berempati dan memahami perasaan orang lain",
         "most": "S",
         "least": "S"
+      },
+      {
+        "text": "Fokus pada kemenangan dan kepemimpinan",
+        "most": "D",
+        "least": "D"
       },
       {
         "text": "Mengutamakan kualitas di atas kecepatan",
@@ -2305,9 +2585,9 @@
     "id": "DISC_22",
     "options": [
       {
-        "text": "Membuat keputusan sulit dengan kepala dingin",
-        "most": "D",
-        "least": "D"
+        "text": "Dapat dipercaya memegang rahasia tim",
+        "most": "S",
+        "least": "S"
       },
       {
         "text": "Menyebarkan energi ceria dan kebersamaan",
@@ -2315,14 +2595,14 @@
         "least": "I"
       },
       {
-        "text": "Dapat dipercaya memegang rahasia tim",
-        "most": "S",
-        "least": "S"
-      },
-      {
         "text": "Sangat terstruktur dalam menyusun rencana kerja",
         "most": "C",
         "least": "C"
+      },
+      {
+        "text": "Membuat keputusan sulit dengan kepala dingin",
+        "most": "D",
+        "least": "D"
       }
     ]
   },
@@ -2330,14 +2610,14 @@
     "id": "DISC_23",
     "options": [
       {
+        "text": "Mengutamakan fakta objektif daripada opini pribadi",
+        "most": "C",
+        "least": "C"
+      },
+      {
         "text": "Siap bertanggung jawab atas risiko kegagalan",
         "most": "D",
         "least": "D"
-      },
-      {
-        "text": "Mengandalkan intuisi sosial dan hubungan baik",
-        "most": "I",
-        "least": "I"
       },
       {
         "text": "Menyukai lingkungan kerja yang damai dan stabil",
@@ -2345,9 +2625,9 @@
         "least": "S"
       },
       {
-        "text": "Mengutamakan fakta objektif daripada opini pribadi",
-        "most": "C",
-        "least": "C"
+        "text": "Mengandalkan intuisi sosial dan hubungan baik",
+        "most": "I",
+        "least": "I"
       }
     ]
   },
@@ -2360,6 +2640,11 @@
         "least": "D"
       },
       {
+        "text": "Cermat memastikan kepatuhan standar mutu SOP",
+        "most": "C",
+        "least": "C"
+      },
+      {
         "text": "Penuh pesona dan daya pikat dalam berkomunikasi",
         "most": "I",
         "least": "I"
@@ -2368,15 +2653,10 @@
         "text": "Pekerja tekun yang tidak mudah mengeluh",
         "most": "S",
         "least": "S"
-      },
-      {
-        "text": "Cermat memastikan kepatuhan standar mutu SOP",
-        "most": "C",
-        "least": "C"
       }
     ]
   }
-];
+    ];
 
     const LIKERT_LABELS = {
       1: "Sangat Tidak Sesuai",
@@ -2443,7 +2723,24 @@
         console.warn('SessionStorage unavailable', e);
       }
 
-      renderQuestions();
+      // Wizard State: Restore saved stage and frexorStarted status
+      try {
+        const savedStage = sessionStorage.getItem('assessment_stage_' + candidateId);
+        if (savedStage !== null) {
+          currentStageIndex = parseInt(savedStage, 10) || 0;
+        }
+        const savedFrexorStarted = sessionStorage.getItem('frexor_started_' + candidateId);
+        if (savedFrexorStarted === 'true') {
+          frexorStarted = true;
+        }
+      } catch (e) {}
+
+      activeModules = buildActiveModules();
+      if (currentStageIndex >= activeModules.length) {
+        currentStageIndex = 0;
+      }
+
+      renderStage(currentStageIndex);
       updateProgress();
 
       // Show UI immediately if fallback data is ready
@@ -2524,24 +2821,30 @@
           list.push({ ...q, _type: 'cognitive', _num: idx + 1 });
         });
       }
+      if (enabledTests.includes('frexor')) {
+        (window.FREXOR_QUESTIONS || []).forEach((q, idx) => {
+          list.push({ ...q, _type: 'frexor', _num: idx + 1 });
+        });
+      }
       return list;
     }
 
-    function renderQuestions() {
-      const container = document.getElementById('questionsList');
-      container.innerHTML = '';
+        // ==========================================
+    // MULTI-STAGE WIZARD ARCHITECTURE
+    // ==========================================
+    let currentStageIndex = 0;
+    let activeModules = [];
+    let frexorStarted = false;
 
-      const hasBigFive = enabledTests.includes('bigfive');
-      const hasDisc = enabledTests.includes('disc');
-      const hasCognitive = enabledTests.includes('cognitive');
-
-// 1. Build list of active modules in consistent sequence: Big Five -> DISC -> Cognitive
-      const activeModules = [];
-      if (hasBigFive) {
-        activeModules.push({
+    function buildActiveModules() {
+      const list = [];
+      if (enabledTests.includes('bigfive')) {
+        list.push({
           key: 'bigfive',
           title: 'Tes Kepribadian Kerja (IPIP Big Five)',
+          shortName: 'Kepribadian',
           countText: '50 Pernyataan',
+          totalCount: 50,
           estTime: '10–12 Menit',
           icon: '🧠',
           accentColor: '#1E40AF',
@@ -2550,11 +2853,13 @@
           subtitle: 'Kuesioner preferensi kerja & pola perilaku sehari-hari • Skala 1 (Sangat Tidak Sesuai) s.d 5 (Sangat Sesuai)'
         });
       }
-      if (hasDisc) {
-        activeModules.push({
+      if (enabledTests.includes('disc')) {
+        list.push({
           key: 'disc',
           title: 'Tes Gaya Kerja & Komunikasi (DISC)',
+          shortName: 'Gaya Kerja (DISC)',
           countText: '24 Soal M/L',
+          totalCount: 24,
           estTime: '8–10 Menit',
           icon: '🧩',
           accentColor: '#7C3AED',
@@ -2563,11 +2868,13 @@
           subtitle: 'Pemetaan gaya komunikasi & dinamika perilaku profesional • Pilih 1 [M] Most (+) dan 1 [L] Least (-)'
         });
       }
-      if (hasCognitive) {
-        activeModules.push({
+      if (enabledTests.includes('cognitive')) {
+        list.push({
           key: 'cognitive',
           title: 'Tes Logika, Kognitif & Bisnis Praktis',
+          shortName: 'Logika Bisnis',
           countText: '15 Soal Pilihan Ganda',
+          totalCount: 15,
           estTime: '15–20 Menit',
           icon: '📊',
           accentColor: '#059669',
@@ -2576,52 +2883,319 @@
           subtitle: 'Penalaran numerik, kalkulasi komersial & pemecahan masalah bisnis • Pilihan Ganda A–E'
         });
       }
+      if (enabledTests.includes('frexor')) {
+        list.push({
+          key: 'frexor',
+          title: 'PAS frexor® Aptitude Test [IQ]',
+          shortName: 'Frexor IQ',
+          countText: '60 Soal',
+          totalCount: 60,
+          estTime: '30 Menit (Batas Waktu Ketat)',
+          icon: '⚡',
+          accentColor: '#4338CA',
+          tagBg: '#EEF2FF',
+          borderColor: '#4338CA',
+          isTimed: true,
+          subtitle: 'Standar resmi tes intelegensi Mensa: Penalaran Verbal, Analogi Spasial, Deret & Logika Deduktif • Skala IQ'
+        });
+      }
+      return list;
+    }
 
-      const totalModules = activeModules.length;
+    function isQuestionAnswered(q) {
+      const val = userAnswers[q.id];
+      if (q._type === 'disc') {
+        return Boolean(val && typeof val === 'object' && val.mostIdx !== undefined && val.leastIdx !== undefined);
+      }
+      return val !== undefined && val !== null && val !== '';
+    }
 
-      // 2. Dynamically Update Top Instruction Card (Roadmap Overview)
+    function getStageQuestions(moduleKey) {
+      if (moduleKey === 'bigfive') {
+        return QUESTIONS.map((q, idx) => ({ ...q, _type: 'bigfive', _num: idx + 1 }));
+      }
+      if (moduleKey === 'disc') {
+        return DISC_QUESTIONS.map((q, idx) => ({ ...q, _type: 'disc', _num: idx + 1 }));
+      }
+      if (moduleKey === 'cognitive') {
+        const cogList = (typeof getCandidateCognitiveQuestions === 'function') 
+          ? getCandidateCognitiveQuestions(candidateId) 
+          : COGNITIVE_QUESTIONS;
+        return cogList.map((q, idx) => ({ ...q, _type: 'cognitive', _num: idx + 1 }));
+      }
+      if (moduleKey === 'frexor') {
+        return (window.FREXOR_QUESTIONS || []).map((q, idx) => ({ ...q, _type: 'frexor', _num: idx + 1 }));
+      }
+      return [];
+    }
+
+    function renderStageStepper() {
+      const bar = document.getElementById('stageStepperBar');
+      const inner = document.getElementById('stageStepperInner');
+      if (!bar || !inner) return;
+
+      if (!activeModules || activeModules.length <= 1) {
+        bar.style.display = 'none';
+        return;
+      }
+
+      bar.style.display = 'block';
+      let html = '';
+
+      activeModules.forEach((m, idx) => {
+        const isDone = idx < currentStageIndex;
+        const isActive = idx === currentStageIndex;
+        const circleContent = isDone ? '✓' : (idx + 1);
+
+        html += `
+          <div class="stage-step-pill ${isActive ? 'active' : ''} ${isDone ? 'completed' : ''}" 
+               id="stagePill_${idx}">
+            <span class="step-circle">${circleContent}</span>
+            <span>${m.icon} ${m.shortName}</span>
+          </div>
+        `;
+
+        if (idx < activeModules.length - 1) {
+          html += `<span class="stage-step-arrow">➔</span>`;
+        }
+      });
+
+      inner.innerHTML = html;
+    }
+
+    function renderStage(stageIndex) {
+      if (!activeModules || activeModules.length === 0) {
+        activeModules = buildActiveModules();
+      }
+      if (stageIndex < 0) stageIndex = 0;
+      if (stageIndex >= activeModules.length) stageIndex = activeModules.length - 1;
+      currentStageIndex = stageIndex;
+
+      try {
+        sessionStorage.setItem('assessment_stage_' + candidateId, currentStageIndex);
+      } catch (e) {}
+
+      renderStageStepper();
+
+      const mod = activeModules[currentStageIndex];
+      if (!mod) return;
+
+      const container = document.getElementById('questionsList');
+      container.innerHTML = '';
+
+      // Update Instruction Card
       const instrTitle = document.getElementById('instructionTitle');
       const instrDesc = document.getElementById('instructionDesc');
-
       if (instrTitle && instrDesc) {
-        if (totalModules === 1) {
-          const m = activeModules[0];
-          instrTitle.innerHTML = `<span>${m.icon}</span> ${m.title}`;
-          instrDesc.innerHTML = `
-            Selamat datang di sesi asesmen on-site PGE Talent Pool. Modul ini terdiri dari <strong>${m.countText}</strong> (Estimasi waktu: ${m.estTime}). Panduan teknis cara menjawab disertakan di awal modul di bawah.
-          `;
-        } else {
-          instrTitle.innerHTML = `<span>📋</span> Sesi Asesmen On-Site (${totalModules} Modul Terintegrasi)`;
-          instrDesc.innerHTML = `
-            <div>
-              Selamat datang di sesi asesmen on-site PGE Talent Pool. Asesmen ini terdiri dari <strong>${totalModules} modul pengujian berurutan</strong> untuk mengenal potensi kepribadian, gaya kerja, dan logika bisnis Anda.
-            </div>
-            <div class="test-roadmap-strip">
-              ${activeModules.map((m, idx) => `
-                <div class="roadmap-step">
-                  <span class="roadmap-num">${idx + 1}</span>
-                  <div>
-                    <div class="roadmap-title">${m.icon} ${m.title}</div>
-                    <div class="roadmap-meta">${m.countText} • ${m.estTime}</div>
-                  </div>
-                </div>
-              `).join('<span class="roadmap-arrow">➔</span>')}
-            </div>
-          `;
+        const stagePrefix = activeModules.length > 1 
+          ? `Tahap ${currentStageIndex + 1} dari ${activeModules.length}: ` 
+          : '';
+        instrTitle.innerHTML = `<span>${mod.icon}</span> ${stagePrefix}${mod.title}`;
+        instrDesc.innerHTML = `
+          <div>${mod.subtitle}</div>
+          <div style="margin-top: 6px; font-size: 12px; color: var(--text-muted);">
+            Jumlah Soal: <strong>${mod.countText}</strong> • Estimasi Waktu: <strong>${mod.estTime}</strong>
+          </div>
+        `;
+      }
+
+      // Check if Frexor Intermission is needed
+      if (mod.key === 'frexor' && !frexorStarted) {
+        // Hide top Frexor timer during intermission
+        const timerWrap = document.getElementById('frexorTimerWrap');
+        if (timerWrap) timerWrap.style.display = 'none';
+
+        renderFrexorIntermission(container, mod);
+        updateStageNavUI(false);
+        updateProgress();
+        return;
+      }
+
+      // If Frexor is active and started, show timer
+      if (mod.key === 'frexor' && frexorStarted) {
+        initFrexorTimer();
+      } else {
+        const timerWrap = document.getElementById('frexorTimerWrap');
+        if (timerWrap) timerWrap.style.display = 'none';
+      }
+
+      // Render Stage Questions
+      if (mod.key === 'bigfive') {
+        renderBigFiveStage(container, mod);
+      } else if (mod.key === 'disc') {
+        renderDiscStage(container, mod);
+      } else if (mod.key === 'cognitive') {
+        renderCognitiveStage(container, mod);
+      } else if (mod.key === 'frexor') {
+        renderFrexorStage(container, mod);
+      }
+
+      updateStageNavUI(true);
+      updateProgress();
+    }
+
+    function renderFrexorIntermission(container, mod) {
+      const card = document.createElement('div');
+      card.className = 'frexor-intermission-card';
+      card.innerHTML = `
+        <div class="frexor-intermission-badge">⚡ TAHAP BERWAKTU KETAT</div>
+        <h2 class="frexor-intermission-title">PAS frexor® Aptitude Test [IQ]</h2>
+        <p class="frexor-intermission-subtitle">
+          Tes ini adalah instrumen resmi untuk mengukur intelegensi umum, daya abstraksi spasial, pemecahan masalah numerik, dan silogisme deduktif berstandar Mensa.
+        </p>
+
+        <div class="frexor-rules-grid">
+          <div class="frexor-rule-item">
+            <div class="frexor-rule-item-title"><span>⏱️</span> Batas Waktu 30 Menit</div>
+            <div class="frexor-rule-item-desc">Timer hitung mundur berjalan otomatis. Jika waktu habis, jawaban otomatis dikirimkan ke server.</div>
+          </div>
+          <div class="frexor-rule-item">
+            <div class="frexor-rule-item-title"><span>📝</span> 60 Butir Soal</div>
+            <div class="frexor-rule-item-desc">Terdiri dari 20 Verbal, 16 Spasial (dengan gambar asli), 9 Numerik, dan 15 Logika Deduktif.</div>
+          </div>
+          <div class="frexor-rule-item">
+            <div class="frexor-rule-item-title"><span>💡</span> Strategi Mengerjakan</div>
+            <div class="frexor-rule-item-desc">Jangan terpaku terlalu lama pada satu soal yang sulit. Kerjakan soal yang mudah terlebih dahulu.</div>
+          </div>
+        </div>
+
+        <div style="background: #FFFBEB; border: 1px solid #FDE68A; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 12.5px; color: #92400E; text-align: left;">
+          ⚠️ <strong>Perhatian:</strong> Pastikan Anda telah berada di ruangan yang tenang, koneksi internet stabil, dan siap fokus penuh selama 30 menit ke depan sebelum menekan tombol di bawah.
+        </div>
+
+        <button type="button" class="btn-start-frexor" onclick="startFrexorStage()">
+          <span>🚀 Saya Siap, Mulai Tes Frexor IQ Sekarang!</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      `;
+      container.appendChild(card);
+    }
+
+    function startFrexorStage() {
+      frexorStarted = true;
+      try {
+        sessionStorage.setItem('frexor_started_' + candidateId, 'true');
+      } catch (e) {}
+
+      initFrexorTimer();
+      renderStage(currentStageIndex);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateStageNavUI(showQuestions) {
+      const btnPrev = document.getElementById('btnStagePrev');
+      const btnNext = document.getElementById('btnStageNext');
+      const btnSubmit = document.getElementById('submitBtn');
+      const meta = document.getElementById('stageStatusMeta');
+      const counterText = document.getElementById('stageCounterText');
+      const summaryText = document.getElementById('stageProgressSummary');
+      const banner = document.getElementById('unansweredBanner');
+      if (banner) banner.style.display = 'none';
+
+      const mod = activeModules[currentStageIndex];
+      const isLastStage = (currentStageIndex === activeModules.length - 1);
+      const isFrexorIntermission = (mod && mod.key === 'frexor' && !frexorStarted);
+
+      // Back button
+      if (btnPrev) {
+        // Can go back if > 0 and NOT inside active Frexor test
+        const canGoBack = (currentStageIndex > 0) && !(mod && mod.key === 'frexor' && frexorStarted);
+        btnPrev.style.display = canGoBack ? 'inline-flex' : 'none';
+        if (canGoBack) {
+          const prevMod = activeModules[currentStageIndex - 1];
+          document.getElementById('btnStagePrevText').textContent = `Kembali ke ${prevMod.shortName}`;
         }
       }
 
-      // 3. Clear container
-      container.innerHTML = '';
+      // Next & Submit button
+      if (isFrexorIntermission) {
+        if (btnNext) btnNext.style.display = 'none';
+        if (btnSubmit) btnSubmit.style.display = 'none';
+        if (meta) meta.style.display = 'none';
+        return;
+      }
 
-      // 4. Render Sections in Order
-      let partCounter = 0;
+      if (meta) meta.style.display = 'flex';
 
-      // --- SECTION: BIG FIVE ---
-      if (hasBigFive) {
-        partCounter++;
-        const mod = activeModules.find(m => m.key === 'bigfive');
-        const partLabel = totalModules > 1 ? `BAGIAN ${partCounter} DARI ${totalModules} • MODUL KEPRIBADIAN KERJA` : 'MODUL ASESMEN KEPRIBADIAN';
+      if (isLastStage) {
+        if (btnNext) btnNext.style.display = 'none';
+        if (btnSubmit) btnSubmit.style.display = 'inline-flex';
+      } else {
+        if (btnSubmit) btnSubmit.style.display = 'none';
+        if (btnNext) {
+          btnNext.style.display = 'inline-flex';
+          const nextMod = activeModules[currentStageIndex + 1];
+          document.getElementById('btnStageNextText').textContent = `Lanjut: ${nextMod.shortName}`;
+        }
+      }
+
+      // Counter Meta
+      if (counterText && summaryText && mod) {
+        const stageQs = getStageQuestions(mod.key);
+        const answeredCount = stageQs.filter(q => isQuestionAnswered(q)).length;
+        counterText.textContent = `Tahap ${currentStageIndex + 1} dari ${activeModules.length}: ${mod.shortName}`;
+        summaryText.textContent = `${answeredCount} / ${stageQs.length} Terjawab`;
+      }
+    }
+
+    function handleStageNext() {
+      const mod = activeModules[currentStageIndex];
+      if (!mod) return;
+
+      const stageQs = getStageQuestions(mod.key);
+      const unanswered = stageQs.filter(q => !isQuestionAnswered(q));
+
+      if (unanswered.length > 0) {
+        showUnansweredBanner(unanswered);
+        const firstUnanswered = unanswered[0];
+        const card = document.getElementById(`qcard_${firstUnanswered.id}`);
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.add('pulse-highlight');
+          setTimeout(() => card.classList.remove('pulse-highlight'), 2000);
+        }
+        return;
+      }
+
+      currentStageIndex++;
+      try {
+        sessionStorage.setItem('assessment_stage_' + candidateId, currentStageIndex);
+      } catch (e) {}
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderStage(currentStageIndex);
+    }
+
+    function navigateStage(delta) {
+      const mod = activeModules[currentStageIndex];
+      if (mod && mod.key === 'frexor' && frexorStarted) {
+        alert('Anda sedang berada dalam sesi tes Frexor berwaktu. Anda tidak dapat kembali ke tahap sebelumnya.');
+        return;
+      }
+
+      const newIndex = currentStageIndex + delta;
+      if (newIndex >= 0 && newIndex < activeModules.length) {
+        currentStageIndex = newIndex;
+        try {
+          sessionStorage.setItem('assessment_stage_' + candidateId, currentStageIndex);
+        } catch (e) {}
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        renderStage(currentStageIndex);
+      }
+    }
+
+    // Alias for backwards compatibility
+    function renderQuestions() {
+      renderStage(currentStageIndex);
+    }
+
+
+// --- STAGE RENDERER: BIG FIVE ---
+    function renderBigFiveStage(container, mod) {
+        
+        
+        const partLabel = activeModules.length > 1 ? `TAHAP ${currentStageIndex + 1} DARI ${activeModules.length} • MODUL KEPRIBADIAN KERJA` : 'MODUL ASESMEN KEPRIBADIAN';
 
         // Unified Section Briefing Card
         const b5Briefing = document.createElement('div');
@@ -2732,11 +3306,12 @@
         });
       }
 
-      // --- SECTION: DISC ---
-      if (hasDisc) {
-        partCounter++;
-        const mod = activeModules.find(m => m.key === 'disc');
-        const partLabel = totalModules > 1 ? `BAGIAN ${partCounter} DARI ${totalModules} • MODUL GAYA KOMUNIKASI & KERJA` : 'MODUL ASESMEN DISC';
+      
+// --- STAGE RENDERER: DISC ---
+    function renderDiscStage(container, mod) {
+        
+        
+        const partLabel = activeModules.length > 1 ? `TAHAP ${currentStageIndex + 1} DARI ${activeModules.length} • MODUL GAYA KOMUNIKASI & KERJA` : 'MODUL ASESMEN DISC';
 
         // Unified Section Briefing Card
         const discBriefing = document.createElement('div');
@@ -2856,11 +3431,12 @@
         });
       }
 
-      // --- SECTION: COGNITIVE & BUSINESS LOGIC ---
-      if (hasCognitive) {
-        partCounter++;
-        const mod = activeModules.find(m => m.key === 'cognitive');
-        const partLabel = totalModules > 1 ? `BAGIAN ${partCounter} DARI ${totalModules} • PENALARAN & ANALISIS BISNIS` : 'MODUL PENALARAN LOGIKA';
+      
+// --- STAGE RENDERER: COGNITIVE ---
+    function renderCognitiveStage(container, mod) {
+        
+        
+        const partLabel = activeModules.length > 1 ? `TAHAP ${currentStageIndex + 1} DARI ${activeModules.length} • PENALARAN & ANALISIS BISNIS` : 'MODUL PENALARAN LOGIKA';
 
         // Unified Section Briefing Card
         const cogBriefing = document.createElement('div');
@@ -2948,9 +3524,112 @@
           container.appendChild(card);
         });
       }
-    }
 
-        function escapeHtml(str) {
+      
+// --- STAGE RENDERER: FREXOR ---
+    function renderFrexorStage(container, mod) {
+        
+        
+        const partLabel = activeModules.length > 1 ? `TAHAP ${currentStageIndex + 1} DARI ${activeModules.length} • PAS FREXOR® APTITUDE TEST [IQ]` : 'PAS FREXOR® APTITUDE TEST [IQ]';
+
+        const frexorBriefing = document.createElement('div');
+        frexorBriefing.className = 'section-briefing-card';
+        frexorBriefing.style.borderLeft = '5px solid #4338CA';
+        frexorBriefing.innerHTML = `
+          <div class="section-briefing-header">
+            <div>
+              <div class="section-briefing-part" style="color: #4338CA;">${partLabel}</div>
+              <h3 class="section-briefing-title">${mod.icon} ${mod.title}</h3>
+              <p class="section-briefing-subtitle">${mod.subtitle}</p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span class="category-chip" style="background:#EEF2FF; color:#4338CA; border: 1px solid #C7D2FE;">60 Butir Soal</span>
+              <span class="category-chip" style="background:#FEF2F2; color:#DC2626; border: 1px solid #FECACA; font-weight: 700;">⏱️ Waktu 30 Menit</span>
+            </div>
+          </div>
+
+          <div class="section-briefing-body">
+            <div class="section-briefing-instructions-title" style="color: #312E81;">
+              <span>💡</span> Panduan Resmi Pengerjaan Frexor Aptitude Test
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px;">
+                <div style="font-size: 12.5px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">⏱️ Batas Waktu 30 Menit</div>
+                <div style="font-size: 12px; color: #475569; line-height: 1.45;">
+                  Terdapat <strong>60 soal</strong> dengan batas waktu total <strong>30 menit</strong>. Kerjakan secepat dan seakurat mungkin.
+                </div>
+              </div>
+
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px;">
+                <div style="font-size: 12.5px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">🎯 1 Jawaban Terbaik</div>
+                <div style="font-size: 12px; color: #475569; line-height: 1.45;">
+                  Pilih <strong>1 (satu)</strong> jawaban yang menurut Anda paling benar dari 5 opsi yang tersedia (A s.d E).
+                </div>
+              </div>
+            </div>
+
+            <div style="font-size: 12px; color: #3730A3; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 10px 14px; border-radius: 8px; line-height: 1.5;">
+              ℹ️ <strong>Cakupan Domain:</strong> Tes ini mencakup 4 dimensi intelegensi: <strong>Kemampuan Verbal</strong> (analogi & klasifikasi), <strong>Penalaran Spasial</strong> (analogi bentuk & rotasi gambar), <strong>Numerik</strong> (deret angka & aritmatika), serta <strong>Logika Deduktif</strong> (silogisme & pemecahan sandi).
+            </div>
+          </div>
+        `;
+        container.appendChild(frexorBriefing);
+
+        const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+        (window.FREXOR_QUESTIONS || []).forEach((q, idx) => {
+          const qNum = idx + 1;
+          const currentAns = userAnswers[q.id];
+
+          const card = document.createElement('div');
+          card.className = `question-card frexor-card ${currentAns ? 'is-answered' : ''}`;
+          card.id = `qcard_${q.id}`;
+          card.setAttribute('tabindex', '0');
+
+          let imgHtml = '';
+          if (q.image) {
+            imgHtml = `
+              <div class="frexor-diagram-wrapper" style="margin: 12px 0 16px 0; padding: 12px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; display: inline-block; max-width: 100%;">
+                <img src="${q.image}" alt="Diagram Soal ${qNum}" style="max-width: 100%; height: auto; display: block; border-radius: 4px;" />
+              </div>
+            `;
+          }
+
+          let mcOptionsHtml = '';
+          (q.options || []).forEach((optText, optIdx) => {
+            const letter = LETTERS[optIdx] || String(optIdx + 1);
+            const isSel = (currentAns === optText);
+
+            mcOptionsHtml += `
+              <button type="button" 
+                      class="mc-btn ${isSel ? 'selected' : ''}" 
+                      onclick="selectFrexorAnswer('${q.id}', '${escapeJsAttr(optText)}')">
+                <span class="mc-letter">${letter}</span>
+                <span class="mc-text">${escapeHtml(optText)}</span>
+              </button>
+            `;
+          });
+
+          card.innerHTML = `
+            <div class="question-header" style="justify-content: space-between; align-items: flex-start;">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span class="question-num" style="background: #312E81; color: #C7D2FE;">#${qNum}</span>
+                <div>
+                  <div class="question-text" style="font-size: 14.5px;">${escapeHtml(q.question)}</div>
+                  ${imgHtml}
+                </div>
+              </div>
+              <span class="category-chip" style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE;">${escapeHtml(q.domain || 'IQ')}</span>
+            </div>
+            <div class="mc-options" style="margin-top: 10px;">
+              ${mcOptionsHtml}
+            </div>
+          `;
+
+          container.appendChild(card);
+        });
+      }
+function escapeHtml(str) {
       if (!str) return '';
       return String(str)
         .replace(/&/g, '&amp;')
@@ -2989,19 +3668,24 @@
       if (!userAnswers[qid] || typeof userAnswers[qid] !== 'object') {
         userAnswers[qid] = {};
       }
+      const q = DISC_QUESTIONS.find(item => item.id === qid);
 
       if (type === 'most') {
         // If this option was already least, unset least
         if (userAnswers[qid].leastIdx === optIdx) {
           delete userAnswers[qid].leastIdx;
+          delete userAnswers[qid].leastTrait;
         }
         userAnswers[qid].mostIdx = optIdx;
+        if (q && q.options[optIdx]) userAnswers[qid].mostTrait = q.options[optIdx].most;
       } else if (type === 'least') {
         // If this option was already most, unset most
         if (userAnswers[qid].mostIdx === optIdx) {
           delete userAnswers[qid].mostIdx;
+          delete userAnswers[qid].mostTrait;
         }
         userAnswers[qid].leastIdx = optIdx;
+        if (q && q.options[optIdx]) userAnswers[qid].leastTrait = q.options[optIdx].least;
       }
 
       // Re-render this specific card only for performance
@@ -3048,6 +3732,80 @@
       updateProgress();
     }
 
+    function selectFrexorAnswer(qid, chosenOption) {
+      userAnswers[qid] = chosenOption;
+
+      const card = document.getElementById(`qcard_${qid}`);
+      if (card) {
+        card.classList.add('is-answered');
+        card.classList.remove('pulse-highlight');
+        const btns = card.querySelectorAll('.mc-btn');
+        btns.forEach(btn => {
+          const textEl = btn.querySelector('.mc-text');
+          const isSelected = textEl && textEl.textContent.trim() === chosenOption.trim();
+          btn.classList.toggle('selected', Boolean(isSelected));
+        });
+      }
+
+      persistUserAnswers();
+      flashAutosaveIndicator();
+      updateProgress();
+    }
+
+    // 30-Minute Timer for Frexor Test
+    const FREXOR_DURATION_SEC = 30 * 60; // 30 minutes = 1800s
+    let frexorTimerInterval = null;
+
+    function initFrexorTimer() {
+      if (!enabledTests.includes('frexor')) return;
+
+      const timerWrap = document.getElementById('frexorTimerWrap');
+      if (timerWrap) timerWrap.style.display = 'flex';
+
+      const storageKey = 'frexor_timer_start_' + (candidateId || 'default');
+      let startTime = sessionStorage.getItem(storageKey);
+      if (!startTime) {
+        startTime = Date.now();
+        sessionStorage.setItem(storageKey, startTime);
+      } else {
+        startTime = parseInt(startTime, 10);
+      }
+
+      function updateCountdown() {
+        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+        const remainingSec = Math.max(0, FREXOR_DURATION_SEC - elapsedSec);
+
+        const mins = Math.floor(remainingSec / 60);
+        const secs = remainingSec % 60;
+        const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+        const el = document.getElementById('frexorCountdown');
+        if (el) el.textContent = timeStr;
+
+        if (timerWrap) {
+          if (remainingSec <= 300) { // 5 minutes warning
+            timerWrap.style.background = '#FEF3C7';
+            timerWrap.style.borderColor = '#F59E0B';
+            if (el) el.style.color = '#B45309';
+          }
+          if (remainingSec <= 60) { // 1 minute warning
+            timerWrap.style.background = '#FEE2E2';
+            timerWrap.style.borderColor = '#EF4444';
+            if (el) el.style.color = '#DC2626';
+          }
+        }
+
+        if (remainingSec <= 0) {
+          clearInterval(frexorTimerInterval);
+          alert('⏱️ Waktu pengerjaan tes Frexor (30 menit) telah habis. Jawaban Anda akan otomatis dikirimkan ke sistem sekarang.');
+          handleVerifyAndSubmit(true); // force submit on timeout
+        }
+      }
+
+      updateCountdown();
+      frexorTimerInterval = setInterval(updateCountdown, 1000);
+    }
+
     function persistUserAnswers() {
       try {
         sessionStorage.setItem('ipip_answers_' + candidateId, JSON.stringify(userAnswers));
@@ -3070,31 +3828,36 @@
       let answeredCount = 0;
 
       activeQuestions.forEach(q => {
-        const ans = userAnswers[q.id];
-        if (q._type === 'disc') {
-          if (ans && typeof ans === 'object' && ans.mostIdx !== undefined && ans.leastIdx !== undefined) {
-            answeredCount++;
-          }
-        } else {
-          if (ans !== undefined && ans !== null && ans !== '') {
-            answeredCount++;
-          }
+        if (isQuestionAnswered(q)) {
+          answeredCount++;
         }
       });
 
       const pct = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
 
-      document.getElementById('progressBar').style.width = pct + '%';
-      document.getElementById('progressText').textContent = `${answeredCount} / ${total} (${pct}%)`;
+      const pBar = document.getElementById('progressBar');
+      const pText = document.getElementById('progressText');
+      if (pBar) pBar.style.width = pct + '%';
+      if (pText) pText.textContent = `${answeredCount} / ${total} (${pct}%)`;
 
-      const remaining = total - answeredCount;
-      const statusText = document.getElementById('submitStatusText');
-      if (statusText) {
-        if (remaining === 0 && total > 0) {
-          statusText.innerHTML = `<strong style="color: var(--accent-emerald);">✓ Seluruh ${total} pertanyaan telah dijawab! Anda siap mengirimkan tes.</strong>`;
-          document.getElementById('unansweredBanner').style.display = 'none';
-        } else {
-          statusText.innerHTML = `Tersisa <strong>${remaining}</strong> pertanyaan yang belum terjawab.`;
+      // Update current stage meta
+      if (activeModules && activeModules[currentStageIndex]) {
+        const currentMod = activeModules[currentStageIndex];
+        const stageQs = getStageQuestions(currentMod.key);
+        const stageAnswered = stageQs.filter(q => isQuestionAnswered(q)).length;
+        const stageSummary = document.getElementById('stageProgressSummary');
+        const stageCounter = document.getElementById('stageCounterText');
+        if (stageSummary) stageSummary.textContent = `${stageAnswered} / ${stageQs.length} Terjawab`;
+        if (stageCounter) stageCounter.textContent = `Tahap ${currentStageIndex + 1} dari ${activeModules.length}: ${currentMod.shortName}`;
+
+        const statusText = document.getElementById('submitStatusText');
+        if (statusText) {
+          const stageRemaining = stageQs.length - stageAnswered;
+          if (stageRemaining === 0) {
+            statusText.innerHTML = `<strong style="color: var(--accent-emerald);">✓ Tahap ini telah selesai (${stageAnswered}/${stageQs.length}). Silakan lanjutkan.</strong>`;
+          } else {
+            statusText.innerHTML = `Tersisa <strong>${stageRemaining}</strong> pertanyaan pada tahap ini.`;
+          }
         }
       }
     }
@@ -3114,15 +3877,22 @@
       DISC_QUESTIONS.forEach(q => {
         const ans = answers[q.id];
         if (ans && typeof ans === 'object') {
-          // Most selection
-          if (ans.mostIdx !== undefined && q.options[ans.mostIdx]) {
-            const traitM = q.options[ans.mostIdx].most;
-            if (tally.most[traitM] !== undefined) tally.most[traitM] += 1;
+          // Most selection (supports direct trait key or index lookup)
+          let traitM = ans.mostTrait;
+          if (!traitM && ans.mostIdx !== undefined && q.options[ans.mostIdx]) {
+            traitM = q.options[ans.mostIdx].most;
           }
-          // Least selection
-          if (ans.leastIdx !== undefined && q.options[ans.leastIdx]) {
-            const traitL = q.options[ans.leastIdx].least;
-            if (tally.least[traitL] !== undefined) tally.least[traitL] += 1;
+          if (traitM && tally.most[traitM] !== undefined) {
+            tally.most[traitM] += 1;
+          }
+
+          // Least selection (supports direct trait key or index lookup)
+          let traitL = ans.leastTrait;
+          if (!traitL && ans.leastIdx !== undefined && q.options[ans.leastIdx]) {
+            traitL = q.options[ans.leastIdx].least;
+          }
+          if (traitL && tally.least[traitL] !== undefined) {
+            tally.least[traitL] += 1;
           }
         }
       });
@@ -3270,26 +4040,29 @@
       };
     }
 
-    async function handleVerifyAndSubmit() {
+    async function handleVerifyAndSubmit(force = false) {
       const activeQuestions = getActiveQuestions();
-      const unanswered = activeQuestions.filter(q => {
-        const val = userAnswers[q.id];
-        if (q._type === 'disc') {
-          return !val || typeof val !== 'object' || val.mostIdx === undefined || val.leastIdx === undefined;
-        }
-        return val === undefined || val === null || val === '';
-      });
+      const unanswered = activeQuestions.filter(q => !isQuestionAnswered(q));
 
-      if (unanswered.length > 0) {
-        showUnansweredBanner(unanswered);
+      if (!force && unanswered.length > 0) {
+        // Find which stage has the first unanswered question
+        const firstUn = unanswered[0];
+        const targetStageIdx = activeModules.findIndex(m => m.key === firstUn._type);
+        if (targetStageIdx !== -1 && targetStageIdx !== currentStageIndex) {
+          renderStage(targetStageIdx);
+        }
+        showUnansweredBanner(unanswered.filter(q => q._type === activeModules[currentStageIndex].key));
+        alert(`Masih ada ${unanswered.length} pertanyaan yang belum Anda jawab. Silakan lengkapi sebelum mengirim.`);
         return;
       }
 
-      // Confirmation Prompt
-      const confirmed = window.confirm(
-        `Apakah Anda yakin telah mengisi semua ${activeQuestions.length} pertanyaan dengan teliti dan ingin mengirimkan hasil asesmen ini?`
-      );
-      if (!confirmed) return;
+      if (!force) {
+        // Confirmation Prompt
+        const confirmed = window.confirm(
+          `Apakah Anda yakin telah mengisi semua ${activeQuestions.length} pertanyaan dengan teliti dan ingin mengirimkan hasil asesmen ini?`
+        );
+        if (!confirmed) return;
+      }
 
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
@@ -3319,6 +4092,9 @@
         if (enabledTests.includes('disc')) {
           payload.disc = calculateDiscScores(userAnswers);
         }
+        if (enabledTests.includes('frexor') && typeof calculateFrexorScores === 'function') {
+          payload.frexor = calculateFrexorScores(userAnswers);
+        }
 
         // Write to Firebase Realtime Database
         await rtdb.ref('candidate_assessments/' + candidateId).set(payload);
@@ -3331,6 +4107,9 @@
         try {
           sessionStorage.removeItem('ipip_answers_' + candidateId);
           sessionStorage.removeItem('pge_cog_set_' + candidateId);
+          sessionStorage.removeItem('frexor_timer_start_' + candidateId);
+          sessionStorage.removeItem('frexor_started_' + candidateId);
+          sessionStorage.removeItem('assessment_stage_' + candidateId);
         } catch (e) {}
 
         showCompletionScreen();
@@ -3358,6 +4137,7 @@
         let typeLabel = 'Big Five';
         if (q._type === 'disc') typeLabel = 'DISC';
         else if (q._type === 'cognitive') typeLabel = 'Kognitif';
+        else if (q._type === 'frexor') typeLabel = 'Frexor';
         chip.textContent = `#${q._num} (${typeLabel})`;
         chip.onclick = () => {
           const targetCard = document.getElementById(`qcard_${q.id}`);
