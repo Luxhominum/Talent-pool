@@ -18,7 +18,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- Extended Features & Role Benchmarks -->
   <script src="js/assessment-features.js"></script>
+  <!-- PAS frexor Aptitude Test Data & Engine -->
+  <script src="/js/frexor-data.js"></script>
 
   <style>
     :root {
@@ -199,6 +202,29 @@
       box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
     }
 
+    .btn-wa {
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      color: #1E40AF;
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: 8px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-wa:hover {
+      background: #DBEAFE;
+      border-color: #93C5FD;
+      color: #1D4ED8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    }
+
     /* Layout Container */
     .container {
       max-width: 1240px;
@@ -317,7 +343,7 @@
 
     .module-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 12px;
     }
 
@@ -1244,10 +1270,10 @@
           </div>
           <div class="preset-btns">
             <span style="font-size: 11px; color: #64748B; margin-right: 4px;">Preset Cepat:</span>
-            <button type="button" class="preset-btn" onclick="applyModulePreset('all')">Pilih Semua (3)</button>
-            <button type="button" class="preset-btn" onclick="applyModulePreset('personality_disc')">Big Five + DISC</button>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('all')">Pilih Semua (4 Modul)</button>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('standard_3')">Standar 3 Modul</button>
+            <button type="button" class="preset-btn" onclick="applyModulePreset('frexor_only')" style="border-color: #C7D2FE; color: #4338CA; background: #EEF2FF; font-weight: 700;">⚡ Frexor IQ Saja (60)</button>
             <button type="button" class="preset-btn" onclick="applyModulePreset('disc_cog')">DISC + Logika</button>
-            <button type="button" class="preset-btn" onclick="applyModulePreset('cog_only')">Logika Saja</button>
           </div>
         </div>
 
@@ -1291,6 +1317,20 @@
                 Deret Angka, Aritmatika Bisnis, Studi Kasus Komersial &amp; Penalaran Analitis untuk problem solving di dunia kerja nyata.
               </div>
               <span class="module-badge" style="background: #ECFDF5; color: #059669; border: 1px solid #D1FAE5;">15 Pilihan Ganda (A–E)</span>
+            </div>
+          </label>
+
+          <!-- PAS Frexor Aptitude Test [IQ] Card -->
+          <label class="module-card" id="cardModuleFrexor">
+            <input type="checkbox" id="chkModuleFrexor" onchange="updateSelectedModules()">
+            <div class="module-info">
+              <div class="module-title">
+                <span>⚡</span> PAS frexor® Aptitude Test [IQ]
+              </div>
+              <div class="module-desc">
+                Standar resmi tes intelegensi Mensa: 60 soal mencakup Verbal, Spasial/Figural, Numerik &amp; Silogisme Deduktif (30 Menit).
+              </div>
+              <span class="module-badge" style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE;">60 Soal • Timer 30 Mnt • Skala IQ</span>
             </div>
           </label>
         </div>
@@ -1566,23 +1606,28 @@
       const chkBigFive = document.getElementById('chkModuleBigFive');
       const chkDisc = document.getElementById('chkModuleDisc');
       const chkCog = document.getElementById('chkModuleCognitive');
+      const chkFrexor = document.getElementById('chkModuleFrexor');
 
       if (preset === 'all') {
         chkBigFive.checked = true;
         chkDisc.checked = true;
         chkCog.checked = true;
-      } else if (preset === 'personality_disc') {
+        if (chkFrexor) chkFrexor.checked = true;
+      } else if (preset === 'standard_3') {
         chkBigFive.checked = true;
         chkDisc.checked = true;
+        chkCog.checked = true;
+        if (chkFrexor) chkFrexor.checked = false;
+      } else if (preset === 'frexor_only') {
+        chkBigFive.checked = false;
+        chkDisc.checked = false;
         chkCog.checked = false;
+        if (chkFrexor) chkFrexor.checked = true;
       } else if (preset === 'disc_cog') {
         chkBigFive.checked = false;
         chkDisc.checked = true;
         chkCog.checked = true;
-      } else if (preset === 'cog_only') {
-        chkBigFive.checked = false;
-        chkDisc.checked = false;
-        chkCog.checked = true;
+        if (chkFrexor) chkFrexor.checked = false;
       }
 
       updateSelectedModules();
@@ -1592,20 +1637,24 @@
       const chkBigFive = document.getElementById('chkModuleBigFive');
       const chkDisc = document.getElementById('chkModuleDisc');
       const chkCog = document.getElementById('chkModuleCognitive');
+      const chkFrexor = document.getElementById('chkModuleFrexor');
 
       const cardBigFive = document.getElementById('cardModuleBigFive');
       const cardDisc = document.getElementById('cardModuleDisc');
       const cardCog = document.getElementById('cardModuleCognitive');
+      const cardFrexor = document.getElementById('cardModuleFrexor');
 
       cardBigFive.classList.toggle('active', chkBigFive.checked);
       cardDisc.classList.toggle('active', chkDisc.checked);
       cardCog.classList.toggle('active', chkCog.checked);
+      if (cardFrexor && chkFrexor) cardFrexor.classList.toggle('active', chkFrexor.checked);
 
       const mods = [];
       let totalQuestions = 0;
       if (chkBigFive.checked) { mods.push('bigfive'); totalQuestions += 50; }
       if (chkDisc.checked) { mods.push('disc'); totalQuestions += 24; }
       if (chkCog.checked) { mods.push('cognitive'); totalQuestions += 15; }
+      if (chkFrexor && chkFrexor.checked) { mods.push('frexor'); totalQuestions += 60; }
 
       if (mods.length === 0) {
         // Prevent all unselected - fallback to at least one
@@ -1680,6 +1729,63 @@
       window.open(url, '_blank');
       showToast(`🚀 Membuka lembar asesmen untuk ${talent.name}...`);
     }
+
+    function formatToInternationalPhone(rawPhone) {
+      if (!rawPhone) return '';
+      let cleaned = String(rawPhone).replace(/[^0-9+]/g, '');
+      if (cleaned.startsWith('08')) cleaned = '+628' + cleaned.substring(2);
+      else if (cleaned.startsWith('628')) cleaned = '+' + cleaned;
+      else if (cleaned.startsWith('8') && !cleaned.startsWith('+')) cleaned = '+62' + cleaned;
+      return cleaned;
+    }
+
+    function generateAndSendAssessmentLink(talentId) {
+      const talent = (typeof state !== 'undefined' && state.talents)
+        ? state.talents.find(t => (t.id === talentId || t.talentId === talentId || t.appwriteId === talentId))
+        : null;
+      if (!talent) {
+        showToast('⚠️ Data kandidat tidak ditemukan.');
+        return;
+      }
+
+      const phoneClean = formatToInternationalPhone(talent.phone);
+      if (!phoneClean) {
+        showToast('⚠️ Kandidat tidak memiliki nomor telepon / WhatsApp yang valid.');
+        return;
+      }
+
+      // Generate 6-digit random numeric token
+      const token = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+
+      // Save token to Firebase RTDB /assessmentTokens
+      if (typeof rtdb !== 'undefined' && rtdb) {
+        rtdb.ref('/assessmentTokens/' + token).set({
+          talentId: talent.id,
+          candidateName: talent.name,
+          role: talent.role || 'Freelance Content Creator',
+          phone: phoneClean,
+          createdAt: Date.now(),
+          expiresAt: expiresAt,
+          status: 'active'
+        }).then(() => {
+          rtdb.ref('/talents/' + talent.id + '/assessmentToken').set(token);
+          rtdb.ref('/talents/' + talent.id + '/assessmentTokenCreatedAt').set(Date.now());
+        }).catch(err => {
+          console.warn('Token sync log:', err);
+        });
+      }
+
+      const cleanDigits = phoneClean.replace(/\+/g, '');
+      const testUrl = 'https://pge-talentpool.web.app/test?token=' + token;
+      const messageText = `Halo Kak ${talent.name},\n\nSelamat! Anda lolos ke tahap asesmen online PGE Talent Pool untuk posisi ${talent.role || 'Freelance Content Creator'}.\n\nSilakan klik link berikut untuk memulai tes melalui smartphone/laptop Anda:\n👉 ${testUrl}\n\nKode Akses (OTP): ${token} (Aktif selama 24 jam).\nEstimasi waktu pengerjaan: 15–20 menit. Pastikan koneksi internet stabil.\n\nTerima kasih,\nTim HR PGE`;
+
+      const waUrl = 'https://wa.me/' + cleanDigits + '?text=' + encodeURIComponent(messageText);
+      window.open(waUrl, '_blank');
+      showToast('✓ Link Asesmen Online & OTP (' + token + ') berhasil dibuat dan dibuka di WhatsApp!');
+    }
+
+    window.generateAndSendAssessmentLink = generateAndSendAssessmentLink;
 
     function toggleScoreDetails(talentId) {
       state.expandedDetailsId = (state.expandedDetailsId === talentId) ? null : talentId;
@@ -2272,6 +2378,14 @@ if (state.resultsViewLayout === 'table') {
                         </span>
                       </div>
                     ` : ''}
+                    ${assessment.frexor && assessment.frexor.iq_estimate ? `
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11px; color: #4338CA; font-weight: 700; width: 44px;">IQ [⚡]:</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 700; color: #312E81; font-family: var(--font-mono);">
+                          IQ ${assessment.frexor.iq_estimate} <span style="font-weight: 600; font-family: var(--font-sans); color: #4338CA; font-size: 10px;">(${assessment.frexor.score}/60 • ${assessment.frexor.category})</span>
+                        </span>
+                      </div>
+                    ` : ''}
                   </div>
                 </td>
 
@@ -2414,6 +2528,12 @@ if (state.resultsViewLayout === 'table') {
             </span>
           </div>
           ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+        </div>
+      ` : ''}
+
+      ${(assessment.frexor && typeof renderFrexorDossierHtml === 'function') ? `
+        <div style="margin-top: 14px;">
+          ${renderFrexorDossierHtml(assessment.frexor)}
         </div>
       ` : ''}
     </div>
@@ -2636,6 +2756,12 @@ if (state.resultsViewLayout === 'table') {
           ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
         </div>
       ` : ''}
+
+      ${(assessment.frexor && typeof renderFrexorDossierHtml === 'function') ? `
+        <div style="margin-top: 14px;">
+          ${renderFrexorDossierHtml(assessment.frexor)}
+        </div>
+      ` : ''}
     </div>
 
     <!-- SEKSI 2: PANDUAN PERTANYAAN WAWANCARA (PROBING) -->
@@ -2827,12 +2953,15 @@ if (state.resultsViewLayout === 'table') {
 
         } else {
           actionAreaHtml = `
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <span class="status-badge-incomplete">
                 ⏳ Belum Tes
               </span>
-              <button type="button" class="btn btn-launch" onclick="launchCandidateTest('${talent.id}')">
+              <button type="button" class="btn btn-launch" onclick="launchCandidateTest('${talent.id}')" title="Mulai asesmen on-site di laptop ini">
                 <span>🚀 Mulai Test ↗</span>
+              </button>
+              <button type="button" class="btn btn-wa" onclick="generateAndSendAssessmentLink('${talent.id}')" title="Buat kode OTP 6-digit & kirim link tes online ke WhatsApp kandidat">
+                <span>📲 Kirim Link WA</span>
               </button>
             </div>
           `;
@@ -3576,11 +3705,22 @@ function renderPentagonMatrixSvg(dimensions) {
         `;
       }
 
+      // 4. Frexor IQ Card
+      let frexorCardHtml = '';
+      if (assessment.frexor && typeof renderFrexorDossierHtml === 'function') {
+        frexorCardHtml = `
+          <div style="grid-column: 1 / -1;">
+            ${renderFrexorDossierHtml(assessment.frexor)}
+          </div>
+        `;
+      }
+
       body.innerHTML = `
         <div class="report-grid-3col">
           ${bigFiveCardHtml}
           ${discCardHtml}
           ${cogCardHtml}
+          ${frexorCardHtml}
         </div>
       `;
 
