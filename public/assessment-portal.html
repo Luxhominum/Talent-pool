@@ -1792,24 +1792,248 @@
       renderCandidates();
     }
 
-    async function resetCandidateData(talentId) {
-      const talent = state.talents.find(t => t.id === talentId);
-      const name = talent ? talent.name : talentId;
+    function resetCandidateData(talentId) {
+      openGranularResetModal(talentId);
+    }
 
-      const confirmed = window.confirm(
-        `Apakah Anda yakin ingin mereset hasil tes untuk ${name} (${talentId})?\n\nData respon dan skor akan dihapus dari database agar kandidat dapat mengerjakan ulang.`
-      );
-      if (!confirmed) return;
+    function openGranularResetModal(talentId) {
+      const talent = state.talents.find(t => (t.id === talentId || t.talentId === talentId || t.appwriteId === talentId));
+      if (!talent) {
+        showToast('⚠️ Data kandidat tidak ditemukan.');
+        return;
+      }
+
+      state._activeResetTalentId = talent.id;
+      const assessment = state.assessments[talent.id] || talent.assessment || {};
+
+      const nameEl = document.getElementById('granularModalCandidateName');
+      const metaEl = document.getElementById('granularModalCandidateMeta');
+      const optList = document.getElementById('granularResetOptionsList');
+      if (nameEl) nameEl.textContent = talent.name;
+      if (metaEl) metaEl.textContent = `${talent.id} • ${talent.role || 'Freelance Content Creator'}`;
+
+      const hasCognitive = Boolean(assessment.cognitive);
+      const hasDisc = Boolean(assessment.disc);
+      const hasBigFive = Boolean(assessment.dimensions || assessment.scores);
+      const hasFrexor = Boolean(assessment.frexor && assessment.frexor.iq_estimate);
+
+      let optionsHtml = '';
+
+      // Option 1: Cognitive
+      if (hasCognitive) {
+        optionsHtml += `
+          <label class="reset-option-card selected" onclick="selectResetRadio(this)">
+            <input type="radio" name="resetTargetModule" value="cognitive" checked style="margin-top: 3px; accent-color: #EF4444;">
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-size: 13px; font-weight: 700; color: #0F172A;">📊 Hanya Tes Logika &amp; Kognitif</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; background: #EEF2FF; color: #3730A3; border: 1px solid #C7D2FE; padding: 2px 7px; border-radius: 4px; font-weight: 700;">
+                  Skor: ${assessment.cognitive.score}/${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
+                </span>
+              </div>
+              <p style="font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">
+                Hapus nilai tes logika saja. Respon Big Five &amp; DISC tetap utuh tersimpan. Kandidat dapat tes ulang 15 soal logika tanpa mengulang tes kepribadian.
+              </p>
+            </div>
+          </label>
+        `;
+      }
+
+      // Option 2: DISC
+      if (hasDisc) {
+        const isChecked = !hasCognitive ? 'checked' : '';
+        optionsHtml += `
+          <label class="reset-option-card ${isChecked ? 'selected' : ''}" onclick="selectResetRadio(this)">
+            <input type="radio" name="resetTargetModule" value="disc" ${isChecked} style="margin-top: 3px; accent-color: #EF4444;">
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-size: 13px; font-weight: 700; color: #0F172A;">🧩 Hanya Tes Gaya Kerja DISC</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; background: #F3E8FF; color: #6B21A8; border: 1px solid #E9D5FF; padding: 2px 7px; border-radius: 4px; font-weight: 700;">
+                  Tipe: ${escapeHtml(assessment.disc.profilePattern || 'DISC')}
+                </span>
+              </div>
+              <p style="font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">
+                Hapus hasil 24 set DISC saja. Modul Big Five dan Kognitif tetap dipertahankan.
+              </p>
+            </div>
+          </label>
+        `;
+      }
+
+      // Option 3: Big Five
+      if (hasBigFive) {
+        const isChecked = (!hasCognitive && !hasDisc) ? 'checked' : '';
+        optionsHtml += `
+          <label class="reset-option-card ${isChecked ? 'selected' : ''}" onclick="selectResetRadio(this)">
+            <input type="radio" name="resetTargetModule" value="bigfive" ${isChecked} style="margin-top: 3px; accent-color: #EF4444;">
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-size: 13px; font-weight: 700; color: #0F172A;">🧠 Hanya Tes Karakter Big Five</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; background: #DBEAFE; color: #1E40AF; border: 1px solid #BFDBFE; padding: 2px 7px; border-radius: 4px; font-weight: 700;">
+                  50 Butir Soal
+                </span>
+              </div>
+              <p style="font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">
+                Hapus 5 dimensi kepribadian Big Five saja. Modul DISC dan Kognitif tetap aman tersimpan.
+              </p>
+            </div>
+          </label>
+        `;
+      }
+
+      // Option 4: Frexor IQ
+      if (hasFrexor) {
+        optionsHtml += `
+          <label class="reset-option-card" onclick="selectResetRadio(this)">
+            <input type="radio" name="resetTargetModule" value="frexor" style="margin-top: 3px; accent-color: #EF4444;">
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                <span style="font-size: 13px; font-weight: 700; color: #0F172A;">⚡ Hanya Tes IQ Frexor</span>
+                <span style="font-family: var(--font-mono); font-size: 11px; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; padding: 2px 7px; border-radius: 4px; font-weight: 700;">
+                  IQ ${assessment.frexor.iq_estimate || 0}
+                </span>
+              </div>
+              <p style="font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">
+                Hapus hasil tes 60 matriks Frexor IQ saja.
+              </p>
+            </div>
+          </label>
+        `;
+      }
+
+      // Option 5: Reset All
+      const isCheckedAll = (!hasCognitive && !hasDisc && !hasBigFive && !hasFrexor) ? 'checked' : '';
+      optionsHtml += `
+        <label class="reset-option-card ${isCheckedAll ? 'selected' : ''}" onclick="selectResetRadio(this)">
+          <input type="radio" name="resetTargetModule" value="all" ${isCheckedAll} style="margin-top: 3px; accent-color: #EF4444;">
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+              <span style="font-size: 13px; font-weight: 700; color: #DC2626;">💥 Reset Seluruh Hasil Asesmen</span>
+              <span style="font-family: var(--font-mono); font-size: 11px; background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; padding: 2px 7px; border-radius: 4px; font-weight: 700;">
+                Semua Modul
+              </span>
+            </div>
+            <p style="font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">
+              Hapus seluruh data respon, skor, dan riwayat tes kandidat dari nol. Kandidat harus mengulang seluruh modul asesmen.
+            </p>
+          </div>
+        </label>
+      `;
+
+      if (optList) optList.innerHTML = optionsHtml;
+
+      const modal = document.getElementById('granularResetModalBackdrop');
+      if (modal) modal.classList.add('open');
+    }
+
+    function selectResetRadio(cardEl) {
+      document.querySelectorAll('.reset-option-card').forEach(c => c.classList.remove('selected'));
+      cardEl.classList.add('selected');
+      const radio = cardEl.querySelector('input[type="radio"]');
+      if (radio) radio.checked = true;
+    }
+
+    function closeGranularResetModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      const modal = document.getElementById('granularResetModalBackdrop');
+      if (modal) modal.classList.remove('open');
+    }
+
+    async function executeGranularReset() {
+      const talentId = state._activeResetTalentId;
+      if (!talentId) return;
+
+      const selected = document.querySelector('input[name="resetTargetModule"]:checked')?.value || 'all';
+      const talent = state.talents.find(t => (t.id === talentId || t.talentId === talentId || t.appwriteId === talentId));
+      const name = talent ? talent.name : talentId;
+      const assessment = state.assessments[talentId] || (talent ? talent.assessment : null) || {};
+
+      const submitBtn = document.getElementById('btnConfirmGranularReset');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Mereset Data...';
+      }
 
       try {
-        await Promise.all([
-          rtdb.ref('/candidate_assessments/' + talentId).remove(),
-          rtdb.ref('/talents/' + talentId + '/assessment').remove()
-        ]);
-        showToast(`✓ Hasil asesmen untuk ${name} berhasil direset.`);
+        const promises = [];
+        const token = talent ? (talent.assessmentToken || assessment.assessmentToken) : null;
+
+        if (selected === 'all') {
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId).remove());
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment').remove());
+          if (token) {
+            promises.push(rtdb.ref('/assessmentTokens/' + token).update({
+              status: 'in_progress',
+              answers: null,
+              tabViolations: 0
+            }));
+          }
+        } else if (selected === 'cognitive') {
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/cognitive').remove());
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/cognitive').remove());
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/status').set('partial'));
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/status').set('partial'));
+          if (token) {
+            promises.push(rtdb.ref('/assessmentTokens/' + token + '/answers/cognitive').remove());
+            promises.push(rtdb.ref('/assessmentTokens/' + token + '/status').set('in_progress'));
+          }
+        } else if (selected === 'disc') {
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/disc').remove());
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/disc').remove());
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/status').set('partial'));
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/status').set('partial'));
+          if (token) {
+            promises.push(rtdb.ref('/assessmentTokens/' + token + '/answers/disc').remove());
+            promises.push(rtdb.ref('/assessmentTokens/' + token + '/status').set('in_progress'));
+          }
+        } else if (selected === 'bigfive') {
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/dimensions').remove());
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/scores').remove());
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/dimensions').remove());
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/scores').remove());
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/status').set('partial'));
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/status').set('partial'));
+          if (token) {
+            promises.push(rtdb.ref('/assessmentTokens/' + token + '/answers/bigFive').remove());
+            promises.push(rtdb.ref('/assessmentTokens/' + token + '/status').set('in_progress'));
+          }
+        } else if (selected === 'frexor') {
+          promises.push(rtdb.ref('/candidate_assessments/' + talentId + '/frexor').remove());
+          promises.push(rtdb.ref('/talents/' + talentId + '/assessment/frexor').remove());
+        }
+
+        await Promise.all(promises);
+
+        // Update local state cache
+        if (state.assessments[talentId]) {
+          if (selected === 'all') {
+            delete state.assessments[talentId];
+          } else if (selected === 'cognitive') {
+            delete state.assessments[talentId].cognitive;
+            state.assessments[talentId].status = 'partial';
+          } else if (selected === 'disc') {
+            delete state.assessments[talentId].disc;
+            state.assessments[talentId].status = 'partial';
+          } else if (selected === 'bigfive') {
+            delete state.assessments[talentId].dimensions;
+            delete state.assessments[talentId].scores;
+            state.assessments[talentId].status = 'partial';
+          } else if (selected === 'frexor') {
+            delete state.assessments[talentId].frexor;
+          }
+        }
+
+        closeGranularResetModal();
+        renderCandidates();
+        showToast(`✓ Hasil tes [${selected.toUpperCase()}] untuk ${name} berhasil direset. Akses tes ulang aktif.`);
       } catch (err) {
         console.error('Reset error:', err);
-        showToast('⚠️ Gagal mereset asesmen: ' + err.message);
+        showToast('⚠️ Gagal mereset: ' + err.message);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '🗑️ Hapus & Buka Akses Tes Ulang';
+        }
       }
     }
 
@@ -2853,6 +3077,7 @@ if (state.resultsViewLayout === 'table') {
       container.innerHTML = filtered.map(talent => {
         const assessment = state.assessments[talent.id] || talent.assessment;
         const isCompleted = Boolean(assessment && assessment.status === 'completed');
+        const isPartial = Boolean(assessment && (assessment.status === 'partial' || (!isCompleted && (assessment.dimensions || assessment.disc || assessment.cognitive))));
         const isExpanded = state.expandedDetailsId === talent.id;
 
         const parts = (talent.name || '').trim().split(/\s+/);
@@ -2872,18 +3097,27 @@ if (state.resultsViewLayout === 'table') {
         let actionAreaHtml = '';
         let scorePanelHtml = '';
 
-        if (isCompleted) {
+        if (isCompleted || isPartial) {
           const cogStr = assessment.cognitive ? `Logika: ${assessment.cognitive.score}/${assessment.cognitive.total}` : null;
           const discStr = assessment.disc ? `DISC: ${assessment.disc.profilePattern}` : null;
-          const summaryPills = [cogStr, discStr].filter(Boolean).map(s => `
+          const frexorStr = (assessment.frexor && assessment.frexor.iq_estimate) ? `IQ: ${assessment.frexor.iq_estimate}` : null;
+          const summaryPills = [cogStr, discStr, frexorStr].filter(Boolean).map(s => `
             <span style="background: #FFFFFF; border: 1px solid #BBF7D0; color: #166534; font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 600;">${s}</span>
           `).join(' ');
 
+          const statusBadgeHtml = isCompleted
+            ? `<span class="status-badge-complete">✓ Selesai</span>`
+            : `<span class="status-badge-partial" style="background: #FEF3C7; border: 1.5px solid #FDE68A; color: #92400E; font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Modul tertentu telah direset untuk tes ulang">⏳ Tes Parsial</span>`;
+
+          const waRetakeBtn = isPartial ? `
+            <button type="button" class="btn btn-wa" onclick="generateAndSendAssessmentLink('${talent.id}')" style="font-size: 11.5px; padding: 5px 10px;" title="Kirim link tes online ke WhatsApp untuk modul yang belum selesai">
+              📲 Kirim Link WA
+            </button>
+          ` : '';
+
           actionAreaHtml = `
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <span class="status-badge-complete">
-                ✓ Selesai
-              </span>
+              ${statusBadgeHtml}
               ${summaryPills}
               <button type="button" class="btn btn-secondary" onclick="toggleScoreDetails('${talent.id}')" style="font-size: 11.5px; padding: 5px 10px;">
                 ${isExpanded ? '▲ Tutup' : '📊 Rincian Skor'}
@@ -2891,7 +3125,8 @@ if (state.resultsViewLayout === 'table') {
               <button type="button" class="btn btn-secondary" onclick="launchCandidateTest('${talent.id}')" style="font-size: 11.5px; padding: 5px 10px;" title="Buka kembali lembar tes">
                 Buka ↗
               </button>
-              <button type="button" class="btn btn-secondary" onclick="resetCandidateData('${talent.id}')" style="font-size: 11.5px; padding: 5px 8px; color: #DC2626; border-color: #FECACA;" title="Reset respon agar kandidat dapat tes ulang">
+              ${waRetakeBtn}
+              <button type="button" class="btn btn-secondary" onclick="resetCandidateData('${talent.id}')" style="font-size: 11.5px; padding: 5px 8px; color: #DC2626; border-color: #FECACA;" title="Reset modul tes tertentu atau semua">
                 🔄 Reset
               </button>
             </div>
@@ -3855,7 +4090,87 @@ function renderPentagonMatrixSvg(dimensions) {
       padding-bottom: 10px;
       border-bottom: 1px solid #F1F5F9;
     }
+
+    .granular-modal-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 580px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalFadeIn 0.2s ease;
+    }
+
+    .reset-option-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 16px;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #FFFFFF;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+
+    .reset-option-card:hover {
+      border-color: #94A3B8;
+      background: #F8FAFC;
+    }
+
+    .reset-option-card.selected {
+      border-color: #EF4444;
+      background: #FEF2F2;
+      box-shadow: 0 2px 6px rgba(239, 68, 68, 0.08);
+    }
   </style>
+
+  <!-- Granular Selective Reset Modal -->
+  <div class="assessment-modal-backdrop" id="granularResetModalBackdrop" onclick="closeGranularResetModal(event)">
+    <div class="granular-modal-card" onclick="event.stopPropagation()">
+      <div class="assessment-modal-header" style="background: #FFFFFF; border-bottom: 1px solid #E2E8F0; padding: 18px 24px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">🔄</span>
+            <h2 style="font-size: 17px; font-weight: 700; color: #0F172A;" id="granularModalCandidateName">Reset Hasil Asesmen</h2>
+          </div>
+          <div style="font-size: 12px; color: #64748B; margin-top: 2px;" id="granularModalCandidateMeta">
+            PGE-000 • Freelance Content Creator
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeGranularResetModal()" style="padding: 5px 10px; font-size: 13px;">
+          ✕ Tutup
+        </button>
+      </div>
+
+      <div style="padding: 20px 24px; background: #F8FAFC; overflow-y: auto; max-height: calc(85vh - 140px);">
+        <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: #1E40AF; line-height: 1.45;">
+          <strong>💡 Reset Selektif / Parsial:</strong> Pilih jenis modul tes yang ingin Anda hapus. Modul tes lain yang sudah dikerjakan kandidat akan <strong>tetap tersimpan aman</strong>, dan kandidat hanya perlu mengerjakan modul yang di-reset.
+        </div>
+
+        <div style="font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+          Pilih Modul yang Ingin Dihapus:
+        </div>
+
+        <div id="granularResetOptionsList">
+          <!-- Dynamic options injected via openGranularResetModal() -->
+        </div>
+      </div>
+
+      <div style="padding: 16px 24px; background: #FFFFFF; border-top: 1px solid #E2E8F0; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeGranularResetModal()" style="font-size: 13px; padding: 8px 16px;">
+          Batal
+        </button>
+        <button type="button" class="btn btn-primary" id="btnConfirmGranularReset" onclick="executeGranularReset()" style="font-size: 13px; padding: 8px 20px; background: #DC2626; border-color: #DC2626;">
+          🗑️ Hapus &amp; Buka Akses Tes Ulang
+        </button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>

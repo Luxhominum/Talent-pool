@@ -1997,17 +1997,42 @@
         // Update token state to in_progress in cloud
         rtdb.ref('/assessmentTokens/' + token + '/status').set('in_progress');
 
-        // Check if there is existing progress to auto-resume seamlessly
-        const b5Count = Object.keys(state.answers.bigFive || {}).length;
-        const discCount = Object.keys(state.answers.disc || {}).length;
-        const cogCount = Object.keys(state.answers.cognitive || {}).length;
-        const hasProgress = (b5Count > 0 || discCount > 0 || cogCount > 0);
+        // Check candidate's existing assessment in database for previously completed modules (for selective retakes)
+        rtdb.ref('/talents/' + state.talentId + '/assessment').once('value').then(assSnap => {
+          const existingAss = assSnap.val() || {};
 
-        if (hasProgress) {
-          autoResumeSession(b5Count, discCount, cogCount);
-        } else {
-          renderWelcomeScreen();
-        }
+          // If Big Five was already completed previously & not reset, mark as completed in state to skip
+          if (existingAss.dimensions && (!state.answers.bigFive || Object.keys(state.answers.bigFive).length === 0)) {
+            QUESTIONS.forEach(q => { state.answers.bigFive[q.id] = 3; });
+            state._skipBigFive = true;
+          }
+
+          // If DISC was already completed previously & not reset, mark as completed in state to skip
+          if (existingAss.disc && (!state.answers.disc || Object.keys(state.answers.disc).length === 0)) {
+            DISC_QUESTIONS.forEach(q => { state.answers.disc[q.id] = { mostIdx: 0, leastIdx: 1 }; });
+            state._skipDisc = true;
+          }
+
+          const b5Count = Object.keys(state.answers.bigFive || {}).length;
+          const discCount = Object.keys(state.answers.disc || {}).length;
+          const cogCount = Object.keys(state.answers.cognitive || {}).length;
+          const hasProgress = (b5Count > 0 || discCount > 0 || cogCount > 0);
+
+          if (hasProgress) {
+            autoResumeSession(b5Count, discCount, cogCount);
+          } else {
+            renderWelcomeScreen();
+          }
+        }).catch(() => {
+          const b5Count = Object.keys(state.answers.bigFive || {}).length;
+          const discCount = Object.keys(state.answers.disc || {}).length;
+          const cogCount = Object.keys(state.answers.cognitive || {}).length;
+          if (b5Count > 0 || discCount > 0 || cogCount > 0) {
+            autoResumeSession(b5Count, discCount, cogCount);
+          } else {
+            renderWelcomeScreen();
+          }
+        });
       }).catch(err => {
         console.error('Validation error:', err);
         renderOtpScreen('Terjadi kendala koneksi ke server. Silakan coba lagi.');
@@ -2515,20 +2540,35 @@
       // 3. Compute Cognitive
       const cognitiveResults = calculateCognitiveScores(state.answers.cognitive);
 
-      const finalPayload = {
-        status: 'completed',
-        completedAt: Date.now(),
-        talentId: state.talentId,
-        tabViolations: state.tabViolations || 0,
-        totalQuestions: QUESTIONS.length + DISC_QUESTIONS.length + COGNITIVE_QUESTIONS.length,
-        mode: 'remote_online',
-        dimensions: bigFiveResults,
-        disc: discResults,
-        cognitive: cognitiveResults
-      };
+      // Read existing assessment to preserve any already-completed modules (for selective retakes)
+      rtdb.ref('/talents/' + state.talentId + '/assessment').once('value').then(snap => {
+        const existing = snap.val() || {};
+        const b5Answered = state._skipBigFive ? 0 : Object.keys(state.answers.bigFive || {}).length;
+        const discAnswered = state._skipDisc ? 0 : Object.keys(state.answers.disc || {}).length;
+        const cogAnswered = Object.keys(state.answers.cognitive || {}).length;
 
-      // Write directly to candidate's assessment node in Firebase
-      rtdb.ref('/talents/' + state.talentId + '/assessment').set(finalPayload).then(() => {
+        const resolvedDimensions = (b5Answered >= 30) ? bigFiveResults : (existing.dimensions || existing.scores || bigFiveResults);
+        const resolvedDisc = (discAnswered >= 15) ? discResults : (existing.disc || discResults);
+        const resolvedCognitive = (cogAnswered > 0) ? cognitiveResults : (existing.cognitive || cognitiveResults);
+
+        const finalPayload = {
+          ...existing,
+          status: 'completed',
+          completedAt: Date.now(),
+          talentId: state.talentId,
+          tabViolations: (existing.tabViolations || 0) + (state.tabViolations || 0),
+          totalQuestions: QUESTIONS.length + DISC_QUESTIONS.length + COGNITIVE_QUESTIONS.length,
+          mode: 'remote_online',
+          dimensions: resolvedDimensions,
+          disc: resolvedDisc,
+          cognitive: resolvedCognitive
+        };
+
+        return Promise.all([
+          rtdb.ref('/talents/' + state.talentId + '/assessment').set(finalPayload),
+          rtdb.ref('/candidate_assessments/' + state.talentId).set(finalPayload)
+        ]);
+      }).then(() => {
         // Lock token
         return rtdb.ref('/assessmentTokens/' + state.token).update({
           status: 'completed',
