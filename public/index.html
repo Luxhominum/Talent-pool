@@ -3615,8 +3615,8 @@
       }
 
       const cleanDigits = phoneClean.replace(/\+/g, '');
-      const testUrl = 'https://pge-talentpool.web.app/test?token=' + token + '&tests=' + encodeURIComponent(mods.join(','));
-      const messageText = `Halo Kak ${talent.name},\n\nSelamat! Anda lolos ke tahap asesmen online PGE Talent Pool untuk posisi ${talent.role || 'Freelance Content Creator'}.\n\nSilakan klik link berikut untuk memulai tes melalui smartphone/laptop Anda:\n👉 ${testUrl}\n\nKode Akses (OTP): ${token} (Aktif selama 24 jam).\nEstimasi waktu pengerjaan: 15–20 menit. Pastikan koneksi internet stabil.\n\nTerima kasih,\nTim HR PGE`;
+      const testUrl = 'https://pge-talentpool.web.app/test';
+      const messageText = `Halo Kak ${talent.name},\n\nSelamat! Anda lolos ke tahap asesmen online PGE Talent Pool untuk posisi ${talent.role || 'Freelance Content Creator'}.\n\nSilakan klik link berikut untuk membuka portal asesmen:\n👉 ${testUrl}\n\n🔑 Kode Akses (OTP): ${token}\n(Berlaku 24 jam. Masukkan kode 6-digit ini saat halaman tes terbuka).\n\nEstimasi waktu pengerjaan: 15–20 menit. Pastikan koneksi internet stabil.\n\nTerima kasih,\nTim HR PGE`;
 
       const waUrl = 'https://wa.me/' + cleanDigits + '?text=' + encodeURIComponent(messageText);
       window.open(waUrl, '_blank');

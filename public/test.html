@@ -1878,19 +1878,17 @@
     /* 4. LIFECYCLE & ROUTING                               */
     /* ---------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', () => {
-      // Check query parameter ?token=xxx or ?otp=xxx and ?tests=xxx
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token') || params.get('otp');
-      const testsParam = params.get('tests');
-      if (testsParam) {
-        const parsed = testsParam.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-        if (parsed.length > 0) state.tests = parsed;
-      }
+      // Check active session in sessionStorage (to recover seamlessly if candidate refreshes during active test)
+      let activeSessionToken = null;
+      try {
+        activeSessionToken = sessionStorage.getItem('pge_active_token');
+      } catch (e) {}
 
-      if (token) {
-        state.token = token.trim();
+      if (activeSessionToken) {
+        state.token = activeSessionToken;
         validateAndLaunchToken(state.token);
       } else {
+        // Always require manual 6-digit OTP verification for security
         renderOtpScreen();
       }
 
@@ -1980,6 +1978,11 @@
         }
 
         // Token Valid! Populate session
+        state.token = token;
+        try {
+          sessionStorage.setItem('pge_active_token', token);
+        } catch (e) {}
+
         state.talentId = data.talentId;
         state.candidateName = data.candidateName || 'Kandidat';
         state.role = data.role || 'Freelance Content Creator';
@@ -2702,6 +2705,7 @@
       }).then(() => {
         try {
           if (state.token) localStorage.removeItem('pge_assessment_' + state.token);
+          sessionStorage.removeItem('pge_active_token');
         } catch (e) {}
         renderThankYouScreen(bigFiveResults, discResults);
       }).catch(err => {
