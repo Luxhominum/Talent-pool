@@ -1861,6 +1861,7 @@
       talentId: '',
       candidateName: '',
       role: '',
+      tests: ['bigfive', 'disc', 'cognitive'], // active modules assigned to candidate
       currentStage: 'otp', // 'otp' | 'welcome' | 'bigfive' | 'inter_disc' | 'disc' | 'inter_cog' | 'cognitive' | 'done' | 'error'
       currentIndex: 0,
       answers: {
@@ -1877,9 +1878,15 @@
     /* 4. LIFECYCLE & ROUTING                               */
     /* ---------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', () => {
-      // Check query parameter ?token=xxx or ?otp=xxx
+      // Check query parameter ?token=xxx or ?otp=xxx and ?tests=xxx
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token') || params.get('otp');
+      const testsParam = params.get('tests');
+      if (testsParam) {
+        const parsed = testsParam.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        if (parsed.length > 0) state.tests = parsed;
+      }
+
       if (token) {
         state.token = token.trim();
         validateAndLaunchToken(state.token);
@@ -1976,6 +1983,17 @@
         state.talentId = data.talentId;
         state.candidateName = data.candidateName || 'Kandidat';
         state.role = data.role || 'Freelance Content Creator';
+
+        // Load modules assigned to this token
+        if (Array.isArray(data.tests) && data.tests.length > 0) {
+          state.tests = data.tests.map(s => String(s).trim().toLowerCase());
+        } else if (typeof data.tests === 'string' && data.tests) {
+          state.tests = data.tests.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        }
+        if (!state.tests || state.tests.length === 0) {
+          state.tests = ['bigfive', 'disc', 'cognitive'];
+        }
+
         if (data.answers) {
           if (data.answers.bigFive) state.answers.bigFive = data.answers.bigFive;
           if (data.answers.disc) state.answers.disc = data.answers.disc;
@@ -2009,13 +2027,13 @@
           const existingAss = assSnap.val() || {};
 
           // If Big Five was already completed previously & not reset, mark as completed in state to skip
-          if (existingAss.dimensions && (!state.answers.bigFive || Object.keys(state.answers.bigFive).length === 0)) {
+          if (state.tests.includes('bigfive') && existingAss.dimensions && (!state.answers.bigFive || Object.keys(state.answers.bigFive).length === 0)) {
             QUESTIONS.forEach(q => { state.answers.bigFive[q.id] = 3; });
             state._skipBigFive = true;
           }
 
           // If DISC was already completed previously & not reset, mark as completed in state to skip
-          if (existingAss.disc && (!state.answers.disc || Object.keys(state.answers.disc).length === 0)) {
+          if (state.tests.includes('disc') && existingAss.disc && (!state.answers.disc || Object.keys(state.answers.disc).length === 0)) {
             DISC_QUESTIONS.forEach(q => { state.answers.disc[q.id] = { mostIdx: 0, leastIdx: 1 }; });
             state._skipDisc = true;
           }
@@ -2023,7 +2041,11 @@
           const b5Count = Object.keys(state.answers.bigFive || {}).length;
           const discCount = Object.keys(state.answers.disc || {}).length;
           const cogCount = Object.keys(state.answers.cognitive || {}).length;
-          const hasProgress = (b5Count > 0 || discCount > 0 || cogCount > 0);
+
+          // Only consider active modules when checking for existing progress
+          const hasProgress = (state.tests.includes('bigfive') && !state._skipBigFive && b5Count > 0) ||
+                             (state.tests.includes('disc') && !state._skipDisc && discCount > 0) ||
+                             (state.tests.includes('cognitive') && cogCount > 0);
 
           if (hasProgress) {
             autoResumeSession(b5Count, discCount, cogCount);
@@ -2034,7 +2056,10 @@
           const b5Count = Object.keys(state.answers.bigFive || {}).length;
           const discCount = Object.keys(state.answers.disc || {}).length;
           const cogCount = Object.keys(state.answers.cognitive || {}).length;
-          if (b5Count > 0 || discCount > 0 || cogCount > 0) {
+          const hasProgress = (state.tests.includes('bigfive') && b5Count > 0) ||
+                             (state.tests.includes('disc') && discCount > 0) ||
+                             (state.tests.includes('cognitive') && cogCount > 0);
+          if (hasProgress) {
             autoResumeSession(b5Count, discCount, cogCount);
           } else {
             renderWelcomeScreen();
@@ -2061,13 +2086,13 @@
     }
 
     function autoResumeSession(b5Count, discCount, cogCount) {
-      if (b5Count < QUESTIONS.length) {
+      if (state.tests.includes('bigfive') && !state._skipBigFive && b5Count < QUESTIONS.length) {
         startBigFive();
         showAutoResumeBanner('Bagian 1A: Karakter Kerja (Big Five)', b5Count, QUESTIONS.length);
-      } else if (discCount < DISC_QUESTIONS.length) {
+      } else if (state.tests.includes('disc') && !state._skipDisc && discCount < DISC_QUESTIONS.length) {
         startDisc();
         showAutoResumeBanner('Bagian 1B: Gaya Kolaborasi (DISC)', discCount, DISC_QUESTIONS.length);
-      } else if (cogCount < COGNITIVE_QUESTIONS.length) {
+      } else if (state.tests.includes('cognitive') && cogCount < COGNITIVE_QUESTIONS.length) {
         startCognitive();
         showAutoResumeBanner('Bagian 2: Penalaran Logika & Analisis', cogCount, COGNITIVE_QUESTIONS.length);
       } else {
@@ -2119,6 +2144,63 @@
     function renderWelcomeScreen() {
       state.currentStage = 'welcome';
       const container = document.getElementById('mainContainer');
+
+      const hasB5 = state.tests.includes('bigfive');
+      const hasDisc = state.tests.includes('disc');
+      const hasCog = state.tests.includes('cognitive');
+
+      let moduleCardsHtml = '';
+      let introDescription = '';
+      let startButtonText = 'Mulai Asesmen ➔';
+
+      if (hasB5 && hasDisc && hasCog) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Asesmen ini terdiri dari 2 bagian utama yang dirancang untuk mengukur kesesuaian gaya kerja dan penalaran bisnis:`;
+        startButtonText = 'Mulai Bagian 1: Karakter Kerja ➔';
+      } else if (hasCog && !hasB5 && !hasDisc) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Penalaran Logika &amp; Analisis Bisnis</strong>:`;
+        startButtonText = 'Mulai Tes Logika &amp; Analisis Bisnis ➔';
+      } else if (hasDisc && !hasB5 && !hasCog) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Gaya Kolaborasi (DISC Profile)</strong>:`;
+        startButtonText = 'Mulai Tes Profil DISC ➔';
+      } else if (hasB5 && !hasDisc && !hasCog) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Karakter Kerja (Big Five)</strong>:`;
+        startButtonText = 'Mulai Tes Karakter Kerja ➔';
+      } else {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Silakan menyelesaikan modul asesmen berikut:`;
+        startButtonText = 'Mulai Asesmen ➔';
+      }
+
+      if (hasB5 || hasDisc) {
+        const titleParts = [];
+        if (hasB5) titleParts.push('Big Five');
+        if (hasDisc) titleParts.push('DISC');
+        moduleCardsHtml += `
+          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13.5px; color: #38BDF8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span>🧠</span> Karakter &amp; Gaya Kolaborasi (${titleParts.join(' + ')})
+            </div>
+            <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
+              • Waktu santai &amp; fleksibel (tanpa timer countdown).<br>
+              • Tidak ada jawaban benar atau salah. Jawablah sesuai kecenderungan alami Anda.
+            </div>
+          </div>
+        `;
+      }
+
+      if (hasCog) {
+        moduleCardsHtml += `
+          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13.5px; color: #FBBF24; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span>📊</span> Penalaran Logika &amp; Analisis Bisnis (15 Soal)
+            </div>
+            <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
+              • Diberikan waktu <strong>45 detik per soal</strong>.<br>
+              • Mohon tidak berpindah tab atau membuka aplikasi lain agar tes tidak terkunci.
+            </div>
+          </div>
+        `;
+      }
+
       container.innerHTML = `
         <div class="portal-card">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px;">
@@ -2132,36 +2214,30 @@
           </div>
 
           <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
-            Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Asesmen ini terdiri dari 2 bagian utama yang dirancang untuk mengukur kesesuaian gaya kerja dan penalaran bisnis:
+            ${introDescription}
           </div>
 
           <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
-            <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
-              <div style="font-weight: 700; font-size: 13.5px; color: #38BDF8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                <span>🧠</span> Bagian 1: Karakter &amp; Gaya Kolaborasi (Big Five + DISC)
-              </div>
-              <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
-                • Waktu santai &amp; fleksibel (tanpa timer countdown).<br>
-                • Tidak ada jawaban benar atau salah. Jawablah sesuai kecenderungan alami Anda.
-              </div>
-            </div>
-
-            <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
-              <div style="font-weight: 700; font-size: 13.5px; color: #FBBF24; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                <span>📊</span> Bagian 2: Penalaran Logika &amp; Analisis Bisnis (15 Soal)
-              </div>
-              <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
-                • Diberikan waktu <strong>45 detik per soal</strong>.<br>
-                • Mohon tidak berpindah tab atau membuka aplikasi lain agar tes tidak terkunci.
-              </div>
-            </div>
+            ${moduleCardsHtml}
           </div>
 
-          <button onclick="startBigFive()" class="btn-cta">
-            Mulai Bagian 1: Karakter Kerja ➔
+          <button onclick="startFirstTest()" class="btn-cta">
+            ${startButtonText}
           </button>
         </div>
       `;
+    }
+
+    function startFirstTest() {
+      if (state.tests.includes('bigfive') && !state._skipBigFive) {
+        startBigFive();
+      } else if (state.tests.includes('disc') && !state._skipDisc) {
+        startDisc();
+      } else if (state.tests.includes('cognitive')) {
+        startCognitive();
+      } else {
+        submitAllAssessments();
+      }
     }
 
     /* ---------------------------------------------------- */
@@ -2183,7 +2259,13 @@
 
     function renderBigFiveQuestion() {
       if (state.currentIndex >= QUESTIONS.length) {
-        renderIntermissionToDisc();
+        if (state.tests.includes('disc') && !state._skipDisc) {
+          renderIntermissionToDisc();
+        } else if (state.tests.includes('cognitive')) {
+          renderIntermissionToCognitive();
+        } else {
+          submitAllAssessments();
+        }
         return;
       }
 
@@ -2302,7 +2384,11 @@
 
     function renderDiscQuestion() {
       if (state.currentIndex >= DISC_QUESTIONS.length) {
-        renderIntermissionToCognitive();
+        if (state.tests.includes('cognitive')) {
+          renderIntermissionToCognitive();
+        } else {
+          submitAllAssessments();
+        }
         return;
       }
 
@@ -2414,12 +2500,14 @@
     function renderIntermissionToCognitive() {
       state.currentStage = 'inter_cog';
       const container = document.getElementById('mainContainer');
+      const prevDone = (state.tests.includes('bigfive') || state.tests.includes('disc'));
+      const headerTitle = prevDone ? 'Tahap Sebelumnya Selesai!' : 'Persiapan Tes';
       container.innerHTML = `
         <div class="portal-card" style="text-align: center;">
           <div style="font-size: 36px; margin-bottom: 12px;">📊</div>
-          <h2 style="font-size: 20px; font-weight: 700; color: #FFF; margin-bottom: 6px;">Bagian 1 Selesai!</h2>
+          <h2 style="font-size: 20px; font-weight: 700; color: #FFF; margin-bottom: 6px;">${headerTitle}</h2>
           <p style="font-size: 13.5px; color: var(--text-muted); max-width: 440px; margin: 0 auto 20px; line-height: 1.5;">
-            Selanjutnya adalah <strong>Bagian 2: Penalaran Logika &amp; Analisis Bisnis (15 Soal)</strong>.
+            Selanjutnya adalah <strong>Penalaran Logika &amp; Analisis Bisnis (15 Soal)</strong>.
           </p>
 
           <div style="background: rgba(245, 158, 11, 0.1); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 16px; text-align: left; margin-bottom: 24px; font-size: 12.5px; color: #FDE68A; line-height: 1.5;">
@@ -2552,24 +2640,39 @@
       `;
 
       // 1. Compute Big Five
-      const bigFiveResults = calculateBigFiveScores(state.answers.bigFive);
+      const bigFiveResults = state.tests.includes('bigfive') ? calculateBigFiveScores(state.answers.bigFive) : null;
 
       // 2. Compute DISC
-      const discResults = calculateDiscScores(state.answers.disc);
+      const discResults = state.tests.includes('disc') ? calculateDiscScores(state.answers.disc) : null;
 
       // 3. Compute Cognitive
-      const cognitiveResults = calculateCognitiveScores(state.answers.cognitive);
+      const cognitiveResults = state.tests.includes('cognitive') ? calculateCognitiveScores(state.answers.cognitive) : null;
 
       // Read existing assessment to preserve any already-completed modules (for selective retakes)
       rtdb.ref('/talents/' + state.talentId + '/assessment').once('value').then(snap => {
         const existing = snap.val() || {};
-        const b5Answered = state._skipBigFive ? 0 : Object.keys(state.answers.bigFive || {}).length;
-        const discAnswered = state._skipDisc ? 0 : Object.keys(state.answers.disc || {}).length;
-        const cogAnswered = Object.keys(state.answers.cognitive || {}).length;
 
-        const resolvedDimensions = (b5Answered >= 30) ? bigFiveResults : (existing.dimensions || existing.scores || bigFiveResults);
-        const resolvedDisc = (discAnswered >= 15) ? discResults : (existing.disc || discResults);
-        const resolvedCognitive = (cogAnswered > 0) ? cognitiveResults : (existing.cognitive || cognitiveResults);
+        let resolvedDimensions = existing.dimensions || existing.scores || null;
+        let resolvedDisc = existing.disc || null;
+        let resolvedCognitive = existing.cognitive || null;
+
+        if (state.tests.includes('bigfive')) {
+          resolvedDimensions = bigFiveResults;
+        }
+
+        if (state.tests.includes('disc')) {
+          resolvedDisc = discResults;
+        }
+
+        if (state.tests.includes('cognitive')) {
+          resolvedCognitive = cognitiveResults;
+        }
+
+        let totalExpected = 0;
+        if (state.tests.includes('bigfive')) totalExpected += QUESTIONS.length;
+        if (state.tests.includes('disc')) totalExpected += DISC_QUESTIONS.length;
+        if (state.tests.includes('cognitive')) totalExpected += COGNITIVE_QUESTIONS.length;
+        if (totalExpected === 0) totalExpected = 89;
 
         const finalPayload = {
           ...existing,
@@ -2577,8 +2680,9 @@
           completedAt: Date.now(),
           talentId: state.talentId,
           tabViolations: (existing.tabViolations || 0) + (state.tabViolations || 0),
-          totalQuestions: QUESTIONS.length + DISC_QUESTIONS.length + COGNITIVE_QUESTIONS.length,
+          totalQuestions: totalExpected,
           mode: 'remote_online',
+          completedModules: Array.from(new Set([...(existing.completedModules || []), ...state.tests])),
           dimensions: resolvedDimensions,
           disc: resolvedDisc,
           cognitive: resolvedCognitive
@@ -2624,14 +2728,9 @@
       state.currentStage = 'done';
       const container = document.getElementById('mainContainer');
 
-      container.innerHTML = `
-        <div class="portal-card" style="text-align: center;">
-          <div style="font-size: 44px; margin-bottom: 12px;">🎉</div>
-          <h2 style="font-size: 22px; font-weight: 800; color: #FFF; margin-bottom: 6px;">Asesmen Berhasil Terkirim!</h2>
-          <p style="font-size: 13.5px; color: var(--text-muted); max-width: 440px; margin: 0 auto 20px; line-height: 1.5;">
-            Terima kasih, <strong>${escapeHtml(state.candidateName)}</strong>. Seluruh hasil tes Anda telah terverifikasi dan tersinkronisasi ke Tim Rekrutmen PGE Talent Pool.
-          </p>
-
+      let perkHtml = '';
+      if (disc && disc.primaryName) {
+        perkHtml = `
           <!-- Mini Workplace Style Infographic (Perk for Candidate) -->
           <div style="background: #1F2937; border: 1px solid #374151; border-radius: 12px; padding: 18px; text-align: left; margin-bottom: 24px;">
             <div style="font-size: 11px; font-family: var(--font-mono); color: #38BDF8; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
@@ -2648,6 +2747,32 @@
               💡 <em>Hasil ini mencerminkan kecenderungan gaya alami Anda. Tim HR akan mempelajari kecocokan profil Anda untuk posisi ${escapeHtml(state.role)}.</em>
             </div>
           </div>
+        `;
+      } else if (state.tests.includes('cognitive')) {
+        perkHtml = `
+          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 12px; padding: 18px; text-align: left; margin-bottom: 24px;">
+            <div style="font-size: 11px; font-family: var(--font-mono); color: #FBBF24; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
+              📊 Status Tes Logika &amp; Analisis:
+            </div>
+            <div style="font-size: 15px; font-weight: 700; color: #FFF; margin-bottom: 6px;">
+              Jawaban Berhasil Diserahkan
+            </div>
+            <div style="font-size: 12.5px; color: #D1D5DB; line-height: 1.45;">
+              Seluruh 15 butir soal penalaran logika &amp; analisis bisnis telah tersimpan dan diverifikasi di sistem HR PGE.
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="portal-card" style="text-align: center;">
+          <div style="font-size: 44px; margin-bottom: 12px;">🎉</div>
+          <h2 style="font-size: 22px; font-weight: 800; color: #FFF; margin-bottom: 6px;">Asesmen Berhasil Terkirim!</h2>
+          <p style="font-size: 13.5px; color: var(--text-muted); max-width: 440px; margin: 0 auto 20px; line-height: 1.5;">
+            Terima kasih, <strong>${escapeHtml(state.candidateName)}</strong>. Seluruh hasil tes Anda telah terverifikasi dan tersinkronisasi ke Tim Rekrutmen PGE Talent Pool.
+          </p>
+
+          ${perkHtml}
 
           <div style="font-size: 12px; color: #9CA3AF; margin-bottom: 16px;">
             Anda dapat menutup jendela peramban ini dengan aman.

@@ -3586,6 +3586,11 @@
         return;
       }
 
+      // Determine modules
+      const mods = (typeof state !== 'undefined' && state.selectedModules && state.selectedModules.length > 0)
+        ? state.selectedModules
+        : ['bigfive', 'disc', 'cognitive'];
+
       // Generate 6-digit random numeric token
       const token = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
@@ -3599,7 +3604,8 @@
           phone: phoneClean,
           createdAt: Date.now(),
           expiresAt: expiresAt,
-          status: 'active'
+          status: 'active',
+          tests: mods
         }).then(() => {
           rtdb.ref('/talents/' + talent.id + '/assessmentToken').set(token);
           rtdb.ref('/talents/' + talent.id + '/assessmentTokenCreatedAt').set(Date.now());
@@ -3609,7 +3615,7 @@
       }
 
       const cleanDigits = phoneClean.replace(/\+/g, '');
-      const testUrl = 'https://pge-talentpool.web.app/test?token=' + token;
+      const testUrl = 'https://pge-talentpool.web.app/test?token=' + token + '&tests=' + encodeURIComponent(mods.join(','));
       const messageText = `Halo Kak ${talent.name},\n\nSelamat! Anda lolos ke tahap asesmen online PGE Talent Pool untuk posisi ${talent.role || 'Freelance Content Creator'}.\n\nSilakan klik link berikut untuk memulai tes melalui smartphone/laptop Anda:\n👉 ${testUrl}\n\nKode Akses (OTP): ${token} (Aktif selama 24 jam).\nEstimasi waktu pengerjaan: 15–20 menit. Pastikan koneksi internet stabil.\n\nTerima kasih,\nTim HR PGE`;
 
       const waUrl = 'https://wa.me/' + cleanDigits + '?text=' + encodeURIComponent(messageText);
