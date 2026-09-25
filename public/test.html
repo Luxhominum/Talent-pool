@@ -1870,7 +1870,7 @@
         cognitive: {}
       },
       tabViolations: 0,
-      timerSeconds: 45,
+      timerSeconds: 60,
       timerInterval: null
     };
 
@@ -2216,7 +2216,7 @@
               <span>📊</span> Penalaran Logika &amp; Analisis Bisnis (15 Soal)
             </div>
             <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
-              • Diberikan waktu <strong>45 detik per soal</strong>.<br>
+              • Diberikan waktu <strong>60 detik per soal</strong>.<br>
               • Mohon tidak berpindah tab atau membuka aplikasi lain agar tes tidak terkunci.
             </div>
           </div>
@@ -2548,7 +2548,7 @@
 
           <div style="background: rgba(245, 158, 11, 0.1); border: 1.5px solid rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 16px; text-align: left; margin-bottom: 24px; font-size: 12.5px; color: #FDE68A; line-height: 1.5;">
             <strong>⚠️ Aturan Penting:</strong><br>
-            • Setiap soal berbatas waktu <strong>45 detik</strong>.<br>
+            • Setiap soal berbatas waktu <strong>60 detik</strong>.<br>
             • Jika waktu habis, layar otomatis berpindah ke soal berikutnya.<br>
             • Dilarang berpindah tab/aplikasi selama tes berlangsung.
           </div>
@@ -2561,7 +2561,7 @@
     }
 
     /* ---------------------------------------------------- */
-    /* 11. SECTION 2: COGNITIVE (15 ITEMS WITH 45S TIMER)   */
+    /* 11. SECTION 2: COGNITIVE (15 ITEMS WITH 60S TIMER)   */
     /* ---------------------------------------------------- */
     function startCognitive() {
       state.currentStage = 'cognitive';
@@ -2589,7 +2589,7 @@
       const pct = Math.round(((state.currentIndex + 1) / COGNITIVE_QUESTIONS.length) * 100);
       const selectedAns = state.answers.cognitive[q.id];
 
-      state.timerSeconds = 45;
+      state.timerSeconds = 60;
 
       const container = document.getElementById('mainContainer');
       container.innerHTML = `
@@ -2601,7 +2601,7 @@
           <div class="meta-row">
             <span>Bagian 2: Logika &amp; Analisis</span>
             <div id="countdownBadge" class="timer-badge">
-              <span>⏱️</span> <span id="timerSecondsText">45s</span>
+              <span>⏱️</span> <span id="timerSecondsText">60s</span>
             </div>
           </div>
 
