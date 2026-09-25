@@ -1861,7 +1861,7 @@
       talentId: '',
       candidateName: '',
       role: '',
-      tests: ['bigfive', 'disc', 'cognitive'], // active modules assigned to candidate
+      tests: [], // active modules assigned to candidate
       currentStage: 'otp', // 'otp' | 'welcome' | 'bigfive' | 'inter_disc' | 'disc' | 'inter_cog' | 'cognitive' | 'done' | 'error'
       currentIndex: 0,
       answers: {
@@ -1987,15 +1987,19 @@
         state.candidateName = data.candidateName || 'Kandidat';
         state.role = data.role || 'Freelance Content Creator';
 
-        // Load modules assigned to this token
-        if (Array.isArray(data.tests) && data.tests.length > 0) {
-          state.tests = data.tests.map(s => String(s).trim().toLowerCase());
-        } else if (typeof data.tests === 'string' && data.tests) {
-          state.tests = data.tests.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+        // Load modules assigned to this token - handle Array, Object, or CSV String
+        let assignedTests = [];
+        if (data.tests) {
+          if (Array.isArray(data.tests)) {
+            assignedTests = data.tests;
+          } else if (typeof data.tests === 'object') {
+            assignedTests = Object.values(data.tests);
+          } else if (typeof data.tests === 'string') {
+            assignedTests = data.tests.split(',');
+          }
         }
-        if (!state.tests || state.tests.length === 0) {
-          state.tests = ['bigfive', 'disc', 'cognitive'];
-        }
+        assignedTests = assignedTests.map(s => String(s).trim().toLowerCase()).filter(Boolean);
+        state.tests = (assignedTests.length > 0) ? assignedTests : ['bigfive', 'disc', 'cognitive'];
 
         if (data.answers) {
           if (data.answers.bigFive) state.answers.bigFive = data.answers.bigFive;
@@ -2151,45 +2155,60 @@
       const hasB5 = state.tests.includes('bigfive');
       const hasDisc = state.tests.includes('disc');
       const hasCog = state.tests.includes('cognitive');
+      const hasFrexor = state.tests.includes('frexor');
 
       let moduleCardsHtml = '';
       let introDescription = '';
       let startButtonText = 'Mulai Asesmen ➔';
 
       if (hasB5 && hasDisc && hasCog) {
-        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Asesmen ini terdiri dari 2 bagian utama yang dirancang untuk mengukur kesesuaian gaya kerja dan penalaran bisnis:`;
-        startButtonText = 'Mulai Bagian 1: Karakter Kerja ➔';
-      } else if (hasCog && !hasB5 && !hasDisc) {
-        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Penalaran Logika &amp; Analisis Bisnis</strong>:`;
-        startButtonText = 'Mulai Tes Logika &amp; Analisis Bisnis ➔';
-      } else if (hasDisc && !hasB5 && !hasCog) {
-        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Gaya Kolaborasi (DISC Profile)</strong>:`;
-        startButtonText = 'Mulai Tes Profil DISC ➔';
-      } else if (hasB5 && !hasDisc && !hasCog) {
-        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Karakter Kerja (Big Five)</strong>:`;
-        startButtonText = 'Mulai Tes Karakter Kerja ➔';
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Asesmen ini terdiri dari modul yang dirancang untuk mengukur kecocokan karakter kerja dan penalaran bisnis:`;
+        startButtonText = 'Mulai Modul 1: Karakter Kerja ➔';
+      } else if (hasCog && !hasB5 && !hasDisc && !hasFrexor) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Penalaran Logika &amp; Analisis Bisnis (15 Soal)</strong>:`;
+        startButtonText = 'Mulai Tes Logika &amp; Analisis Bisnis (15 Soal) ➔';
+      } else if (hasDisc && !hasB5 && !hasCog && !hasFrexor) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Gaya Kolaborasi (DISC Profile - 24 Set)</strong>:`;
+        startButtonText = 'Mulai Tes Profil DISC (24 Set) ➔';
+      } else if (hasB5 && !hasDisc && !hasCog && !hasFrexor) {
+        introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Modul asesmen yang ditugaskan adalah <strong>Karakter Kerja (Big Five - 50 Butir)</strong>:`;
+        startButtonText = 'Mulai Tes Karakter Kerja (50 Butir) ➔';
       } else {
         introDescription = `Anda terdaftar untuk posisi <strong>${escapeHtml(state.role)}</strong>. Silakan menyelesaikan modul asesmen berikut:`;
-        startButtonText = 'Mulai Asesmen ➔';
+        startButtonText = `Mulai Asesmen (${state.tests.length} Modul) ➔`;
       }
 
-      if (hasB5 || hasDisc) {
-        const titleParts = [];
-        if (hasB5) titleParts.push('Big Five');
-        if (hasDisc) titleParts.push('DISC');
+      // 1. Big Five Card
+      if (hasB5) {
         moduleCardsHtml += `
           <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
             <div style="font-weight: 700; font-size: 13.5px; color: #38BDF8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-              <span>🧠</span> Karakter &amp; Gaya Kolaborasi (${titleParts.join(' + ')})
+              <span>🧠</span> Karakter Kerja: IPIP Big Five (50 Butir)
             </div>
             <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
-              • Waktu santai &amp; fleksibel (tanpa timer countdown).<br>
-              • Tidak ada jawaban benar atau salah. Jawablah sesuai kecenderungan alami Anda.
+              • Waktu santai &amp; fleksibel (tanpa countdown per soal).<br>
+              • Mengukur 5 dimensi kecenderungan gaya kerja alami Anda.
             </div>
           </div>
         `;
       }
 
+      // 2. DISC Card
+      if (hasDisc) {
+        moduleCardsHtml += `
+          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13.5px; color: #A78BFA; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span>🧩</span> Gaya Kolaborasi: DISC Profile (24 Set)
+            </div>
+            <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
+              • Pilih 1 pernyataan yang Paling [M] &amp; 1 yang Kurang [L] menggambarkan diri.<br>
+              • Waktu santai &amp; fleksibel (tanpa countdown per soal).
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. Cognitive Card
       if (hasCog) {
         moduleCardsHtml += `
           <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
@@ -2199,6 +2218,20 @@
             <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
               • Diberikan waktu <strong>45 detik per soal</strong>.<br>
               • Mohon tidak berpindah tab atau membuka aplikasi lain agar tes tidak terkunci.
+            </div>
+          </div>
+        `;
+      }
+
+      // 4. Frexor Card
+      if (hasFrexor) {
+        moduleCardsHtml += `
+          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 10px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 13.5px; color: #818CF8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <span>⚡</span> PAS frexor® Aptitude Test [IQ] (60 Soal)
+            </div>
+            <div style="font-size: 12px; color: #D1D5DB; line-height: 1.45;">
+              • Tes penalaran intelegensi 60 soal dengan timer global 30 menit.
             </div>
           </div>
         `;
