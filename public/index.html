@@ -3914,7 +3914,6 @@
       
       const scheduleTag = `\n[Interview Scheduled: ${slot.displayDate} ${slot.assignedTime} @ ${locVal}]`;
       talent.notes = (cleanNotes ? cleanNotes + scheduleTag : scheduleTag.trim());
-      talent.stage = 'Invited';
 
       // Sync to Appwrite Cloud
       try {
@@ -3926,7 +3925,7 @@
             docId,
             {
               notes: talent.notes,
-              stage: 'Invited'
+              stage: talent.stage || 'Screening'
             }
           ).catch(err => console.warn('Appwrite plan schedule sync error:', err));
         }
@@ -3939,7 +3938,7 @@
         if (typeof firebase !== 'undefined' && firebase.database) {
           firebase.database().ref('/talents/' + talent.id).update({
             notes: talent.notes,
-            stage: 'Invited'
+            stage: talent.stage || 'Screening'
           }).catch(err => console.warn('Firebase RTDB plan schedule sync error:', err));
         }
       } catch (err) {
@@ -5842,12 +5841,14 @@
 
         const outreach = item.outreachStatus || parsedNotes.status || 'Pending';
         const fullNotes = parsedNotes.text || item.notes || '';
-        let resolvedStage = item.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Prospect'));
+        let resolvedStage = item.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Screening'));
         if (outreach === 'Tidak Hadir') {
           resolvedStage = 'Archived';
         } else if (resolvedStage === 'Interviewed' && !fullNotes.includes('[Interview Result')) {
           resolvedStage = 'Invited';
-        } else if ((!resolvedStage || resolvedStage === 'Prospect') && (fullNotes.includes('[Interview Scheduled:') || fullNotes.includes('[Rescheduled to:') || outreach === 'WA Sent' || outreach === 'Reschedule')) {
+        } else if (item.stage === 'Invited' && outreach === 'Pending' && !fullNotes.includes('WA Sent')) {
+          resolvedStage = 'Screening';
+        } else if ((!resolvedStage || resolvedStage === 'Prospect') && (outreach === 'WA Sent' || outreach === 'Reschedule')) {
           resolvedStage = 'Invited';
         }
 
@@ -5965,12 +5966,14 @@
 
           const outreach = doc.outreachStatus || parsedNotes.status || 'Pending';
           const fullNotes = parsedNotes.text || doc.notes || '';
-          let resolvedStage = doc.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Prospect'));
+          let resolvedStage = doc.stage || (outreach === 'Reschedule' ? 'Invited' : (outreach === 'Tidak Hadir' ? 'Archived' : 'Screening'));
           if (outreach === 'Tidak Hadir') {
             resolvedStage = 'Archived';
           } else if (resolvedStage === 'Interviewed' && !fullNotes.includes('[Interview Result')) {
             resolvedStage = 'Invited';
-          } else if ((!resolvedStage || resolvedStage === 'Prospect') && (fullNotes.includes('[Interview Scheduled:') || fullNotes.includes('[Rescheduled to:') || outreach === 'WA Sent' || outreach === 'Reschedule')) {
+          } else if (doc.stage === 'Invited' && outreach === 'Pending' && !fullNotes.includes('WA Sent')) {
+            resolvedStage = 'Screening';
+          } else if ((!resolvedStage || resolvedStage === 'Prospect') && (outreach === 'WA Sent' || outreach === 'Reschedule')) {
             resolvedStage = 'Invited';
           }
 
@@ -7682,7 +7685,6 @@
       const remark = `\n[Interview Scheduled: ${displayDate} ${timeVal} WIB @ ${locVal}]`;
       const updatedNotes = cleanNotes ? (cleanNotes + remark) : remark.trim();
       
-      target.stage = 'Invited';
       target.notes = updatedNotes;
       
       // Update local state map and dates immediately
@@ -7718,7 +7720,7 @@
             APPWRITE_CONFIG.collectionId,
             docId,
             {
-              stage: 'Invited',
+              stage: target.stage || 'Screening',
               notes: target.notes
             }
           );
@@ -7730,7 +7732,7 @@
 
       if (typeof firebase !== 'undefined' && firebase.database) {
         firebase.database().ref('/talents/' + target.id).update({
-          stage: 'Invited',
+          stage: target.stage || 'Screening',
           notes: target.notes
         }).catch(err => console.warn('Firebase RTDB schedule update error:', err));
       }
