@@ -3177,7 +3177,16 @@
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
               <span id="profModalId" class="talent-id" style="font-size: 11px;">PGE-000</span>
-              <span id="profModalStageBadge" class="stage-badge stage-prospect">Prospect</span>
+              <select id="profModalStageBadge" class="stage-select-pill stage-prospect" onchange="updateCandidateStage(currentProfileTalentId, this.value, event)">
+                <option value="Prospect">Prospect</option>
+                <option value="Screening">Screening</option>
+                <option value="Invited">Invited</option>
+                <option value="Interviewed">Interviewed</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="Offered">Offered</option>
+                <option value="Hired">Hired</option>
+                <option value="Archived">Archived</option>
+              </select>
               <span id="profModalRatingStars" style="color: #D97706; font-size: 12px; font-weight: 700;">★★★★★</span>
             </div>
             <h2 id="profModalName" style="font-family: var(--font-serif); font-size: 20px; font-weight: 600; color: var(--text-primary); margin: 0;">
@@ -6115,6 +6124,19 @@
         talent.stage = newStage;
       }
       applyFilters();
+      if (typeof renderBroadcastTable === 'function') {
+        renderBroadcastTable();
+      }
+      const profBadge = document.getElementById('profModalStageBadge');
+      if (profBadge && typeof currentProfileTalentId !== 'undefined' && currentProfileTalentId === id) {
+        if (profBadge.tagName === 'SELECT') {
+          profBadge.value = newStage;
+          profBadge.className = 'stage-select-pill stage-' + newStage.toLowerCase();
+        } else {
+          profBadge.textContent = newStage;
+          profBadge.className = 'stage-badge stage-' + newStage.toLowerCase();
+        }
+      }
 
       try {
         const docId = talent && talent.$id ? talent.$id : (id || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -7924,7 +7946,11 @@
                 <div style="font-size: 11px; color: var(--text-secondary);">${escapeHtml(talent.role || 'Freelance')} • ${escapeHtml(talent.domisili || '-')}</div>
               </td>
               <td>
-                <span class="stage-select-pill stage-${(talent.stage || 'prospect').toLowerCase()}">${talent.stage || 'Prospect'}</span>
+                <select class="stage-select-pill stage-${(talent.stage || 'prospect').toLowerCase()}" 
+                        onchange="updateCandidateStage('${talent.id}', this.value, event)" 
+                        onclick="event.stopPropagation()">
+                  ${STAGES.map(st => `<option value="${st}" ${(talent.stage || 'Prospect') === st ? 'selected' : ''}>${st}</option>`).join('')}
+                </select>
               </td>
               <td style="font-family: var(--font-mono); font-size: 12px;">
                 ${phone ? `<span style="color: #166534; font-weight: 500;">${phone}</span>` : '<span style="color: #DC2626;">No WhatsApp</span>'}
@@ -9743,8 +9769,13 @@ function renderPentagonMatrixSvg(dimensions) {
       if (ratingStarsEl) ratingStarsEl.textContent = renderStarGlyphs(talent.overallRating || 3);
 
       if (stageBadgeEl) {
-        stageBadgeEl.textContent = talent.stage || 'Prospect';
-        stageBadgeEl.className = 'stage-badge stage-' + (talent.stage || 'prospect').toLowerCase();
+        if (stageBadgeEl.tagName === 'SELECT') {
+          stageBadgeEl.value = talent.stage || 'Prospect';
+          stageBadgeEl.className = 'stage-select-pill stage-' + (talent.stage || 'prospect').toLowerCase();
+        } else {
+          stageBadgeEl.textContent = talent.stage || 'Prospect';
+          stageBadgeEl.className = 'stage-badge stage-' + (talent.stage || 'prospect').toLowerCase();
+        }
       }
 
       if (adminEditBtn) {
@@ -10977,7 +11008,11 @@ function renderPentagonMatrixSvg(dimensions) {
               </tr>
               <tr>
                 <td style="font-weight: 600; background: #F9FAFB;">Pipeline Stage</td>
-                ${talents.map(t => `<td style="text-align: center; border-left: 1px solid var(--border-light);"><span class="stage-select-pill stage-${(t.stage || 'prospect').toLowerCase()}">${t.stage || 'Prospect'}</span></td>`).join('')}
+                ${talents.map(t => `<td style="text-align: center; border-left: 1px solid var(--border-light);">
+                  <select class="stage-select-pill stage-${(t.stage || 'prospect').toLowerCase()}" onchange="updateCandidateStage('${t.id}', this.value, event)">
+                    ${STAGES.map(st => `<option value="${st}" ${(t.stage || 'Prospect') === st ? 'selected' : ''}>${st}</option>`).join('')}
+                  </select>
+                </td>`).join('')}
               </tr>
               <tr>
                 <td style="font-weight: 600; background: #F9FAFB;">Experience Level</td>
