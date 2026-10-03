@@ -2610,7 +2610,7 @@
 
           <div class="options-list">
             ${q.options.map((opt, i) => `
-              <button type="button" class="btn-option ${selectedAns === opt ? 'selected' : ''}" onclick="selectCognitiveAnswer('${q.id}', '${escapeHtml(opt)}')">
+              <button type="button" class="btn-option ${selectedAns === opt ? 'selected' : ''}" onclick="selectCognitiveAnswer('${q.id}', ${i})">
                 <span class="opt-key">${String.fromCharCode(65 + i)}</span>
                 <span>${escapeHtml(opt)}</span>
               </button>
@@ -2643,8 +2643,13 @@
       }, 1000);
     }
 
-    function selectCognitiveAnswer(qid, optValue) {
+    function selectCognitiveAnswer(qid, optIndexOrValue) {
       if (state.timerInterval) clearInterval(state.timerInterval);
+      const q = (typeof COGNITIVE_QUESTIONS !== 'undefined' && COGNITIVE_QUESTIONS[state.currentIndex]) ? COGNITIVE_QUESTIONS[state.currentIndex] : null;
+      let optValue = optIndexOrValue;
+      if (typeof optIndexOrValue === 'number' && q && q.options && q.options[optIndexOrValue] !== undefined) {
+        optValue = q.options[optIndexOrValue];
+      }
       state.answers.cognitive[qid] = optValue;
       saveLocalBackup();
 
@@ -2759,63 +2764,72 @@
     }
 
     /* ---------------------------------------------------- */
-    /* 13. CANDIDATE APPRECIATION SCREEN (DELIGHT & PERK)   */
+    /* 13. CANDIDATE APPRECIATION SCREEN (MINIMALIST RECEIPT)*/
     /* ---------------------------------------------------- */
     function renderThankYouScreen(b5, disc) {
       state.currentStage = 'done';
       const container = document.getElementById('mainContainer');
 
-      let perkHtml = '';
-      if (disc && disc.primaryName) {
-        perkHtml = `
-          <!-- Mini Workplace Style Infographic (Perk for Candidate) -->
-          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 12px; padding: 18px; text-align: left; margin-bottom: 24px;">
-            <div style="font-size: 11px; font-family: var(--font-mono); color: #38BDF8; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
-              🎁 Karakter Kerja Dominan Anda:
-            </div>
-            <div style="font-size: 16px; font-weight: 700; color: #FFF; margin-bottom: 6px;">
-              ${escapeHtml(disc.primaryName || 'Kolaborator Andal')}
-            </div>
-            <div style="font-size: 12.5px; color: #D1D5DB; line-height: 1.45; margin-bottom: 12px;">
-              ${escapeHtml(disc.summary || 'Memiliki gaya kerja yang adaptif, komunikatif, dan mampu bekerja harmonis dalam tim.')}
-            </div>
-
-            <div style="border-top: 1px solid #374151; padding-top: 10px; font-size: 11px; color: var(--text-muted);">
-              💡 <em>Hasil ini mencerminkan kecenderungan gaya alami Anda. Tim HR akan mempelajari kecocokan profil Anda untuk posisi ${escapeHtml(state.role)}.</em>
-            </div>
-          </div>
-        `;
-      } else if (state.tests.includes('cognitive')) {
-        perkHtml = `
-          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 12px; padding: 18px; text-align: left; margin-bottom: 24px;">
-            <div style="font-size: 11px; font-family: var(--font-mono); color: #FBBF24; text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">
-              📊 Status Tes Logika &amp; Analisis:
-            </div>
-            <div style="font-size: 15px; font-weight: 700; color: #FFF; margin-bottom: 6px;">
-              Jawaban Berhasil Diserahkan
-            </div>
-            <div style="font-size: 12.5px; color: #D1D5DB; line-height: 1.45;">
-              Seluruh 15 butir soal penalaran logika &amp; analisis bisnis telah tersimpan dan diverifikasi di sistem HR PGE.
-            </div>
-          </div>
-        `;
-      }
+      const submitTime = new Date().toLocaleString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      });
 
       container.innerHTML = `
-        <div class="portal-card" style="text-align: center;">
-          <div style="font-size: 44px; margin-bottom: 12px;">🎉</div>
-          <h2 style="font-size: 22px; font-weight: 800; color: #FFF; margin-bottom: 6px;">Asesmen Berhasil Terkirim!</h2>
-          <p style="font-size: 13.5px; color: var(--text-muted); max-width: 440px; margin: 0 auto 20px; line-height: 1.5;">
-            Terima kasih, <strong>${escapeHtml(state.candidateName)}</strong>. Seluruh hasil tes Anda telah terverifikasi dan tersinkronisasi ke Tim Rekrutmen PGE Talent Pool.
+        <div class="portal-card" style="text-align: center; max-width: 520px; margin: 0 auto; padding: 36px 28px;">
+          <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 2px solid #10B981; color: #10B981; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 18px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);">
+            ✓
+          </div>
+
+          <h2 style="font-size: 22px; font-weight: 800; color: #FFF; margin-bottom: 8px; letter-spacing: -0.02em;">
+            Asesmen Berhasil Dikirim!
+          </h2>
+          <p style="font-size: 13.5px; color: var(--text-muted); max-width: 440px; margin: 0 auto 24px; line-height: 1.55;">
+            Terima kasih, <strong>${escapeHtml(state.candidateName)}</strong>. Seluruh jawaban dan respons Anda telah terverifikasi serta tersimpan dengan aman di sistem Rekrutmen PGE Talent Pool.
           </p>
 
-          ${perkHtml}
+          <!-- Minimalist Receipt Card -->
+          <div style="background: #1F2937; border: 1px solid #374151; border-radius: 12px; padding: 18px 20px; text-align: left; margin-bottom: 24px;">
+            <div style="font-size: 11px; font-family: var(--font-mono); color: #9CA3AF; text-transform: uppercase; font-weight: 700; letter-spacing: 0.06em; margin-bottom: 12px; border-bottom: 1px solid #374151; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Bukti Penyerahan Asesmen</span>
+              <span style="color: #10B981; font-weight: 700;">● Terverifikasi</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12.5px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #9CA3AF;">Nama Kandidat</span>
+                <span style="color: #F3F4F6; font-weight: 600;">${escapeHtml(state.candidateName)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #9CA3AF;">ID / Posisi</span>
+                <span style="color: #F3F4F6; font-weight: 600; font-family: var(--font-mono); font-size: 12px;">${escapeHtml(state.talentId || 'PGE')} • ${escapeHtml(state.role || 'Candidate')}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #9CA3AF;">Waktu Selesai</span>
+                <span style="color: #E5E7EB; font-family: var(--font-mono); font-size: 11.5px;">${escapeHtml(submitTime)}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #9CA3AF;">Status Berkas</span>
+                <span style="background: rgba(16, 185, 129, 0.15); color: #34D399; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                  Diterima Tim Rekrutmen
+                </span>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid #374151; margin-top: 14px; padding-top: 12px; font-size: 11.5px; color: #9CA3AF; line-height: 1.45;">
+              Tim HR akan mempelajari berkas Anda dan menghubungi Anda untuk tahapan rekrutmen berikutnya.
+            </div>
+          </div>
 
           <div style="font-size: 12px; color: #9CA3AF; margin-bottom: 16px;">
             Anda dapat menutup jendela peramban ini dengan aman.
           </div>
 
-          <button onclick="window.close()" class="btn-cta" style="background: #374151; box-shadow: none;">
+          <button onclick="window.close()" class="btn-cta" style="background: #374151; box-shadow: none; width: 100%; justify-content: center; font-weight: 600;">
             Tutup Halaman Ini
           </button>
         </div>

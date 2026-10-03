@@ -20,6 +20,10 @@
       ".read": true,
       ".write": true
     },
+    "candidate_photos": {
+      ".read": true,
+      ".write": true
+    },
     "metadata": {
       ".read": true,
       ".write": true
@@ -29,6 +33,10 @@
       ".write": true
     },
     "assessmentTokens": {
+      ".read": true,
+      ".write": true
+    },
+    "user_preferences": {
       ".read": true,
       ".write": true
     }

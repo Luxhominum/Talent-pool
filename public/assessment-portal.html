@@ -20,6 +20,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <!-- Extended Features & Role Benchmarks -->
   <script src="js/assessment-features.js"></script>
+  <!-- Standard Interview Question Bank & Rubrics -->
+  <script src="js/interview-questions.js"></script>
   <!-- PAS frexor Aptitude Test Data & Engine -->
   <script src="/js/frexor-data.js"></script>
 
@@ -623,6 +625,25 @@
       padding: 2px 8px;
       border-radius: 12px;
     }
+
+    .stage-select-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 20px 2px 8px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='8' height='6' viewBox='0 0 8 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L4 4.5L7 1.5' stroke='%234B5563' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .stage-select-pill:hover { filter: brightness(0.96); }
+    .stage-select-pill:focus { border-color: #2563EB; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
 
     .stage-prospect { background: #F3F4F6; color: #374151; border: 1px solid #E5E7EB; }
     .stage-screening { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
@@ -1232,6 +1253,11 @@
         <span>📊</span> Dashboard Hasil &amp; Analitik
         <span class="mode-badge" id="modeResultsCountBadge">0</span>
       </button>
+      <button type="button" class="mode-switch-btn" id="btnModeInterview" onclick="switchPortalMode('interview')" title="Ruang Wawancara Langsung Layar Penuh (Tanpa Modal)">
+        <span class="pulse-dot" style="background: #10B981; display: inline-block; width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);"></span>
+        <span>🎙️</span> Ruang Wawancara
+        <span class="mode-badge" id="modeInterviewActiveBadge" style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; font-weight: 700;">Live</span>
+      </button>
     </div>
 
     <div class="topbar-actions">
@@ -1381,13 +1407,45 @@
       </div>
     </section>
 
-    <!-- Candidate List Feed -->
+    <!-- Candidate List Feed (Used by Launcher & Results modes) -->
     <section class="candidates-grid" id="candidatesList">
       <div class="empty-card">
         <div class="spinner" style="margin: 0 auto 12px; width: 28px; height: 28px; border: 3px solid #E2E8F0; border-top-color: #0F172A; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
         <p>Menghubungkan ke database PGE Talent Pool...</p>
       </div>
     </section>
+
+    <!-- Mode 3: Dedicated Full-Page Live Interview Workspace (No Modal) -->
+    <section class="station-hero" id="stationHeroInterview" style="display: none; background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%); color: #FFFFFF; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 30px rgba(15,23,42,0.15);">
+      <div class="hero-header" style="margin-bottom: 0;">
+        <div class="hero-title-area">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+            <span class="pulse-dot" style="background: #10B981; width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.4);"></span>
+            <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #34D399; text-transform: uppercase; letter-spacing: 0.08em;">
+              Operations Command • Live Interview Station
+            </span>
+            <span id="interviewActiveRoleTag" style="background: rgba(255,255,255,0.15); color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-family: var(--font-mono);">
+              Pilih Kandidat
+            </span>
+          </div>
+          <h1 style="font-size: 22px; font-weight: 800; color: #FFFFFF; margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span>🎙️</span> Ruang Wawancara Terstruktur &amp; Penilaian Langsung
+          </h1>
+          <p style="font-size: 13px; color: #94A3B8; margin-top: 6px; max-width: 780px; line-height: 1.5;">
+            Panduan wawancara berbasis kompetensi peran, kepribadian DISC, dan stabilitas emosi. Tuliskan respon dan jawaban kandidat secara langsung pada kotak catatan di bawah setiap pertanyaan.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="printActiveInterviewForm()" style="background: rgba(255,255,255,0.12); color: #FFFFFF; border-color: rgba(255,255,255,0.25); font-size: 11.5px; padding: 6px 12px; cursor: pointer;" title="Cetak Lembar Wawancara A4">
+            🖨️ Cetak Formulir A4
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dedicated Full-Page Live Interview Body Section -->
+    <section id="interviewWorkspaceView" style="display: none;"></section>
 
   </main>
 
@@ -1432,13 +1490,59 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const rtdb = firebase.database();
+
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        auth.signInAnonymously().catch(e => console.warn('Anonymous auth:', e));
+      }
+    });
+
+    /* ---------------------------------------------------- */
+    /* 1b. Global Helper Functions                          */
+    /* ---------------------------------------------------- */
+    function isValidDisplayUrl(url) {
+      if (!url || typeof url !== 'string') return false;
+      const clean = url.trim();
+      return clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:') || clean.startsWith('blob:');
+    }
+    window.isValidDisplayUrl = isValidDisplayUrl;
+
+    function normalizeExternalUrl(url) {
+      if (!url || typeof url !== 'string') return '#';
+      const clean = url.trim();
+      if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+      return 'https://' + clean;
+    }
+    window.normalizeExternalUrl = normalizeExternalUrl;
+
+    function formatToInternationalPhone(rawPhone) {
+      if (!rawPhone) return '';
+      let cleaned = String(rawPhone).replace(/[^0-9+]/g, '');
+      if (cleaned.startsWith('08')) cleaned = '+628' + cleaned.substring(2);
+      else if (cleaned.startsWith('628')) cleaned = '+' + cleaned;
+      else if (cleaned.startsWith('8') && !cleaned.startsWith('+')) cleaned = '+62' + cleaned;
+      return cleaned;
+    }
+    window.formatToInternationalPhone = formatToInternationalPhone;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    window.escapeHtml = escapeHtml;
 
     /* ---------------------------------------------------- */
     /* 2. State Management                                  */
     /* ---------------------------------------------------- */
     const state = {
-      portalMode: 'launcher', // 'launcher' | 'results'
+      portalMode: 'launcher', // 'launcher' | 'results' | 'interview'
       resultsViewLayout: 'table', // 'table' | 'cards'
       expandedLeaderboardId: null, // talent id whose drawer is open
       talents: [],
@@ -1450,7 +1554,12 @@
       filterStage: '',
       filterDisc: '',
       resultsSort: 'cognitive_desc',
-      expandedDetailsId: null
+      expandedDetailsId: null,
+      activeInterviewCandidateId: null,
+      interviewSubMode: 'probing', // 'probing' | 'bank'
+      interviewBankCategory: 'all',
+      interviewBankSearch: '',
+      interviewSessionAnswers: {}
     };
 
     function switchResultsViewLayout(layout) {
@@ -1465,24 +1574,54 @@
     }
 
     /* ---------------------------------------------------- */
-    /* 2. Mode Switching Logic (Launcher vs Results)        */
+    /* 2. Mode Switching Logic (Launcher vs Results vs Interview) */
     /* ---------------------------------------------------- */
-    function switchPortalMode(mode) {
+    function switchPortalMode(mode, targetCandidateId = null) {
       state.portalMode = mode;
+      if (targetCandidateId) {
+        state.activeInterviewCandidateId = targetCandidateId;
+      }
       
       const btnLauncher = document.getElementById('btnModeLauncher');
       const btnResults = document.getElementById('btnModeResults');
+      const btnInterview = document.getElementById('btnModeInterview');
       const launcherHero = document.getElementById('stationHeroLauncher');
       const resultsHero = document.getElementById('resultsHero');
+      const interviewHero = document.getElementById('stationHeroInterview');
+      const interviewWorkspace = document.getElementById('interviewWorkspaceView');
       const statusTabs = document.getElementById('statusTabsWrap');
+      const filterToolbar = document.querySelector('.filter-toolbar');
+      const candidatesList = document.getElementById('candidatesList');
       const filterColStage = document.getElementById('filterColStage');
       const filterColDisc = document.getElementById('filterColDisc');
       const filterColSort = document.getElementById('filterColSort');
 
+      if (btnLauncher) btnLauncher.classList.remove('active');
+      if (btnResults) btnResults.classList.remove('active');
+      if (btnInterview) btnInterview.classList.remove('active');
+
+      if (mode === 'interview') {
+        history.replaceState(null, null, '#interview' + (state.activeInterviewCandidateId ? `?id=${state.activeInterviewCandidateId}` : ''));
+        if (btnInterview) btnInterview.classList.add('active');
+        if (launcherHero) launcherHero.style.display = 'none';
+        if (resultsHero) resultsHero.style.display = 'none';
+        if (interviewHero) interviewHero.style.display = 'block';
+        if (statusTabs) statusTabs.style.display = 'none';
+        if (filterToolbar) filterToolbar.style.display = 'none';
+        if (candidatesList) candidatesList.style.display = 'none';
+        if (interviewWorkspace) interviewWorkspace.style.display = 'block';
+        renderInterviewWorkspace();
+        return;
+      } else {
+        if (interviewHero) interviewHero.style.display = 'none';
+        if (interviewWorkspace) interviewWorkspace.style.display = 'none';
+        if (filterToolbar) filterToolbar.style.display = 'flex';
+        if (candidatesList) candidatesList.style.display = 'grid';
+      }
+
       if (mode === 'results') {
         history.replaceState(null, null, '#results');
-        btnLauncher.classList.remove('active');
-        btnResults.classList.add('active');
+        if (btnResults) btnResults.classList.add('active');
         if (launcherHero) launcherHero.style.display = 'none';
         if (resultsHero) resultsHero.style.display = 'block';
         if (statusTabs) statusTabs.style.display = 'none';
@@ -1491,8 +1630,7 @@
         if (filterColSort) filterColSort.style.display = 'block';
       } else {
         history.replaceState(null, null, '#launcher');
-        btnLauncher.classList.add('active');
-        btnResults.classList.remove('active');
+        if (btnLauncher) btnLauncher.classList.add('active');
         if (launcherHero) launcherHero.style.display = 'block';
         if (resultsHero) resultsHero.style.display = 'none';
         if (statusTabs) statusTabs.style.display = 'flex';
@@ -2613,7 +2751,7 @@
                 Skor Akhir: ${assessment.cognitive ? assessment.cognitive.score : 0} / ${assessment.cognitive ? assessment.cognitive.total : 15} (${assessment.cognitive ? assessment.cognitive.percentage : 0}%)
               </strong>
             </div>
-            ${assessment.cognitive ? renderCognitiveAspectsBarsHtml(assessment.cognitive) : '<p>Tidak ada data Kognitif</p>'}
+            ${assessment.cognitive ? renderCognitiveAspectsBarsHtml(assessment.cognitive, null, false) : '<p>Tidak ada data Kognitif</p>'}
           </div>
 
           <!-- 4. Interviewer Notes & Recommendation -->
@@ -2624,10 +2762,8 @@
                 [ &nbsp; ] Disarankan &nbsp;&nbsp;&nbsp; [ &nbsp; ] Dipertimbangkan &nbsp;&nbsp;&nbsp; [ &nbsp; ] Tidak Disarankan
               </div>
             </div>
-            <div class="notes-box">
-              <div style="font-size: 10px; color: #94A3B8; font-style: italic;">
-                Tuliskan catatan observasi karakter kerja kandidat selama wawancara berlangsung...
-              </div>
+            <div class="notes-box" style="min-height: 140px; font-size: 11px; line-height: 25px; color: ${talent.notes ? '#0F172A' : '#94A3B8'}; font-style: ${talent.notes ? 'normal' : 'italic'}; white-space: pre-wrap; padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 6px; background-color: #FFFFFF; background-image: repeating-linear-gradient(transparent, transparent 24px, #E2E8F0 25px);">
+              ${talent.notes ? escapeHtml(talent.notes) : 'Tuliskan catatan observasi karakter kerja kandidat selama wawancara berlangsung...'}
             </div>
             <div style="display: flex; justify-content: flex-end; margin-top: 24px; gap: 40px; font-size: 10px;">
               <div style="text-align: center;">
@@ -2698,6 +2834,12 @@
     }
 
 function renderCandidates() {
+      // If in Interview Mode, delegate rendering directly to the Interview Workspace
+      if (state.portalMode === 'interview') {
+        renderInterviewWorkspace();
+        return;
+      }
+
       const container = document.getElementById('candidatesList');
       if (!container) return;
 
@@ -2881,13 +3023,22 @@ if (state.resultsViewLayout === 'table') {
             const parts = (talent.name || '').trim().split(/\s+/);
             const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'NA');
 
-            const cogPct = cog.percentage !== undefined ? cog.percentage : 0;
+            const hasTestedCog = (window.AssessmentExtensions && window.AssessmentExtensions.isCognitiveTested)
+              ? window.AssessmentExtensions.isCognitiveTested(assessment)
+              : (assessment.cognitive && typeof assessment.cognitive.score === 'number' && assessment.cognitive.score > 0);
+
+            const cogPct = hasTestedCog && cog.percentage !== undefined ? cog.percentage : 0;
             let cogBadgeBg = '#ECFDF5'; let cogBadgeColor = '#065F46'; let cogBorder = '#A7F3D0';
             if (cogPct < 50) { cogBadgeBg = '#FEF2F2'; cogBadgeColor = '#991B1B'; cogBorder = '#FECACA'; }
             else if (cogPct < 75) { cogBadgeBg = '#FFFBEB'; cogBadgeColor = '#92400E'; cogBorder = '#FDE68A'; }
 
             const discPattern = disc.profilePattern || '-';
             const discName = disc.primaryName || 'DISC';
+            const traitFormatter = (window.AssessmentExtensions && window.AssessmentExtensions.formatBigFiveTraitName)
+              ? window.AssessmentExtensions.formatBigFiveTraitName
+              : (k => k);
+
+            const candidatePhoto = (talent.photoUrl || (typeof localStorage !== 'undefined' ? localStorage.getItem('pge_candidate_photo_' + talent.id) : '') || '');
 
             rowsHtml += `
               <tr class="leaderboard-row ${isDrawerOpen ? 'expanded' : ''}" onclick="toggleLeaderboardDrawer('${talent.id}', event)">
@@ -2902,8 +3053,8 @@ if (state.resultsViewLayout === 'table') {
                 <!-- 2. Candidate & Role -->
                 <td class="leaderboard-cell">
                   <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 38px; height: 38px; border-radius: 10px; background: #0F172A; color: #FFF; font-family: var(--font-mono); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                      ${initials}
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: #0F172A; color: #FFF; font-family: var(--font-mono); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border: 1px solid #CBD5E1;">
+                      ${candidatePhoto ? `<img src="${escapeHtml(candidatePhoto)}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='${initials}';">` : `${initials}`}
                     </div>
                     <div>
                       <div style="font-weight: 700; font-size: 14px; color: #0F172A;">${escapeHtml(talent.name)}</div>
@@ -2933,14 +3084,16 @@ if (state.resultsViewLayout === 'table') {
                 <!-- 4. Assessment Summary (Cognitive + DISC) -->
                 <td class="leaderboard-cell" style="width: 240px;">
                   <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span style="font-size: 11px; color: #64748B; font-weight: 600; width: 44px;">Logika:</span>
-                      <div style="width: 80px; height: 6px; background: #F1F5F9; border-radius: 999px; overflow: hidden;">
-                        <div style="width: ${cogPct}%; height: 100%; background: ${cogPct >= 75 ? '#059669' : (cogPct >= 50 ? '#D97706' : '#DC2626')}; border-radius: 999px;"></div>
+                    ${hasTestedCog ? `
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11px; color: #64748B; font-weight: 600; width: 44px;">Logika:</span>
+                        <div style="width: 80px; height: 6px; background: #F1F5F9; border-radius: 999px; overflow: hidden;">
+                          <div style="width: ${cogPct}%; height: 100%; background: ${cogPct >= 75 ? '#059669' : (cogPct >= 50 ? '#D97706' : '#DC2626')}; border-radius: 999px;"></div>
+                        </div>
+                        <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #0F172A;">${cog.score !== undefined ? cog.score : 0}/${cog.total || 15}</span>
+                        <span style="font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px; background: ${cogBadgeBg}; color: ${cogBadgeColor}; border: 1px solid ${cogBorder}; font-family: var(--font-mono);">${cogPct}%</span>
                       </div>
-                      <span style="font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: #0F172A;">${cog.score !== undefined ? cog.score : 0}/${cog.total || 15}</span>
-                      <span style="font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px; background: ${cogBadgeBg}; color: ${cogBadgeColor}; border: 1px solid ${cogBorder}; font-family: var(--font-mono);">${cogPct}%</span>
-                    </div>
+                    ` : ''}
                     ${disc.profilePattern ? `
                       <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 11px; color: #64748B; font-weight: 600; width: 44px;">DISC:</span>
@@ -2961,8 +3114,11 @@ if (state.resultsViewLayout === 'table') {
                 </td>
 
                 <!-- 5. Actions -->
-                <td class="leaderboard-cell" style="text-align: right; width: 175px;">
+                <td class="leaderboard-cell" style="text-align: right; width: 230px;">
                   <div style="display: flex; justify-content: flex-end; align-items: center; gap: 6px;" onclick="event.stopPropagation()">
+                    <button type="button" class="btn btn-sm" onclick="switchPortalMode('interview', '${talent.id}'); event.stopPropagation();" title="Buka Ruang Wawancara Layar Penuh" style="font-size: 11px; padding: 5px 9px; color: #FFFFFF; background: #4F46E5; border-color: #4338CA; font-weight: 700; box-shadow: 0 1px 2px rgba(79,70,229,0.2);">
+                      <span>🎙️ Wawancara</span>
+                    </button>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="AssessmentExtensions.openWhatsAppModal('${talent.id}', event)" title="Hubungi via WhatsApp" style="font-size: 11.5px; padding: 5px 9px; color: #16A34A; border-color: #BBF7D0; background: #F0FDF4; font-weight: 700;">
                       <span>💬 WA</span>
                     </button>
@@ -3006,6 +3162,11 @@ if (state.resultsViewLayout === 'table') {
                               <option value="Archived" ${talent.stage === 'Archived' ? 'selected' : ''}>📁 Arsipkan</option>
                             </select>
                           </div>
+
+                          <!-- Dedicated Panduan Wawancara Langsung Full Page -->
+                          <button type="button" class="btn btn-sm" onclick="switchPortalMode('interview', '${talent.id}')" style="font-size: 11.5px; font-weight: 700; color: #FFFFFF; background: #4F46E5; border-color: #4338CA; box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);" title="Buka Ruang Wawancara Layar Penuh">
+                            <span>🎙️ Panduan Wawancara Langsung</span>
+                          </button>
 
                           <!-- WhatsApp Candidate -->
                           <button type="button" class="btn btn-secondary btn-sm" onclick="AssessmentExtensions.openWhatsAppModal('${talent.id}', event)" style="font-size: 11.5px; font-weight: 700; color: #16A34A; border-color: #BBF7D0; background: #F0FDF4;">
@@ -3059,11 +3220,11 @@ if (state.resultsViewLayout === 'table') {
           </div>
           ${b5Data ? renderPentagonMatrixSvg(b5Data) : '<div style="color:#94A3B8; font-size:12px;">Modul Big Five tidak diujikan</div>'}
           ${b5Data ? `
-            <div style="margin-top:6px; display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px; font-size:10.5px;">
+            <div style="margin-top:8px; display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px; font-size:11px;">
               ${Object.entries(b5Data).map(([k, d]) => `
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:4px 6px; border-radius:6px;">
-                  <div style="color:#64748B; font-size:9.5px; text-transform:capitalize;">${k}</div>
-                  <div style="font-weight:700; color:#1E40AF;">${d.percentage}% (${d.level})</div>
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:6px 8px; border-radius:6px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="color:#64748B; font-size:10px; font-weight: 600;">${traitFormatter(k)}</div>
+                  <div style="font-weight:700; color:#1E40AF; margin-top: 3px; font-size: 11.5px;">${d.percentage}% <span style="font-size: 10px; color: #475569; font-weight: 500;">(${d.level})</span></div>
                 </div>
               `).join('')}
             </div>
@@ -3090,7 +3251,7 @@ if (state.resultsViewLayout === 'table') {
         </div>
       </div>
 
-      ${assessment.cognitive ? `
+      ${hasTestedCog ? `
         <div class="dossier-subcard" style="margin-top: 14px;">
           <div class="dossier-subcard-title" style="color:#059669;">
             <span style="display:flex; align-items:center; gap:6px;"><span>📊</span> Aspek Logika, Penalaran Kognitif &amp; Analisis Bisnis</span>
@@ -3098,7 +3259,7 @@ if (state.resultsViewLayout === 'table') {
               Total Skor: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
             </span>
           </div>
-          ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+          ${renderCognitiveAspectsBarsHtml(assessment.cognitive, talent.id)}
         </div>
       ` : ''}
 
@@ -3140,7 +3301,7 @@ if (state.resultsViewLayout === 'table') {
                 <div style="display: flex; gap: 4px; margin-bottom: 10px; background: #E2E8F0; padding: 3px; border-radius: 8px;">
                   ${(q.options || []).map((opt, optIdx) => {
                     const isFirst = optIdx === 0;
-                    const shortTitle = opt.label && opt.label.includes('A') ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
+                    const shortTitle = optIdx === 0 ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
                     return `
                       <button type="button" 
                               class="probe-pill-btn probe-pill-${talent.id}-${qIdx}-${optIdx}" 
@@ -3222,12 +3383,22 @@ if (state.resultsViewLayout === 'table') {
           const completedDate = assessment.completedAt ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : 'Baru saja';
           const parts = (talent.name || '').trim().split(/\s+/);
           const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : (parts[0] ? parts[0].slice(0, 2).toUpperCase() : 'NA');
+          const hasTestedCog = (window.AssessmentExtensions && window.AssessmentExtensions.isCognitiveTested)
+            ? window.AssessmentExtensions.isCognitiveTested(assessment)
+            : (assessment.cognitive && typeof assessment.cognitive.score === 'number' && assessment.cognitive.score > 0);
+          const traitFormatter = (window.AssessmentExtensions && window.AssessmentExtensions.formatBigFiveTraitName)
+            ? window.AssessmentExtensions.formatBigFiveTraitName
+            : (k => k);
+
+          const candidatePhoto = (talent.photoUrl || (typeof localStorage !== 'undefined' ? localStorage.getItem('pge_candidate_photo_' + talent.id) : '') || '');
 
           return `
             <div class="dossier-card" id="dossier_${talent.id}" style="margin-bottom: 16px;">
               <div class="dossier-header">
                 <div class="candidate-profile-area">
-                  <div class="candidate-avatar" style="background:#0F172A; width:48px; height:48px; font-size:16px;">${initials}</div>
+                  <div class="candidate-avatar" style="background:#0F172A; width:48px; height:48px; font-size:16px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #CBD5E1;">
+                    ${candidatePhoto ? `<img src="${escapeHtml(candidatePhoto)}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='${initials}';">` : `${initials}`}
+                  </div>
                   <div class="candidate-details">
                     <div class="candidate-name-row">
                       <span class="candidate-name" style="font-size:16px;">${escapeHtml(talent.name)}</span>
@@ -3243,6 +3414,9 @@ if (state.resultsViewLayout === 'table') {
                 </div>
 
                 <div class="dossier-actions">
+                  <button type="button" class="btn btn-sm" onclick="switchPortalMode('interview', '${talent.id}')" style="font-size: 12px; font-weight: 700; color: #FFFFFF; background: #4F46E5; border-color: #4338CA; box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);" title="Buka Ruang Wawancara & Lembar Penilaian Layar Penuh">
+                    <span>🎙️ Mulai Wawancara</span>
+                  </button>
                   <button type="button" class="btn btn-secondary" onclick="printCandidateDossier('${talent.id}')" title="Cetak laporan resmi 1 lembar atau Simpan PDF" style="font-size:12px; font-weight:700; color:#1E40AF; border-color:#BFDBFE; background:#EFF6FF;">
                     <span>🖨️ Cetak Dossier (PDF)</span>
                   </button>
@@ -3285,11 +3459,11 @@ if (state.resultsViewLayout === 'table') {
           </div>
           ${b5 ? renderPentagonMatrixSvg(b5) : '<div style="color:#94A3B8; font-size:12px;">Modul Big Five tidak diujikan</div>'}
           ${b5 ? `
-            <div style="margin-top:6px; display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:6px; font-size:10.5px;">
+            <div style="margin-top:8px; display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px; font-size:11px;">
               ${Object.entries(b5).map(([k, d]) => `
-                <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:4px 6px; border-radius:6px;">
-                  <div style="color:#64748B; font-size:9.5px; text-transform:capitalize;">${k}</div>
-                  <div style="font-weight:700; color:#1E40AF;">${d.percentage}% (${d.level})</div>
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:6px 8px; border-radius:6px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="color:#64748B; font-size:10px; font-weight: 600;">${traitFormatter(k)}</div>
+                  <div style="font-weight:700; color:#1E40AF; margin-top: 3px; font-size: 11.5px;">${d.percentage}% <span style="font-size: 10px; color: #475569; font-weight: 500;">(${d.level})</span></div>
                 </div>
               `).join('')}
             </div>
@@ -3316,7 +3490,7 @@ if (state.resultsViewLayout === 'table') {
         </div>
       </div>
 
-      ${assessment.cognitive ? `
+      ${hasTestedCog ? `
         <div class="dossier-subcard" style="margin-top: 14px;">
           <div class="dossier-subcard-title" style="color:#059669;">
             <span style="display:flex; align-items:center; gap:6px;"><span>📊</span> Aspek Logika, Penalaran Kognitif &amp; Analisis Bisnis</span>
@@ -3324,7 +3498,7 @@ if (state.resultsViewLayout === 'table') {
               Total Skor: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
             </span>
           </div>
-          ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+          ${renderCognitiveAspectsBarsHtml(assessment.cognitive, talent.id)}
         </div>
       ` : ''}
 
@@ -3366,7 +3540,7 @@ if (state.resultsViewLayout === 'table') {
                 <div style="display: flex; gap: 4px; margin-bottom: 10px; background: #E2E8F0; padding: 3px; border-radius: 8px;">
                   ${(q.options || []).map((opt, optIdx) => {
                     const isFirst = optIdx === 0;
-                    const shortTitle = opt.label && opt.label.includes('A') ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
+                    const shortTitle = optIdx === 0 ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
                     return `
                       <button type="button" 
                               class="probe-pill-btn probe-pill-${talent.id}-${qIdx}-${optIdx}" 
@@ -3445,12 +3619,14 @@ if (state.resultsViewLayout === 'table') {
         let scorePanelHtml = '';
 
         if (isCompleted || isPartial) {
-          const hasCog = Boolean(assessment.cognitive);
+          const hasTestedCog = (window.AssessmentExtensions && window.AssessmentExtensions.isCognitiveTested)
+            ? window.AssessmentExtensions.isCognitiveTested(assessment)
+            : (assessment.cognitive && typeof assessment.cognitive.score === 'number' && assessment.cognitive.score > 0);
           const hasDisc = Boolean(assessment.disc);
           const hasB5 = Boolean(assessment.dimensions || assessment.scores);
           const hasFrexor = Boolean(assessment.frexor && assessment.frexor.iq_estimate);
 
-          const cogStr = hasCog ? `Logika: ${assessment.cognitive.score}/${assessment.cognitive.total}` : null;
+          const cogStr = hasTestedCog ? `Logika: ${assessment.cognitive.score}/${assessment.cognitive.total}` : null;
           const discStr = hasDisc ? `DISC: ${assessment.disc.profilePattern}` : null;
           const b5Str = hasB5 ? `Big Five: Selesai` : null;
           const frexorStr = hasFrexor ? `IQ: ${assessment.frexor.iq_estimate}` : null;
@@ -3462,7 +3638,7 @@ if (state.resultsViewLayout === 'table') {
             ? `<span class="status-badge-complete">✓ Selesai</span>`
             : `<span class="status-badge-partial" style="background: #FEF3C7; border: 1.5px solid #FDE68A; color: #92400E; font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;" title="Modul tertentu telah direset untuk tes ulang">⏳ Tes Parsial</span>`;
 
-          const hasUncompleted = !hasCog || !hasDisc || !hasB5 || !hasFrexor;
+          const hasUncompleted = !hasTestedCog || !hasDisc || !hasB5 || !hasFrexor;
           const addTestBtn = hasUncompleted ? `
             <button type="button" class="btn btn-primary" onclick="openAddAdditionalTestModal('${talent.id}')" style="font-size: 11.5px; padding: 5px 10px; background: #0284C7; border-color: #0284C7; color: #FFFFFF;" title="Tugaskan modul tes tambahan untuk kandidat ini tanpa menghapus skor yang sudah ada">
               + Tambah Tes
@@ -3530,7 +3706,7 @@ if (state.resultsViewLayout === 'table') {
                   ` : ''}
                 </div>
 
-                ${assessment.cognitive ? `
+                ${hasTestedCog && assessment.cognitive ? `
                   <div style="margin-top: 14px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                       <div style="font-size: 12px; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 6px;">
@@ -3540,7 +3716,7 @@ if (state.resultsViewLayout === 'table') {
                         Total: ${assessment.cognitive.score}/${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
                       </span>
                     </div>
-                    ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+                    ${renderCognitiveAspectsBarsHtml(assessment.cognitive, talent.id)}
                   </div>
                 ` : ''}
               </div>
@@ -3563,16 +3739,24 @@ if (state.resultsViewLayout === 'table') {
           `;
         }
 
+        const candidatePhoto = (talent.photoUrl || (typeof localStorage !== 'undefined' ? localStorage.getItem('pge_candidate_photo_' + talent.id) : '') || '');
+
         return `
           <div class="candidate-card" id="card_${talent.id}">
             <div class="candidate-main-row">
               <div class="candidate-profile-area">
-                <div class="candidate-avatar">${initials}</div>
+                <div class="candidate-avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #CBD5E1;">
+                  ${candidatePhoto ? `<img src="${escapeHtml(candidatePhoto)}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='${initials}';">` : `${initials}`}
+                </div>
                 <div class="candidate-details">
                   <div class="candidate-name-row">
                     <span class="candidate-name">${escapeHtml(talent.name)}</span>
                     <span class="candidate-id-badge">${escapeHtml(talent.id)}</span>
-                    <span class="stage-badge ${stageClass}">${escapeHtml(talent.stage || 'Prospect')}</span>
+                    <select class="stage-select-pill stage-${(talent.stage || 'prospect').toLowerCase()}" 
+                            onchange="AssessmentExtensions.updateCandidateStageDirectly('${talent.id}', this.value, event)" 
+                            onclick="event.stopPropagation()">
+                      ${['Prospect', 'Screening', 'Invited', 'Interviewed', 'Shortlisted', 'Offered', 'Hired', 'Archived'].map(st => `<option value="${st}" ${(talent.stage || 'Prospect') === st ? 'selected' : ''}>${st}</option>`).join('')}
+                    </select>
                   </div>
                   <div class="candidate-meta">
                     <span>💼 ${escapeHtml(talent.role || 'Freelance Content Creator')}</span>
@@ -3592,6 +3776,10 @@ if (state.resultsViewLayout === 'table') {
         `;
       }).join('');
     }
+    window.renderCandidates = renderCandidates;
+    window.renderTalents = renderCandidates;
+    window.renderTalent = renderCandidates;
+    window.renderActiveView = renderCandidates;
 
         /* ---------------------------------------------------- */
     /* 7. Realtime Firebase RTDB & Appwrite Cloud Listeners  */
@@ -3618,10 +3806,11 @@ if (state.resultsViewLayout === 'table') {
       if (stage === 'Interviewed' && !fullNotes.includes('[Interview Result')) {
         return 'Invited';
       }
-      if ((!stage || stage === 'Prospect') && (fullNotes.includes('[Interview Scheduled:') || fullNotes.includes('[Rescheduled to:') || outreach === 'WA Sent' || outreach === 'Reschedule')) {
+      if (doc.stage) return doc.stage;
+      if ((!stage || stage === 'Prospect') && (outreach === 'WA Sent' || outreach === 'Reschedule')) {
         return 'Invited';
       }
-      return stage || 'Prospect';
+      return stage || 'Screening';
     }
 
     async function loadAppwriteCandidatesDirect() {
@@ -3653,7 +3842,8 @@ if (state.resultsViewLayout === 'table') {
               cvUrl: doc.cvUrl || '',
               portfolioUrl: doc.portfolioUrl || '',
               notes: fullNotes,
-              outreachStatus: outreach
+              outreachStatus: outreach,
+              photoUrl: doc.photoUrl || doc.avatarUrl || ''
             };
           });
 
@@ -3664,6 +3854,9 @@ if (state.resultsViewLayout === 'table') {
           });
 
           state.talents = list;
+          try {
+            localStorage.setItem('pge_talents_cache', JSON.stringify(list));
+          } catch (e) {}
           populateRoleDropdown();
           renderCandidates();
         }
@@ -3672,7 +3865,33 @@ if (state.resultsViewLayout === 'table') {
       }
     }
 
+    const DEFAULT_CANDIDATES_SEED = [
+      { id: 'PGE-058', name: 'Meiva Shofi Az Zahra', role: 'Freelance Content Creator', stage: 'Interviewed', domisili: 'Surabaya', expectedSalary: 'Standard Uang Saku', overallRating: 5, notes: 'Portofolio video dan feed Instagram sangat rapi. Siap interview.' },
+      { id: 'PGE-057', name: 'Sri Purwanti', role: 'Live Streamer', stage: 'Interviewed', domisili: 'Malang', expectedSalary: 'Standard Uang Saku', overallRating: 4, notes: 'Pengalaman live streaming TikTok Shop 1+ tahun.' },
+      { id: 'PGE-052', name: 'Ghayu Rivanda', role: 'Video Editor', stage: 'Interviewed', domisili: 'Sidoarjo', expectedSalary: 'Standard Uang Saku', overallRating: 5, notes: 'Mahir Premiere Pro & After Effects.' },
+      { id: 'PGE-048', name: 'Nabila Putri', role: 'Graphic Designer', stage: 'Screening', domisili: 'Surabaya', expectedSalary: 'Standard Uang Saku', overallRating: 4, notes: 'Portofolio Canva & Photoshop.' },
+      { id: 'PGE-045', name: 'Budi Santoso', role: 'Digital Marketing Specialist', stage: 'Screening', domisili: 'Gresik', expectedSalary: 'Standard Uang Saku', overallRating: 4, notes: 'Fokus Meta Ads & TikTok Ads.' }
+    ];
+
     function initRealtimeListeners() {
+      // 0. Instantly bootstrap from localStorage cache or seed so UI never gets stuck loading
+      try {
+        const cached = localStorage.getItem('pge_talents_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            state.talents = parsed;
+          }
+        }
+      } catch (e) {}
+
+      if (!state.talents || state.talents.length === 0) {
+        state.talents = [...DEFAULT_CANDIDATES_SEED];
+      }
+
+      populateRoleDropdown();
+      renderCandidates();
+
       // 1. Load from Appwrite Cloud directly
       loadAppwriteCandidatesDirect();
 
@@ -3703,7 +3922,8 @@ if (state.resultsViewLayout === 'table') {
               education: doc.education || existing.education || '',
               stage: resolvedStage,
               notes: fullNotes,
-              outreachStatus: outreach
+              outreachStatus: outreach,
+              photoUrl: doc.photoUrl || doc.avatarUrl || ''
             };
             existingMap.set(k, merged);
           }
@@ -3717,12 +3937,28 @@ if (state.resultsViewLayout === 'table') {
             return numB - numA;
           });
           state.talents = list;
+          try {
+            localStorage.setItem('pge_talents_cache', JSON.stringify(list));
+          } catch (e) {}
           populateRoleDropdown();
           renderCandidates();
         }
       });
 
-      // 3. Listen to /candidate_assessments
+      // 3. Listen to /candidate_photos in Firebase RTDB for instant photo sync
+      rtdb.ref('/candidate_photos').on('value', snapshot => {
+        const photos = snapshot.val() || {};
+        if (state && state.talents && state.talents.length > 0) {
+          state.talents.forEach(t => {
+            const pEntry = photos[t.id] || (t.appwriteId ? photos[t.appwriteId] : null);
+            const pUrl = pEntry ? (typeof pEntry === 'string' ? pEntry : (pEntry.photoUrl || '')) : '';
+            if (pUrl) t.photoUrl = pUrl;
+          });
+          renderCandidates();
+        }
+      });
+
+      // 4. Listen to /candidate_assessments
       rtdb.ref('/candidate_assessments').on('value', (snapshot) => {
         const data = snapshot.val() || {};
         state.assessments = { ...state.assessments, ...data };
@@ -3936,25 +4172,485 @@ function renderPentagonMatrixSvg(dimensions) {
       `;
     }
 
-        function renderCognitiveItemsAuditHtml(cogData) {
+    // ==========================================
+    // COMPLETE COGNITIVE & BUSINESS LOGIC QUESTION BANK (40 ITEMS)
+    // ==========================================
+    const COGNITIVE_QUESTION_BANK = [
+      {
+        "id": "COG_NUM_01",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret berikut: 3, 7, 15, 31, 63, ... Angka berapakah selanjutnya?",
+        "options": ["125", "126", "127", "128", "130"],
+        "correct_answer": "127",
+        "explanation": "Pola: (n * 2) + 1. Jadi 63 * 2 + 1 = 127."
+      },
+      {
+        "id": "COG_NUM_02",
+        "category": "Deret Angka",
+        "question": "Perhatikan barisan berikut: 2, 3, 5, 8, 13, 21, ... Angka berikutnya adalah?",
+        "options": ["31", "34", "36", "38", "40"],
+        "correct_answer": "34",
+        "explanation": "Pola Fibonacci (penjumlahan dua angka sebelumnya): 13 + 21 = 34."
+      },
+      {
+        "id": "COG_NUM_03",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret: 100, 96, 88, 72, 40, ... Angka berikutnya adalah?",
+        "options": ["-24", "-8", "0", "8", "16"],
+        "correct_answer": "-24",
+        "explanation": "Selisih bertingkat dua kali lipat: -4, -8, -16, -32, berikutnya -64 (40 - 64 = -24)."
+      },
+      {
+        "id": "COG_NUM_04",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret selang-seling: 4, 18, 8, 14, 12, 10, ... Angka berikutnya adalah?",
+        "options": ["14", "16", "18", "6", "8"],
+        "correct_answer": "16",
+        "explanation": "Deret 1: 4, 8, 12, (+4) -> 16. Deret 2: 18, 14, 10, (-4) -> 6."
+      },
+      {
+        "id": "COG_NUM_05",
+        "category": "Deret Angka",
+        "question": "Perhatikan pola: 1, 4, 9, 16, 25, 36, ... Angka selanjutnya adalah?",
+        "options": ["42", "48", "49", "54", "64"],
+        "correct_answer": "49",
+        "explanation": "Pola bilangan kuadrat: 1^2, 2^2, 3^2, 4^2, 5^2, 6^2, maka selanjutnya 7^2 = 49."
+      },
+      {
+        "id": "COG_NUM_06",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret: 5, 10, 20, 40, 80, ... Angka berikutnya adalah?",
+        "options": ["120", "140", "150", "160", "180"],
+        "correct_answer": "160",
+        "explanation": "Pola dikali 2 pada setiap langkah: 80 x 2 = 160."
+      },
+      {
+        "id": "COG_NUM_07",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret: 81, 27, 9, 3, ... Angka berikutnya adalah?",
+        "options": ["0", "1", "1/3", "2", "3"],
+        "correct_answer": "1",
+        "explanation": "Pola dibagi 3 pada setiap langkah: 3 / 3 = 1."
+      },
+      {
+        "id": "COG_NUM_08",
+        "category": "Deret Angka",
+        "question": "Perhatikan deret: 12, 15, 19, 24, 30, ... Angka berikutnya adalah?",
+        "options": ["35", "36", "37", "38", "39"],
+        "correct_answer": "37",
+        "explanation": "Penambahan bertahap +3, +4, +5, +6, selanjutnya +7 (30 + 7 = 37)."
+      },
+      {
+        "id": "COG_ARI_01",
+        "category": "Aritmatika Dasar",
+        "question": "Sebuah toko pakaian memberikan diskon 20% untuk jaket seharga Rp150.000. Saat membayar di kasir, pembeli mendapatkan diskon member tambahan 10% dari harga setelah diskon pertama. Berapa total yang harus dibayar?",
+        "options": ["Rp105.000", "Rp108.000", "Rp110.000", "Rp115.000", "Rp120.000"],
+        "correct_answer": "Rp108.000",
+        "explanation": "Diskon 1: 150.000 - 30.000 = 120.000. Diskon member 10%: 120.000 - 12.000 = Rp108.000."
+      },
+      {
+        "id": "COG_ARI_02",
+        "category": "Aritmatika Dasar",
+        "question": "Seorang content creator mengunggah 3 video per hari kerja (Senin–Jumat) dan 1 video per hari libur (Sabtu–Minggu). Berapa total video yang ia unggah selama 4 minggu penuh?",
+        "options": ["56 video", "64 video", "68 video", "72 video", "80 video"],
+        "correct_answer": "68 video",
+        "explanation": "Per minggu: (5 hari x 3) + (2 hari x 1) = 15 + 2 = 17 video. Selama 4 minggu = 17 x 4 = 68 video."
+      },
+      {
+        "id": "COG_ARI_03",
+        "category": "Aritmatika Dasar",
+        "question": "Modal produksi sebuah tumbler adalah Rp40.000. Jika perusahaan menargetkan margin keuntungan 60% dari harga jual, berapakah harga jual yang harus dipasang?",
+        "options": ["Rp64.000", "Rp80.000", "Rp100.000", "Rp120.000", "Rp150.000"],
+        "correct_answer": "Rp100.000",
+        "explanation": "Margin 60% dari harga jual artinya HPP = 40% dari harga jual. Harga jual = 40.000 / 0.40 = Rp100.000."
+      },
+      {
+        "id": "COG_ARI_04",
+        "category": "Aritmatika Dasar",
+        "question": "Jika 4 orang staf admin mampu memverifikasi 200 berkas kandidat dalam waktu 5 jam, berapa waktu yang dibutuhkan oleh 5 orang staf admin untuk memverifikasi 300 berkas dengan kecepatan yang sama?",
+        "options": ["4.5 jam", "5 jam", "6 jam", "7.5 jam", "8 jam"],
+        "correct_answer": "6 jam",
+        "explanation": "1 orang dalam 1 jam memverifikasi 200 / (4 x 5) = 10 berkas. Waktu 5 staf untuk 300 berkas: 300 / (5 x 10) = 6 jam."
+      },
+      {
+        "id": "COG_ARI_05",
+        "category": "Aritmatika Dasar",
+        "question": "Sebuah kemasan kopi 250 gram dijual seharga Rp50.000. Kemasan hemat 1 kg dijual seharga Rp160.000. Berapa persen penghematan per gram jika membeli kemasan hemat?",
+        "options": ["15%", "20%", "25%", "30%", "40%"],
+        "correct_answer": "20%",
+        "explanation": "Harga kemasan kecil = Rp200/gram. Kemasan hemat = Rp160/gram. Hemat = (40 / 200) x 100% = 20%."
+      },
+      {
+        "id": "COG_ARI_06",
+        "category": "Aritmatika Dasar",
+        "question": "Budget iklan digital sebesar Rp12.000.000 dibagi ke 3 channel: TikTok, Meta, dan Google Ads dengan perbandingan 3 : 2 : 1. Berapa anggaran untuk TikTok?",
+        "options": ["Rp2.000.000", "Rp4.000.000", "Rp6.000.000", "Rp8.000.000", "Rp9.000.000"],
+        "correct_answer": "Rp6.000.000",
+        "explanation": "Total bagian = 3 + 2 + 1 = 6. Bagian TikTok = (3/6) x 12.000.000 = Rp6.000.000."
+      },
+      {
+        "id": "COG_ARI_07",
+        "category": "Aritmatika Dasar",
+        "question": "Sebuah pesanan online dikenakan biaya ongkir Rp25.000 dan biaya layanan Rp2.000. Pembeli memakai kupon potongan ongkir Rp15.000. Jika total belanja barang adalah Rp120.000, berapa total uang yang dibayar pembeli?",
+        "options": ["Rp132.000", "Rp135.000", "Rp142.000", "Rp147.000", "Rp150.000"],
+        "correct_answer": "Rp132.000",
+        "explanation": "Total = 120.000 + (25.000 - 15.000) + 2.000 = 120.000 + 10.000 + 2.000 = Rp132.000."
+      },
+      {
+        "id": "COG_ARI_08",
+        "category": "Aritmatika Dasar",
+        "question": "Jika sebuah video live streaming menghasilkan 150 order dalam 2 jam, berapa rata-rata order yang masuk setiap menitnya?",
+        "options": ["1 order", "1.25 order", "1.5 order", "2 order", "2.5 order"],
+        "correct_answer": "1.25 order",
+        "explanation": "2 jam = 120 menit. 150 order / 120 menit = 1.25 order per menit."
+      },
+      {
+        "id": "COG_BIZ_01",
+        "category": "Logika Komersial",
+        "question": "Toko online Anda memiliki 10.000 pengunjung per bulan dengan tingkat konversi 2% dan rata-rata nilai belanja Rp150.000. Jika conversion rate naik menjadi 3% melalui optimasi visual produk, berapa kenaikan omzet per bulan?",
+        "options": ["Rp10.000.000", "Rp15.000.000", "Rp30.000.000", "Rp45.000.000", "Rp60.000.000"],
+        "correct_answer": "Rp15.000.000",
+        "explanation": "Omzet awal: 10.000 x 2% x 150.000 = Rp30 juta. Omzet baru: 10.000 x 3% x 150.000 = Rp45 juta. Kenaikan = Rp15 juta."
+      },
+      {
+        "id": "COG_BIZ_02",
+        "category": "Logika Komersial",
+        "question": "Rata-rata pembeli di toko Anda biasanya hanya membeli 1 botol minuman seharga Rp20.000. Anda ingin membuat pembeli membelanjakan uang lebih banyak dalam sekali transaksi tanpa membuat toko rugi. Strategi mana yang paling tepat?",
+        "options": [
+          "Menaikkan harga minuman menjadi Rp50.000 per botol secara tiba-tiba",
+          "Membuat paket bundling \"Beli 3 botol seharga Rp50.000\"",
+          "Menolak melayani pembeli yang hanya membeli 1 botol",
+          "Memberikan minuman gratis tanpa syarat",
+          "Menutup toko lebih awal agar terlihat ramai"
+        ],
+        "correct_answer": "Membuat paket bundling \"Beli 3 botol seharga Rp50.000\"",
+        "explanation": "Paket bundling meningkatkan Average Order Value (AOV) sekaligus memberikan persepsi hemat yang menguntungkan bagi konsumen dan penjual."
+      },
+      {
+        "id": "COG_BIZ_03",
+        "category": "Logika Komersial",
+        "question": "Campaign iklan TikTok menghasilkan 500 klik dengan total biaya Rp1.000.000. Dari 500 klik tersebut, 25 orang melakukan pembelian produk. Berapakah Cost Per Acquisition (CPA) atau biaya perolehan setiap 1 pembeli?",
+        "options": ["Rp2.000", "Rp20.000", "Rp40.000", "Rp50.000", "Rp80.000"],
+        "correct_answer": "Rp40.000",
+        "explanation": "CPA = Total Biaya / Jumlah Pembeli = Rp1.000.000 / 25 pembeli = Rp40.000 per pembeli."
+      },
+      {
+        "id": "COG_BIZ_04",
+        "category": "Logika Komersial",
+        "question": "Sebuah toko memiliki stok 1.000 unit baju musim hujan. Musim hujan diperkirakan berakhir 2 minggu lagi, namun stok baru terjual 200 unit. Strategi inventori apa yang paling rasional untuk meminimalkan kerugian 'dead-stock'?",
+        "options": [
+          "Menyimpan seluruh sisa stok di gudang dan menunggu musim hujan tahun depan",
+          "Menjalankan flash sale diskon khusus / promo clearance untuk melikuidasi stok sebelum musim berakhir",
+          "Menaikkan harga baju agar mendapat profit lebih tinggi dari sisa pembeli",
+          "Membuang baju yang tersisa agar gudang tidak penuh",
+          "Menghentikan seluruh aktivitas promosi toko"
+        ],
+        "correct_answer": "Menjalankan flash sale diskon khusus / promo clearance untuk melikuidasi stok sebelum musim berakhir",
+        "explanation": "Clearance promo mengembalikan modal kerja (cash flow) dan memitigasi risiko kerugian penuh akibat barang mati (dead-stock)."
+      },
+      {
+        "id": "COG_BIZ_05",
+        "category": "Logika Komersial",
+        "question": "Pelanggan setia mengeluhkan produk yang dibeli rusak saat diterima. Tim CS dihadapkan pada 2 opsi: (A) Mengganti baru tanpa biaya senilai Rp50.000, atau (B) Menolak karena barang keluar gudang dalam kondisi baik. Jika Customer Lifetime Value (LTV) pelanggan ini adalah Rp3.000.000 per tahun, keputusan apa yang paling menguntungkan perusahaan dalam jangka panjang?",
+        "options": [
+          "Pilih Opsi B untuk menghemat biaya Rp50.000",
+          "Pilih Opsi A karena mempertahankan pelanggan bernilai Rp3.000.000 jauh lebih penting daripada biaya retur Rp50.000",
+          "Menyuruh pelanggan membeli ulang dengan diskon 5%",
+          "Memblokir kontak pelanggan",
+          "Menyerahkan masalah ke pihak ekspedisi tanpa menengahi"
+        ],
+        "correct_answer": "Pilih Opsi A karena mempertahankan pelanggan bernilai Rp3.000.000 jauh lebih penting daripada biaya retur Rp50.000",
+        "explanation": "Biaya retensi (Rp50.000) sangat kecil dibandingkan LTV (Rp3.000.000). Retensi loyal customer adalah prioritas bisnis."
+      },
+      {
+        "id": "COG_BIZ_06",
+        "category": "Logika Komersial",
+        "question": "Jika sebuah live streaming dengan 1 orang host menghadirkan GMV Rp10 juta per sesi (biaya Rp500.000), dan saat menggunakan 2 host (biaya Rp1.000.000) GMV naik menjadi Rp18 juta per sesi. Apakah penambahan host kedua layak secara finansial?",
+        "options": [
+          "Tidak layak, karena biaya host membengkak 2 kali lipat",
+          "Sangat layak, karena penambahan biaya Rp500.000 menghasilkan tambahan omzet Rp8.000.000",
+          "Sama saja",
+          "Tidak bisa dinilai",
+          "Hanya layak jika host kedua bekerja gratis"
+        ],
+        "correct_answer": "Sangat layak, karena penambahan biaya Rp500.000 menghasilkan tambahan omzet Rp8.000.000",
+        "explanation": "Return on Investment (ROI) dari biaya tambahan sangat tinggi: tambahan biaya 500rb menghasilkan extra GMV 8 juta."
+      },
+      {
+        "id": "COG_BIZ_07",
+        "category": "Logika Komersial",
+        "question": "Kompetitor menjual produk serupa seharga Rp99.000 (gratis ongkir). Toko Anda menjual seharga Rp85.000 + ongkir Rp18.000 (Total Rp103.000). Mengapa toko kompetitor mendapatkan penjualan lebih tinggi?",
+        "options": [
+          "Pembeli menyukai angka ganjil",
+          "Total harga kompetitor lebih murah Rp4.000 dan bebas friksi biaya ongkir tak terduga",
+          "Kompetitor pasti menipu",
+          "Produk mahal selalu lebih laku",
+          "Pembeli tidak melihat harga total"
+        ],
+        "correct_answer": "Total harga kompetitor lebih murah Rp4.000 dan bebas friksi biaya ongkir tak terduga",
+        "explanation": "Gratis ongkir menghilangkan hambatan psikologis di checkout dan total biaya belanja lebih murah."
+      },
+      {
+        "id": "COG_BIZ_08",
+        "category": "Logika Komersial",
+        "question": "Sebuah video TikTok berdurasi 60 detik memiliki retention drop terbesar pada detik ke-0 hingga detik ke-3 (70% penonton scroll lewat). Apa tindakan optimasi paling mendasar yang harus dilakukan tim kreatif?",
+        "options": [
+          "Memperpanjang durasi video menjadi 3 menit",
+          "Memperbaiki 'Hook' 3 detik pertama (visual pembuka, headline teks, atau problem statement yang kuat)",
+          "Menghapus seluruh caption video",
+          "Menaruh logo perusahaan berukuran besar di awal video",
+          "Mengurangi resolusi video agar cepat diunggah"
+        ],
+        "correct_answer": "Memperbaiki 'Hook' 3 detik pertama (visual pembuka, headline teks, atau problem statement yang kuat)",
+        "explanation": "Tiga detik pertama adalah penentu utama keberhasilan short-form video untuk menghentikan scrolling (stopping power)."
+      },
+      {
+        "id": "COG_DAT_01",
+        "category": "Analisis Data",
+        "question": "Data penjualan: Produk A (Harga Rp100.000, Terjual 500 unit, Margin 20%), Produk B (Harga Rp250.000, Terjual 150 unit, Margin 40%). Manakah produk yang menyumbang total keuntungan bersih terbesar bagi perusahaan?",
+        "options": [
+          "Produk A menyumbang keuntungan lebih besar",
+          "Produk B menyumbang keuntungan lebih besar",
+          "Keduanya menyumbang nominal keuntungan yang sama persis",
+          "Tidak dapat dihitung dari data",
+          "Produk A lebih rugi"
+        ],
+        "correct_answer": "Produk B menyumbang keuntungan lebih besar",
+        "explanation": "Laba Produk A = 500 x (100.000 x 20%) = Rp10.000.000. Laba Produk B = 150 x (250.000 x 40%) = Rp15.000.000. Produk B menyumbang laba lebih tinggi."
+      },
+      {
+        "id": "COG_DAT_02",
+        "category": "Analisis Data",
+        "question": "Grafik mingguan menunjukkan View video naik 300%, namun Link Klik produk turun 50%. Kesimpulan paling akurat mengenai performa konten tersebut adalah:",
+        "options": [
+          "Konten sangat sukses dari segala metrik bisnis",
+          "Konten viral dan menjangkau audiens luas, namun 'Call-to-Action' (CTA) atau relevansi produk lemah",
+          "Algoritma platform mengalami kerusakan total",
+          "Produk yang dijual sudah kadaluarsa",
+          "Penonton tidak memiliki koneksi internet"
+        ],
+        "correct_answer": "Konten viral dan menjangkau audiens luas, namun 'Call-to-Action' (CTA) atau relevansi produk lemah",
+        "explanation": "Tingginya awareness (views) tanpa konversi aksi (klik) mengindikasikan kelemahan pada bridge konten ke produk (CTA)."
+      },
+      {
+        "id": "COG_DAT_03",
+        "category": "Analisis Data",
+        "question": "A/B Testing dua thumbnail video: Thumbnail X menghasilkan Click-Through-Rate (CTR) 4.2% dengan rata-rata tonton 15 detik. Thumbnail Y menghasilkan CTR 8.5% dengan rata-rata tonton 4 detik (banyak yang langsung keluar). Keputusan mana yang paling bijak?",
+        "options": [
+          "Memilih Thumbnail Y karena CTR paling tinggi",
+          "Memilih Thumbnail X karena retensi tonton lebih berkualitas dan terhindar dari sinyal 'clickbait' yang merugikan algoritma jangka panjang",
+          "Menghapus kedua video",
+          "Mengganti thumbnail setiap 1 jam",
+          "Mengabaikan kedua hasil tes"
+        ],
+        "correct_answer": "Memilih Thumbnail X karena retensi tonton lebih berkualitas dan terhindar dari sinyal 'clickbait' yang merugikan algoritma jangka panjang",
+        "explanation": "Tinggi CTR dengan drop-off instan menandakan clickbait yang menurunkan skor algoritma platform. Engagement berkualitas lebih berkelanjutan."
+      },
+      {
+        "id": "COG_DAT_04",
+        "category": "Analisis Data",
+        "question": "Dari 1.000 orang yang memasukkan barang ke keranjang toko, hanya 200 orang yang melanjutkan hingga pembayaran sukses. Apa saran pertama untuk tim operasional?",
+        "options": [
+          "Menutup toko online",
+          "Menganalisis proses checkout (cek apakah ongkos kirim terlalu mahal, metode pembayaran sedikit, atau alur rumit)",
+          "Menghukum tim gudang",
+          "Menaikkan harga produk 50%",
+          "Mematikan fitur keranjang belanja"
+        ],
+        "correct_answer": "Menganalisis proses checkout (cek apakah ongkos kirim terlalu mahal, metode pembayaran sedikit, atau alur rumit)",
+        "explanation": "Cart abandonment rate yang tinggi mengindikasikan adanya friksi teknis atau biaya tersembunyi pada tahapan finalisasi pembayaran."
+      },
+      {
+        "id": "COG_DAT_05",
+        "category": "Analisis Data",
+        "question": "Sebuah toko baju mencatat: 100 orang memasukkan baju ke keranjang, namun 80 orang batal checkout setelah melihat ongkos kirim sebesar Rp45.000 (harga baju Rp50.000). Apa kesimpulan data ini?",
+        "options": [
+          "Baju tersebut jelek",
+          "Tarif ongkos kirim yang tinggi menjadi penghambat utama pembeli menyelesaikan pembayaran",
+          "Aplikasi toko sedang offline",
+          "Baju tersebut kebesaran untuk pembeli",
+          "Pembeli lupa kata sandi akunnya"
+        ],
+        "correct_answer": "Tarif ongkos kirim yang tinggi menjadi penghambat utama pembeli menyelesaikan pembayaran",
+        "explanation": "Ongkos kirim yang tidak proporsional merupakan titik friksi utama yang menyebabkan pembeli membatalkan checkout di keranjang."
+      },
+      {
+        "id": "COG_DAT_06",
+        "category": "Analisis Data",
+        "question": "Jumlah orang yang mengklik link produk tetap ramai, namun jumlah orang yang membeli tiba-tiba anjlok tepat setelah tim mengganti foto produk dan deskripsi barang dengan yang baru. Apa evaluasi paling masuk akal?",
+        "options": [
+          "Jaringan internet seluruh Indonesia sedang lambat",
+          "Foto atau deskripsi yang baru kurang menarik atau kurang meyakinkan calon pembeli dibanding yang lama",
+          "Kurir pengiriman sedang libur",
+          "Tombol beli di aplikasi rusak permanen",
+          "Kompetitor mematikan toko Anda"
+        ],
+        "correct_answer": "Foto atau deskripsi yang baru kurang menarik atau kurang meyakinkan calon pembeli dibanding yang lama",
+        "explanation": "Penurunan konversi pembelian tepat setelah perubahan materi produk menandakan materi visual/copy baru kurang efektif meyakinkan calon pembeli."
+      },
+      {
+        "id": "COG_DAT_07",
+        "category": "Analisis Data",
+        "question": "Anda mencoba berpromosi ke 2 orang kreator: Kreator X dibayar Rp1.000.000 menghasilkan 10 pembeli baru (biaya Rp100.000 per pembeli). Kreator Y dibayar Rp1.000.000 menghasilkan 20 pembeli baru (biaya Rp50.000 per pembeli). Kreator manakah yang lebih hemat biaya untuk mendatangkan pembeli?",
+        "options": [
+          "Kreator X, karena jumlah pembelinya lebih sedikit sehingga lebih eksklusif",
+          "Kreator Y, karena biaya untuk mendapatkan setiap 1 pembeli separuh lebih murah",
+          "Keduanya sama hematnya karena biayanya sama-sama 1 juta",
+          "Tidak ada yang hemat",
+          "Kreator X, karena lebih terkenal"
+        ],
+        "correct_answer": "Kreator Y, karena biaya untuk mendapatkan setiap 1 pembeli separuh lebih murah",
+        "explanation": "Kreator Y menghasilkan efisiensi biaya per pembeli yang jauh lebih hemat (Rp50.000 vs Rp100.000 per pembeli)."
+      },
+      {
+        "id": "COG_DAT_08",
+        "category": "Analisis Data",
+        "question": "Berdasarkan survei, 90% komplain bintang 1 pelanggan disebabkan oleh: \"Keterlambatan kurir mengantar barang hingga berminggu-minggu\". Seorang rekan kerja mengusulkan: \"Mari kita ganti kantong plastik packing dengan kardus tebal berpita emas agar komplain hilang\". Apakah usulan tersebut tepat?",
+        "options": [
+          "Ya, karena kemasan mewah selalu disukai pembeli",
+          "Tidak tepat, karena masalah utamanya ada pada kecepatan jasa ekspedisi atau kurir, bukan pada kemasannya",
+          "Ya, kardus tebal otomatis membuat kurir mengantar lebih cepat",
+          "Tepat, asalkan harga barang dinaikkan 2 kali lipat",
+          "Ya, pita emas bisa menggantikan barang yang terlambat"
+        ],
+        "correct_answer": "Tidak tepat, karena masalah utamanya ada pada kecepatan jasa ekspedisi atau kurir, bukan pada kemasannya",
+        "explanation": "Solusi harus menyelesaikan akar masalah (root cause) yaitu keterlambatan pengiriman, bukan perubahan kemasan."
+      },
+      {
+        "id": "COG_SIL_01",
+        "category": "Silogisme",
+        "question": "Semua produk yang diskon diletakkan di etalase kategori 'Promo'. Beberapa gantungan kunci diletakkan di etalase kategori 'Promo'. Kesimpulan yang paling tepat adalah:",
+        "options": [
+          "Semua gantungan kunci adalah produk diskon",
+          "Gantungan kunci pasti produk paling murah",
+          "Tidak ada gantungan kunci yang diskon",
+          "Beberapa gantungan kunci mungkin adalah produk diskon",
+          "Gantungan kunci bukan produk diskon"
+        ],
+        "correct_answer": "Beberapa gantungan kunci mungkin adalah produk diskon",
+        "explanation": "Premis tidak secara eksklusif menyatakan HANYA produk diskon yang ada di etalase Promo. Jadi 'beberapa' mengindikasikan kemungkinan."
+      },
+      {
+        "id": "COG_SIL_02",
+        "category": "Silogisme",
+        "question": "Semua konten yang masuk FYP memiliki rasio retensi tontonan di atas 60%. Sebagian konten video unboxing masuk FYP. Kesimpulan yang sah adalah:",
+        "options": [
+          "Semua konten video unboxing memiliki retensi di atas 60%",
+          "Sebagian konten video unboxing memiliki rasio retensi tontonan di atas 60%",
+          "Tidak ada video unboxing yang memiliki retensi rendah",
+          "Semua konten dengan retensi di atas 60% pasti video unboxing",
+          "Video unboxing pasti selalu masuk FYP"
+        ],
+        "correct_answer": "Sebagian konten video unboxing memiliki rasio retensi tontonan di atas 60%",
+        "explanation": "Jika semua P adalah Q, dan sebagian R adalah P, maka sebagian R pasti adalah Q."
+      },
+      {
+        "id": "COG_SIL_03",
+        "category": "Silogisme",
+        "question": "Tidak ada pesanan sistem yang diproses tanpa verifikasi pembayaran. Semua pesanan COD (Bayar di Tempat) telah diverifikasi otomatis oleh sistem. Kesimpulan yang valid:",
+        "options": [
+          "Semua pesanan COD diproses oleh sistem",
+          "Beberapa pesanan COD tidak diproses",
+          "Pesanan non-COD tidak memerlukan verifikasi",
+          "Sistem hanya memproses pesanan COD",
+          "Pesanan COD tidak perlu membayar uang"
+        ],
+        "correct_answer": "Semua pesanan COD diproses oleh sistem",
+        "explanation": "Karena seluruh pesanan COD telah diverifikasi, maka seluruh pesanan COD memenuhi syarat untuk diproses."
+      },
+      {
+        "id": "COG_SIL_04",
+        "category": "Silogisme",
+        "question": "Semua anggota tim kreatif menguasai aplikasi CapCut. Beberapa anggota tim kreatif juga mahir menggunakan Adobe Premiere. Kesimpulan yang benar adalah:",
+        "options": [
+          "Semua anggota tim kreatif menguasai Adobe Premiere",
+          "Sebagian pengguna mahir Adobe Premiere dalam tim tersebut juga menguasai CapCut",
+          "Anggota yang memakai CapCut tidak boleh memakai Premiere",
+          "Hanya tim kreatif yang boleh mengedit video",
+          "Aplikasi CapCut lebih sulit dibanding Adobe Premiere"
+        ],
+        "correct_answer": "Sebagian pengguna mahir Adobe Premiere dalam tim tersebut juga menguasai CapCut",
+        "explanation": "Karena seluruh tim menguasai CapCut, maka anggota yang mahir Premiere pun otomatis menguasai CapCut."
+      },
+      {
+        "id": "COG_LOG_01",
+        "category": "Penalaran Kritis",
+        "question": "Anda menemukan kompetitor menjual produk identik dengan harga 10% lebih murah. Produk kompetitor memiliki rating 3.5 dari 5, sedangkan produk perusahaan Anda memiliki rating 4.9 dari 5. Apa rekomendasi harga (pricing) yang paling logis?",
+        "options": [
+          "Ikut menurunkan harga 10% agar tidak kalah saing",
+          "Menurunkan harga 15% untuk mematikan kompetitor",
+          "Pertahankan harga saat ini dan jadikan ulasan/kualitas sebagai nilai jual utama",
+          "Menaikkan harga 10% karena kualitas lebih bagus",
+          "Berhenti menjual produk tersebut"
+        ],
+        "correct_answer": "Pertahankan harga saat ini dan jadikan ulasan/kualitas sebagai nilai jual utama",
+        "explanation": "Penurunan harga tidak rasional jika produk memiliki keunggulan kompetitif pada trust (rating tinggi)."
+      },
+      {
+        "id": "COG_LOG_02",
+        "category": "Penalaran Kritis",
+        "question": "Toko menerima keluhan publik di kolom komentar TikTok karena salah mengirimkan warna baju. Pelanggan tersebut memiliki 50.000 followers dan videonya mulai ramai. Respon pertama yang paling tepat?",
+        "options": [
+          "Menghapus komentar pelanggan dan memblokir akunnya",
+          "Menyalahkan pihak bagian gudang packing di depan umum",
+          "Meminta maaf secara santun di kolom komentar, mengakui kelalaian, dan segera mengirimkan barang yang benar via ekspedisi instan tanpa membebani pelanggan",
+          "Mengabaikan komentar karena keluhan adalah hal biasa",
+          "Menantang pelanggan untuk membuktikan video rekaman pembukaan paket"
+        ],
+        "correct_answer": "Meminta maaf secara santun di kolom komentar, mengakui kelalaian, dan segera mengirimkan barang yang benar via ekspedisi instan tanpa membebani pelanggan",
+        "explanation": "Respons cepat, transparan, dan berorientasi solusi memitigasi krisis PR dan justru membangun reputasi positif brand."
+      },
+      {
+        "id": "COG_LOG_03",
+        "category": "Penalaran Kritis",
+        "question": "Perusahaan memiliki anggaran promosi Rp30 juta dan membidik direct sales. Opsi A: endorse 1 artis besar (jangkauan luas tapi umum). Opsi B: endorse 10 micro-creator segmented (engagement tinggi & niche relevan). Opsi mana yang lebih rasional untuk direct sales?",
+        "options": [
+          "Opsi A, karena artis besar membuat toko terlihat bergengsi",
+          "Opsi B, karena komunitas niche dengan keterikatan tinggi memiliki tingkat konversi pembelian langsung yang lebih kuat",
+          "Keduanya memiliki performa yang sama persis",
+          "Tidak memilih keduanya dan membiarkan produk terjual organik",
+          "Membagikan voucher acak ke 100 orang lewat direct message"
+        ],
+        "correct_answer": "Opsi B, karena komunitas niche dengan keterikatan tinggi memiliki tingkat konversi pembelian langsung yang lebih kuat",
+        "explanation": "Untuk tujuan direct sales pada budget terbatas, micro-influencer niche memberikan conversion rate dan efisiensi biaya (CAC) yang lebih tinggi dibanding artis umum."
+      },
+      {
+        "id": "COG_LOG_04",
+        "category": "Penalaran Kritis",
+        "question": "Dua insiden terjadi serentak: (1) Printer resi gudang offline sehingga 50 paket tertunda cetak, dan (2) Akun media sosial utama diretas dan menyebarkan tautan penipuan ke followers. Bagaimana prioritas tindakan PIC?",
+        "options": [
+          "Prioritaskan penanganan akun media sosial secepatnya guna menghentikan penipuan terhadap publik, sambil mengarahkan gudang memakai printer cadangan / manual",
+          "Fokus cetak resi terlebih dahulu karena jam jemput kurir sudah dekat",
+          "Menunggu kedatangan pimpinan yang sedang rapat di luar kota",
+          "Mematikan daya listrik seluruh kantor",
+          "Membiarkan keduanya ditangani pihak luar"
+        ],
+        "correct_answer": "Prioritaskan penanganan akun media sosial secepatnya guna menghentikan penipuan terhadap publik, sambil mengarahkan gudang memakai printer cadangan / manual",
+        "explanation": "Peretasan akun publik menimbulkan risiko reputasi masif dan potensi kerugian finansial pihak ketiga (followers), sehingga merupakan krisis prioritas darurat."
+      }
+    ];
+    window.COGNITIVE_QUESTION_BANK = COGNITIVE_QUESTION_BANK;
+
+    function renderCognitiveItemsAuditHtml(cogData, talentId) {
       if (!cogData || !Array.isArray(cogData.items) || cogData.items.length === 0) {
         return '';
       }
 
+      const activeTalentId = talentId || (window.currentViewingTalentId) || (window.activeTalentId) || '';
       const items = cogData.items;
       const score = cogData.score || 0;
       const total = cogData.total || items.length;
-      const wrongItems = items.filter(it => !it.isCorrect);
+      const wrongItemsWithIdx = items.map((it, idx) => ({ ...it, originalIdx: idx })).filter(it => !it.isCorrect);
 
       let wrongCardsHtml = '';
-      if (wrongItems.length > 0) {
+      if (wrongItemsWithIdx.length > 0) {
         wrongCardsHtml = `
           <div style="margin-top: 14px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 10px; padding: 14px 16px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
               <div style="display: flex; align-items: center; gap: 7px;">
                 <span style="font-size: 15px;">⚠️</span>
                 <span style="font-size: 11.5px; font-weight: 700; color: #9F1239; text-transform: uppercase; letter-spacing: 0.5px;">
-                  Butir Soal Perlu Evaluasi / Klarifikasi Wawancara (${wrongItems.length})
+                  Butir Soal Perlu Evaluasi / Klarifikasi Wawancara (${wrongItemsWithIdx.length})
                 </span>
               </div>
               <span style="font-size: 10.5px; font-weight: 700; color: #BE123C; background: #FFE4E6; border: 1px solid #FDA4AF; padding: 2px 8px; border-radius: 6px;">
@@ -3963,15 +4659,27 @@ function renderPentagonMatrixSvg(dimensions) {
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 12px;">
-              ${wrongItems.map((item, idx) => `
+              ${wrongItemsWithIdx.map((item) => `
                 <div style="background: #FFFFFF; border: 1px solid #FDA4AF; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
-                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px;">
-                    <span style="font-size: 10.5px; font-weight: 700; color: #BE123C; background: #FFF1F2; border: 1px solid #FECDD3; padding: 2px 7px; border-radius: 5px;">
-                      ${escapeHtml(item.category || 'Soal')}
-                    </span>
-                    <span style="font-size: 10.5px; font-weight: 700; color: #E11D48; display: inline-flex; align-items: center; gap: 3px;">
-                      ✕ Kurang Tepat
-                    </span>
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span style="font-size: 10.5px; font-weight: 700; color: #BE123C; background: #FFF1F2; border: 1px solid #FECDD3; padding: 2px 7px; border-radius: 5px;">
+                        ${escapeHtml(item.category || 'Soal')}
+                      </span>
+                      ${item.manuallyCorrected ? `
+                        <span style="font-size: 9.5px; font-weight: 700; color: #7C3AED; background: #F5F3FF; border: 1px solid #DDD6FE; padding: 2px 6px; border-radius: 4px;">
+                          ✍️ Dikoreksi Tim HR
+                        </span>
+                      ` : ''}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 10.5px; font-weight: 700; color: ${item.isCorrect ? '#059669' : '#E11D48'}; display: inline-flex; align-items: center; gap: 3px;">
+                        ${item.isCorrect ? '✓ Benar' : '✕ Kurang Tepat'}
+                      </span>
+                      <button type="button" class="btn btn-secondary btn-xs" onclick="event.stopPropagation(); openCognitiveAnswerCorrectionModal('${escapeHtml(activeTalentId)}', ${item.originalIdx})" style="font-size: 11px; font-weight: 700; color: #1D4ED8; background: #EFF6FF; border: 1.5px solid #93C5FD; padding: 3px 10px; border-radius: 6px; cursor: pointer; box-shadow: 0 1px 2px rgba(37,99,235,0.08); display: inline-flex; align-items: center; gap: 4px;" title="Ubah atau koreksi jawaban kandidat">
+                        <span>✏️</span> Koreksi Jawaban
+                      </button>
+                    </div>
                   </div>
 
                   <div style="font-size: 12.5px; font-weight: 600; color: #1E293B; line-height: 1.45; margin-bottom: 10px;">
@@ -4003,6 +4711,12 @@ function renderPentagonMatrixSvg(dimensions) {
                   ${item.explanation ? `
                     <div style="background: #F8FAFC; border-left: 3px solid #F43F5E; border-radius: 0 6px 6px 0; padding: 8px 10px; font-size: 11px; color: #475569; line-height: 1.45;">
                       <strong style="color: #9F1239;">💡 Analisis &amp; Rasional:</strong> ${escapeHtml(item.explanation)}
+                    </div>
+                  ` : ''}
+
+                  ${item.correctionNote ? `
+                    <div style="margin-top: 6px; background: #F5F3FF; border: 1px solid #DDD6FE; border-radius: 4px; padding: 6px 8px; font-size: 10.5px; color: #5B21B6;">
+                      <strong>✍️ Catatan Koreksi Evaluator:</strong> ${escapeHtml(item.correctionNote)}
                     </div>
                   ` : ''}
                 </div>
@@ -4037,6 +4751,7 @@ function renderPentagonMatrixSvg(dimensions) {
                   <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
                     <span style="font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 700; color: #64748B;">#${idx + 1}</span>
                     <span style="font-size: 10px; font-weight: 600; color: #475569; background: #E2E8F0; padding: 1px 5px; border-radius: 4px;">${escapeHtml(it.category || 'Soal')}</span>
+                    ${it.manuallyCorrected ? `<span style="font-size: 9px; font-weight: 700; color: #7C3AED; background: #F5F3FF; border: 1px solid #DDD6FE; padding: 1px 5px; border-radius: 3px;">✍️ Dikoreksi HR</span>` : ''}
                   </div>
                   <div style="font-weight: 600; color: #1E293B; line-height: 1.35; margin-bottom: 4px;">
                     ${escapeHtml(it.question)}
@@ -4044,10 +4759,20 @@ function renderPentagonMatrixSvg(dimensions) {
                   <div style="font-size: 11px; color: ${it.isCorrect ? '#065F46' : '#9F1239'};">
                     ${it.isCorrect ? `<strong>Respon:</strong> ${escapeHtml(it.candidateAnswer)}` : `<strong>Jawaban:</strong> <span style="text-decoration: line-through;">${escapeHtml(it.candidateAnswer || '-')}</span> &rarr; <strong>Kunci:</strong> ${escapeHtml(it.correctAnswer)}`}
                   </div>
+                  ${it.correctionNote ? `
+                    <div style="font-size: 10px; color: #7C3AED; font-style: italic; margin-top: 2px;">
+                      Catatan: ${escapeHtml(it.correctionNote)}
+                    </div>
+                  ` : ''}
                 </div>
-                <span style="font-size: 11px; font-weight: 700; color: ${it.isCorrect ? '#059669' : '#E11D48'}; white-space: nowrap; padding-top: 2px;">
-                  ${it.isCorrect ? '✓ Benar' : '✕ Salah'}
-                </span>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;">
+                  <span style="font-size: 11px; font-weight: 700; color: ${it.isCorrect ? '#059669' : '#E11D48'}; white-space: nowrap;">
+                    ${it.isCorrect ? '✓ Benar' : '✕ Salah'}
+                  </span>
+                  <button type="button" class="btn btn-secondary btn-xs" onclick="event.stopPropagation(); openCognitiveAnswerCorrectionModal('${escapeHtml(activeTalentId)}', ${idx})" style="font-size: 10px; font-weight: 700; padding: 2px 7px; color: #1D4ED8; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 4px; cursor: pointer;" title="Koreksi / ubah jawaban butir ini">
+                    ✏️ Ubah
+                  </button>
+                </div>
               </div>
             `).join('')}
           </div>
@@ -4062,11 +4787,14 @@ function renderPentagonMatrixSvg(dimensions) {
               <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0;">
                 ${score}/${total} Benar
               </span>
-              ${wrongItems.length > 0 ? `
+              ${wrongItemsWithIdx.length > 0 ? `
                 <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 9999px; background: #FFF1F2; color: #BE123C; border: 1px solid #FECDD3;">
-                  ${wrongItems.length} Perlu Evaluasi
+                  ${wrongItemsWithIdx.length} Perlu Evaluasi
                 </span>
               ` : ''}
+            </div>
+            <div style="font-size: 10px; color: #475569;">
+              💡 <em>Klik tombol <strong>✏️ Koreksi Jawaban</strong> untuk mengubah respon kandidat &amp; mengkalkulasi ulang skor secara instan</em>
             </div>
           </div>
 
@@ -4082,7 +4810,23 @@ function renderPentagonMatrixSvg(dimensions) {
       }
     }
 
-    function renderCognitiveAspectsBarsHtml(cogData) {
+    function renderCognitiveAspectsBarsHtml(cogData, talentId, isPrintOrIncludeAudit = true, optionalIncludeAudit = true) {
+      let isPrint = false;
+      let includeAudit = true;
+
+      if (typeof isPrintOrIncludeAudit === 'boolean' && isPrintOrIncludeAudit === true && arguments.length === 3) {
+        isPrint = true;
+        includeAudit = false;
+      } else if (typeof isPrintOrIncludeAudit === 'boolean' && arguments.length >= 4) {
+        isPrint = isPrintOrIncludeAudit;
+        includeAudit = optionalIncludeAudit;
+      } else if (typeof isPrintOrIncludeAudit === 'object' && isPrintOrIncludeAudit !== null) {
+        isPrint = !!isPrintOrIncludeAudit.isPrint;
+        includeAudit = isPrintOrIncludeAudit.includeAudit !== undefined ? isPrintOrIncludeAudit.includeAudit : !isPrint;
+      } else {
+        includeAudit = !!isPrintOrIncludeAudit;
+      }
+
       const score = cogData ? (cogData.score || 0) : 0;
       const total = cogData ? (cogData.total || 15) : 15;
       const pct = cogData ? (cogData.percentage || 0) : 0;
@@ -4123,25 +4867,113 @@ function renderPentagonMatrixSvg(dimensions) {
         { name: 'Penalaran & Silogisme', icon: '🧩', correct: (rawCats['Penalaran Kritis'] ? rawCats['Penalaran Kritis'].correct : 0) + (rawCats['Silogisme'] ? rawCats['Silogisme'].correct : 0), total: (rawCats['Penalaran Kritis'] ? rawCats['Penalaran Kritis'].total : 1) + (rawCats['Silogisme'] ? rawCats['Silogisme'].total : 1) }
       ];
 
-      // Gauge math
-      const r = 46;
-      const circ = 2 * Math.PI * r; // ~289.0
-      const strokeOffset = circ - (pct / 100) * circ;
+      if (isPrint) {
+        // High-clarity, spacious 2-column side-by-side layout for A4 Page 2 Print layout
+        const r = 30;
+        const circ = 2 * Math.PI * r; // ~188.5
+        const strokeOffset = circ - (pct / 100) * circ;
+        const w = 530;
+        const h = 104;
+        const padLeft = 160;
+        const barW = 270;
+        const rowH = 18;
+        const startY = 14;
 
-      // SVG Bar Chart geometry
+        let ticksSvg = '';
+        [0, 25, 50, 75, 100].forEach(tick => {
+          const x = padLeft + (tick / 100) * barW;
+          ticksSvg += `
+            <line x1="${x.toFixed(1)}" y1="8" x2="${x.toFixed(1)}" y2="${startY + aspects.length * rowH - 2}" stroke="#E2E8F0" stroke-width="0.9" stroke-dasharray="2 2" />
+            <text x="${x.toFixed(1)}" y="7" text-anchor="middle" font-family="'Geist Mono', monospace" font-size="7.5" fill="#94A3B8" font-weight="600">${tick}%</text>
+          `;
+        });
+
+        let barsSvg = '';
+        aspects.forEach((asp, i) => {
+          const y = startY + i * rowH;
+          const aPct = asp.total > 0 ? Math.round((asp.correct / asp.total) * 100) : 0;
+          const fillWidth = Math.max(5, (aPct / 100) * barW);
+
+          let barFill = '#059669';
+          let valColor = '#065F46';
+          if (aPct < 50) {
+            barFill = '#DC2626';
+            valColor = '#991B1B';
+          } else if (aPct < 75) {
+            barFill = '#D97706';
+            valColor = '#92400E';
+          }
+
+          barsSvg += `
+            <!-- Label -->
+            <text x="${padLeft - 10}" y="${y + 8}" text-anchor="end" font-family="'Geist', sans-serif" font-size="9.5" font-weight="600" fill="#1E293B">
+              ${asp.icon} ${escapeHtml(asp.name)}
+            </text>
+
+            <!-- Track -->
+            <rect x="${padLeft}" y="${y}" width="${barW}" height="9.5" rx="4.75" fill="#F1F5F9" />
+
+            <!-- Fill -->
+            <rect x="${padLeft}" y="${y}" width="${fillWidth.toFixed(1)}" height="9.5" rx="4.75" fill="${barFill}" />
+
+            <!-- Score Value -->
+            <text x="${padLeft + barW + 7}" y="${y + 7.5}" font-family="'Geist Mono', monospace" font-size="8.5" font-weight="700" fill="${valColor}">
+              ${asp.correct}/${asp.total} (${aPct}%)
+            </text>
+          `;
+        });
+
+        return `
+          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 10px; margin-top: 2px;">
+            <div style="display: grid; grid-template-columns: 110px 1fr; gap: 10px; align-items: center;">
+              
+              <!-- Left: High-Clarity Circular Gauge -->
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <div style="position: relative; width: 68px; height: 68px;">
+                  <svg viewBox="0 0 68 68" width="68" height="68" style="transform: rotate(-90deg); display: block;">
+                    <circle cx="34" cy="34" r="${r}" fill="none" stroke="#E2E8F0" stroke-width="6" />
+                    <circle cx="34" cy="34" r="${r}" fill="none" stroke="${ringColor}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}" />
+                  </svg>
+                  <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 800; color: #0F172A; line-height: 1;">${pct}%</span>
+                    <span style="font-size: 7.5px; font-weight: 600; color: #64748B; margin-top: 1.5px;">${score}/${total} Benar</span>
+                  </div>
+                </div>
+                <div style="margin-top: 3px; font-size: 7.5px; font-weight: 700; padding: 1.5px 6px; border-radius: 3px; background: ${levelBg}; color: ${levelColor}; border: 1px solid ${levelBorder}; white-space: nowrap;">
+                  ${level}
+                </div>
+              </div>
+
+              <!-- Right: Clear Aspect Bars SVG -->
+              <div style="overflow: hidden;">
+                <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="display: block; max-width: 100%;">
+                  ${ticksSvg}
+                  ${barsSvg}
+                </svg>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }
+
+      // Interactive Mode (for modal and screen views)
+      const r = 44;
+      const circ = 2 * Math.PI * r;
+      const strokeOffset = circ - (pct / 100) * circ;
       const w = 530;
-      const h = 180;
+      const h = 170;
       const padLeft = 175;
       const barW = 265;
-      const rowH = 30;
-      const startY = 32;
+      const rowH = 28;
+      const startY = 30;
 
       let ticksSvg = '';
       [0, 25, 50, 75, 100].forEach(tick => {
         const x = padLeft + (tick / 100) * barW;
         ticksSvg += `
-          <line x1="${x.toFixed(1)}" y1="18" x2="${x.toFixed(1)}" y2="${startY + aspects.length * rowH}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2 2" />
-          <text x="${x.toFixed(1)}" y="13" text-anchor="middle" font-family="'Geist Mono', monospace" font-size="9" fill="#94A3B8" font-weight="600">${tick}%</text>
+          <line x1="${x.toFixed(1)}" y1="16" x2="${x.toFixed(1)}" y2="${startY + aspects.length * rowH}" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="2 2" />
+          <text x="${x.toFixed(1)}" y="12" text-anchor="middle" font-family="'Geist Mono', monospace" font-size="9" fill="#94A3B8" font-weight="600">${tick}%</text>
         `;
       });
 
@@ -4168,38 +5000,38 @@ function renderPentagonMatrixSvg(dimensions) {
           </text>
 
           <!-- Track -->
-          <rect x="${padLeft}" y="${y}" width="${barW}" height="13" rx="6.5" fill="#F1F5F9" />
+          <rect x="${padLeft}" y="${y}" width="${barW}" height="12" rx="6" fill="#F1F5F9" />
 
           <!-- Fill -->
-          <rect x="${padLeft}" y="${y}" width="${fillWidth.toFixed(1)}" height="13" rx="6.5" fill="${barFill}" />
+          <rect x="${padLeft}" y="${y}" width="${fillWidth.toFixed(1)}" height="12" rx="6" fill="${barFill}" />
 
           <!-- Score Value -->
-          <text x="${padLeft + barW + 8}" y="${y + 11}" font-family="'Geist Mono', monospace" font-size="10.5" font-weight="700" fill="${valColor}">
+          <text x="${padLeft + barW + 8}" y="${y + 10}" font-family="'Geist Mono', monospace" font-size="10" font-weight="700" fill="${valColor}">
             ${asp.correct}/${asp.total} (${aPct}%)
           </text>
         `;
       });
 
       return `
-        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-          <div class="cognitive-viz-grid">
+        <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+          <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center;" class="cognitive-viz-grid">
             
             <!-- Left: Donut Gauge Score Card -->
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-              <div style="position: relative; width: 110px; height: 110px;">
-                <svg viewBox="0 0 110 110" width="110" height="110" style="transform: rotate(-90deg); display: block;">
-                  <circle cx="55" cy="55" r="${r}" fill="none" stroke="#E2E8F0" stroke-width="10" />
-                  <circle cx="55" cy="55" r="${r}" fill="none" stroke="${ringColor}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}" style="transition: stroke-dashoffset 0.6s ease;" />
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+              <div style="position: relative; width: 96px; height: 96px;">
+                <svg viewBox="0 0 96 96" width="96" height="96" style="transform: rotate(-90deg); display: block;">
+                  <circle cx="48" cy="48" r="${r}" fill="none" stroke="#E2E8F0" stroke-width="9" />
+                  <circle cx="48" cy="48" r="${r}" fill="none" stroke="${ringColor}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${strokeOffset.toFixed(1)}" style="transition: stroke-dashoffset 0.6s ease;" />
                 </svg>
                 <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 800; color: #0F172A; line-height: 1;">${pct}%</span>
-                  <span style="font-size: 10.5px; font-weight: 600; color: #64748B; margin-top: 3px;">${score} / ${total} Benar</span>
+                  <span style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 800; color: #0F172A; line-height: 1;">${pct}%</span>
+                  <span style="font-size: 9.5px; font-weight: 600; color: #64748B; margin-top: 2px;">${score} / ${total} Benar</span>
                 </div>
               </div>
-              <div style="margin-top: 10px; font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 12px; background: ${levelBg}; color: ${levelColor}; border: 1px solid ${levelBorder};">
+              <div style="margin-top: 8px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: ${levelBg}; color: ${levelColor}; border: 1px solid ${levelBorder};">
                 ${level}
               </div>
-              <div style="font-size: 10px; color: #64748B; margin-top: 4px; font-weight: 500;">
+              <div style="font-size: 9.5px; color: #64748B; margin-top: 3px; font-weight: 500;">
                 Akurasi Logika &amp; Bisnis
               </div>
             </div>
@@ -4214,13 +5046,432 @@ function renderPentagonMatrixSvg(dimensions) {
 
           </div>
 
-          ${renderCognitiveItemsAuditHtml(cogData)}
+          ${includeAudit ? renderCognitiveItemsAuditHtml(cogData, talentId) : ''}
         </div>
       `;
     }
+    window.renderCognitiveItemsAuditHtml = renderCognitiveItemsAuditHtml;
+    window.renderCognitiveAspectsBarsHtml = renderCognitiveAspectsBarsHtml;
 
-    /* Modal Open / Close */
-    function openAssessmentResultModal(talentId) {
+    // ------------------------------------------------------------------
+    // COGNITIVE ANSWER CORRECTION & EVALUATOR OVERRIDE LOGIC
+    // ------------------------------------------------------------------
+    let activeCognitiveCorrectionSession = null;
+
+    function escapeJsAttr(str) {
+      if (!str) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n').replace(/\r/g, '');
+    }
+    window.escapeJsAttr = escapeJsAttr;
+
+    function openCognitiveAnswerCorrectionModal(talentId, itemIndex) {
+      const resolvedTalentId = talentId || (window.currentModalTalentId) || (window.currentViewingTalentId) || (window.activeTalentId) || (state && state.selectedTalent && state.selectedTalent.id) || (state && state.talents && state.talents.length > 0 && state.talents[0].id) || '';
+      const talent = (state.talents || []).find(t => t.id === resolvedTalentId || t.talentId === resolvedTalentId || t.$id === resolvedTalentId || t.appwriteId === resolvedTalentId);
+      if (!talent) {
+        console.warn('openCognitiveAnswerCorrectionModal: talent not found for', talentId, resolvedTalentId);
+        showToast('⚠️ Data kandidat tidak ditemukan.');
+        return;
+      }
+
+      const assessmentsMap = state.assessments || state.candidateAssessments || {};
+      const assessment = assessmentsMap[talent.id] || (talent.talentId && assessmentsMap[talent.talentId]) || talent.assessment;
+      if (!assessment || !assessment.cognitive || !Array.isArray(assessment.cognitive.items)) {
+        console.warn('openCognitiveAnswerCorrectionModal: cognitive items missing for', talent.id, assessment);
+        showToast('⚠️ Data butir soal kognitif tidak ditemukan.');
+        return;
+      }
+
+      const item = assessment.cognitive.items[itemIndex];
+      if (!item) {
+        console.warn('openCognitiveAnswerCorrectionModal: item not found at index', itemIndex);
+        showToast('⚠️ Butir soal tidak ditemukan.');
+        return;
+      }
+
+      // Find question bank definition for full options list
+      let matchedBankQ = (window.COGNITIVE_QUESTION_BANK || []).find(q => q.id === item.id || q.question.trim().toLowerCase() === item.question.trim().toLowerCase());
+      let optionsList = (item.options && item.options.length > 0) ? item.options : (matchedBankQ ? matchedBankQ.options : []);
+
+      if (!optionsList || optionsList.length === 0) {
+        optionsList = [item.correctAnswer];
+        if (item.candidateAnswer && item.candidateAnswer !== item.correctAnswer) {
+          optionsList.unshift(item.candidateAnswer);
+        }
+      }
+
+      activeCognitiveCorrectionSession = {
+        talentId: talent.id,
+        talentName: talent.name,
+        itemIndex: itemIndex,
+        item: item,
+        optionsList: optionsList,
+        correctAnswer: item.correctAnswer || (matchedBankQ ? matchedBankQ.correct_answer : '')
+      };
+
+      const titleEl = document.getElementById('cogCorrectModalTitle');
+      if (titleEl) {
+        titleEl.textContent = `Koreksi Butir #${itemIndex + 1}: ${escapeHtml(talent.name)} (${talent.id})`;
+      }
+
+      const bodyEl = document.getElementById('cogCorrectModalBody');
+      if (bodyEl) {
+        const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+        const currentSelected = item.candidateAnswer || '';
+
+        bodyEl.innerHTML = `
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Question Box -->
+            <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 10px; padding: 14px 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 700; color: #2563EB; background: #EFF6FF; border: 1px solid #BFDBFE; padding: 2px 8px; border-radius: 4px;">
+                  Soal #${itemIndex + 1} • ${escapeHtml(item.category || 'Penalaran Logika')}
+                </span>
+                <span style="font-size: 11px; font-weight: 700; color: ${item.isCorrect ? '#059669' : '#DC2626'}; background: ${item.isCorrect ? '#ECFDF5' : '#FEF2F2'}; border: 1px solid ${item.isCorrect ? '#A7F3D0' : '#FECACA'}; padding: 2px 8px; border-radius: 4px;">
+                  ${item.isCorrect ? '✓ Saat Ini: Benar' : '✕ Saat Ini: Salah'}
+                </span>
+              </div>
+              <div style="font-size: 13.5px; font-weight: 600; color: #0F172A; line-height: 1.5;">
+                ${escapeHtml(item.question)}
+              </div>
+            </div>
+
+            <!-- Current Answer vs Official Key Comparison -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 8px; padding: 10px 12px;">
+                <div style="font-size: 10px; font-weight: 700; color: #E11D48; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">
+                  ✕ Jawaban Kandidat (Terekam):
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: #9F1239;">
+                  ${escapeHtml(item.candidateAnswer || '(Tidak terjawab)')}
+                </div>
+              </div>
+              <div style="background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; padding: 10px 12px;">
+                <div style="font-size: 10px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">
+                  ✓ Kunci Jawaban Resmi:
+                </div>
+                <div style="font-size: 12px; font-weight: 700; color: #065F46;">
+                  ${escapeHtml(item.correctAnswer || '-')}
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Action: Direct Correct Key Button -->
+            <div style="background: #F0FDF4; border: 1.5px dashed #86EFAC; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <div>
+                <div style="font-size: 12px; font-weight: 700; color: #166534;">⚡ Koreksi Cepat: Tetapkan Kunci Jawaban Benar</div>
+                <div style="font-size: 10.5px; color: #15803D;">Otomatis memilih jawaban yang benar (${escapeHtml(item.correctAnswer || '')})</div>
+              </div>
+              <button type="button" class="btn btn-sm" onclick="selectQuickCorrectKey()" style="background: #059669; color: #FFFFFF; font-weight: 700; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                ✓ Pilih Kunci Benar
+              </button>
+            </div>
+
+            <!-- Options Radio Selector -->
+            <div>
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 8px; display: block;">
+                Pilih Jawaban Baru yang Seharusnya:
+              </label>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                ${optionsList.map((optText, optIdx) => {
+                  const letter = LETTERS[optIdx] || `${optIdx + 1}`;
+                  const isChecked = (String(optText).trim().toLowerCase() === String(currentSelected).trim().toLowerCase());
+                  const isKey = (String(optText).trim().toLowerCase() === String(item.correctAnswer || '').trim().toLowerCase());
+                  return `
+                    <label class="cog-option-radio-card" style="display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; border: 1.5px solid ${isChecked ? '#2563EB' : '#E2E8F0'}; background: ${isChecked ? '#EFF6FF' : '#FFFFFF'}; cursor: pointer; transition: all 0.15s ease;">
+                      <input type="radio" name="cognitiveCorrectRadio" value="${escapeHtml(optText)}" ${isChecked ? 'checked' : ''} onchange="highlightSelectedCorrectionRadio(this)" style="margin: 0; cursor: pointer;">
+                      <span style="font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 700; color: #64748B; width: 18px;">${letter}.</span>
+                      <span style="font-size: 12.5px; color: #1E293B; font-weight: ${isChecked ? '700' : '500'}; flex: 1;">
+                        ${escapeHtml(optText)}
+                      </span>
+                      ${isKey ? `
+                        <span style="font-size: 10px; font-weight: 700; color: #059669; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 2px 6px; border-radius: 4px;">
+                          Kunci Benar
+                        </span>
+                      ` : ''}
+                    </label>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Reason Note -->
+            <div>
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #475569;">
+                Catatan Alasan Koreksi (Opsional):
+              </label>
+              <input type="text" id="cogCorrectionReasonInput" class="form-input" placeholder="e.g. Terkendala tombol klik pada tes sebelumnya / konfirmasi saat wawancara" value="${escapeHtml(item.correctionNote || 'Kandidat mengonfirmasi jawaban saat wawancara / kendala tombol klik')}" style="font-size: 12px; width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #CBD5E1; box-sizing: border-box;">
+            </div>
+          </div>
+        `;
+      }
+
+      const backdrop = document.getElementById('cognitiveCorrectionModalBackdrop');
+      if (backdrop) {
+        backdrop.style.setProperty('display', 'flex', 'important');
+        backdrop.style.setProperty('z-index', '99999', 'important');
+        backdrop.classList.add('open');
+      }
+    }
+
+    function closeCognitiveAnswerCorrectionModal() {
+      const backdrop = document.getElementById('cognitiveCorrectionModalBackdrop');
+      if (backdrop) {
+        backdrop.style.setProperty('display', 'none', 'important');
+        backdrop.classList.remove('open');
+      }
+      activeCognitiveCorrectionSession = null;
+    }
+
+    function selectQuickCorrectKey(explicitKey) {
+      const correctKeyText = explicitKey || (activeCognitiveCorrectionSession && activeCognitiveCorrectionSession.correctAnswer) || '';
+      if (!correctKeyText) return;
+      const radios = document.querySelectorAll('input[name="cognitiveCorrectRadio"]');
+      radios.forEach(r => {
+        if (r.value.trim().toLowerCase() === correctKeyText.trim().toLowerCase()) {
+          r.checked = true;
+          highlightSelectedCorrectionRadio(r);
+        }
+      });
+    }
+
+    function highlightSelectedCorrectionRadio(radioEl) {
+      const cards = document.querySelectorAll('.cog-option-radio-card');
+      cards.forEach(c => {
+        c.style.borderColor = '#E2E8F0';
+        c.style.background = '#FFFFFF';
+      });
+      if (radioEl && radioEl.parentElement) {
+        radioEl.parentElement.style.borderColor = '#2563EB';
+        radioEl.parentElement.style.background = '#EFF6FF';
+      }
+    }
+
+    async function submitCognitiveAnswerCorrection() {
+      if (!activeCognitiveCorrectionSession) return;
+      const { talentId, itemIndex } = activeCognitiveCorrectionSession;
+
+      const selectedRadio = document.querySelector('input[name="cognitiveCorrectRadio"]:checked');
+      if (!selectedRadio) {
+        showToast('⚠️ Silakan pilih salah satu opsi jawaban terlebih dahulu.');
+        return;
+      }
+
+      const newAnswer = selectedRadio.value;
+      const note = document.getElementById('cogCorrectionReasonInput') ? document.getElementById('cogCorrectionReasonInput').value.trim() : '';
+
+      const talent = (state.talents || []).find(t => t.id === talentId || t.talentId === talentId || t.$id === talentId || t.appwriteId === talentId);
+      if (!talent) {
+        showToast('⚠️ Data kandidat tidak ditemukan.');
+        return;
+      }
+
+      const assessmentsMap = state.assessments || state.candidateAssessments || {};
+      const assessment = assessmentsMap[talent.id] || (talent.talentId && assessmentsMap[talent.talentId]) || talent.assessment;
+      if (!assessment || !assessment.cognitive || !Array.isArray(assessment.cognitive.items)) {
+        showToast('⚠️ Objek asesmen tidak valid.');
+        return;
+      }
+
+      const btnSave = document.getElementById('btnSaveCognitiveCorrection');
+      if (btnSave) {
+        btnSave.disabled = true;
+        btnSave.textContent = '⏳ Menyimpan...';
+      }
+
+      try {
+        const items = assessment.cognitive.items;
+        const item = items[itemIndex];
+        const isNowCorrect = (newAnswer.trim().toLowerCase() === String(item.correctAnswer || '').trim().toLowerCase());
+
+        item.candidateAnswer = newAnswer;
+        item.isCorrect = isNowCorrect;
+        item.manuallyCorrected = true;
+        item.correctedAt = Date.now();
+        item.correctedBy = (state.currentUser && (state.currentUser.email || state.currentUser.name)) || 'HR Evaluator';
+        if (note) item.correctionNote = note;
+
+        // Recalculate total score & percentage
+        const newScore = items.filter(it => it.isCorrect).length;
+        const total = items.length || assessment.cognitive.total || 15;
+        const newPct = Math.round((newScore / total) * 100);
+
+        let newLevel = 'Perlu Evaluasi';
+        if (newPct >= 80) newLevel = 'Sangat Baik';
+        else if (newPct >= 60) newLevel = 'Kompeten / Cukup';
+        else if (newPct >= 40) newLevel = 'Cukup';
+
+        // Recompute category breakdown
+        const newCategories = {};
+        items.forEach(it => {
+          const cat = it.category || 'Lainnya';
+          if (!newCategories[cat]) newCategories[cat] = { correct: 0, total: 0 };
+          newCategories[cat].total += 1;
+          if (it.isCorrect) newCategories[cat].correct += 1;
+        });
+
+        assessment.cognitive.score = newScore;
+        assessment.cognitive.total = total;
+        assessment.cognitive.percentage = newPct;
+        assessment.cognitive.level = newLevel;
+        assessment.cognitive.categories = newCategories;
+
+        // Sync to Firebase Realtime Database
+        if (typeof rtdb !== 'undefined' && rtdb) {
+          await Promise.all([
+            rtdb.ref('/candidate_assessments/' + talent.id + '/cognitive').set(assessment.cognitive),
+            rtdb.ref('/talents/' + talent.id + '/assessment/cognitive').set(assessment.cognitive)
+          ]);
+        }
+
+        // Update local state
+        if (state.assessments) {
+          state.assessments[talent.id] = assessment;
+        }
+        if (state.candidateAssessments) {
+          state.candidateAssessments[talent.id] = assessment;
+        }
+        if (talent.assessment) {
+          talent.assessment.cognitive = assessment.cognitive;
+        }
+
+        showToast(`✅ Jawaban butir #${itemIndex + 1} berhasil dikoreksi! Skor baru: ${newScore}/${total} (${newPct}%).`);
+        closeCognitiveAnswerCorrectionModal();
+
+        // Refresh currently open modal
+        const modalBackdrop = document.getElementById('assessmentResultModalBackdrop');
+        if (modalBackdrop && modalBackdrop.classList.contains('open')) {
+          openAssessmentResultModal(talent.id, currentModalActiveTab || 'details');
+        }
+        if (typeof renderInterviewWorkspace === 'function') {
+          renderInterviewWorkspace();
+        }
+      } catch (err) {
+        console.error('Error saving cognitive correction:', err);
+        showToast('❌ Gagal menyimpan koreksi: ' + (err.message || err));
+      } finally {
+        if (btnSave) {
+          btnSave.disabled = false;
+          btnSave.textContent = '💾 Simpan & Hitung Ulang Skor';
+        }
+      }
+    }
+
+    window.openCognitiveAnswerCorrectionModal = openCognitiveAnswerCorrectionModal;
+    window.closeCognitiveAnswerCorrectionModal = closeCognitiveAnswerCorrectionModal;
+    window.selectQuickCorrectKey = selectQuickCorrectKey;
+    window.highlightSelectedCorrectionRadio = highlightSelectedCorrectionRadio;
+    window.submitCognitiveAnswerCorrection = submitCognitiveAnswerCorrection;
+
+    /* Modal Open / Close & Live Interview Guide Integration */
+    let currentModalActiveTab = 'details';
+
+    function openLiveInterviewGuideModal(talentId) {
+      openAssessmentResultModal(talentId, 'interview');
+    }
+    window.openLiveInterviewGuideModal = openLiveInterviewGuideModal;
+
+    function switchAssessmentModalTab(talentId, tabName) {
+      currentModalActiveTab = tabName;
+      const detailsPanel = document.getElementById('modalTabPanel_details');
+      const interviewPanel = document.getElementById('modalTabPanel_interview');
+      const btnDetails = document.getElementById('modalTabBtn_details');
+      const btnInterview = document.getElementById('modalTabBtn_interview');
+
+      if (detailsPanel && interviewPanel && btnDetails && btnInterview) {
+        if (tabName === 'details') {
+          detailsPanel.style.display = 'block';
+          interviewPanel.style.display = 'none';
+          btnDetails.style.background = '#FFFFFF';
+          btnDetails.style.color = '#1E40AF';
+          btnDetails.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+          btnInterview.style.background = 'transparent';
+          btnInterview.style.color = '#64748B';
+          btnInterview.style.boxShadow = 'none';
+        } else {
+          detailsPanel.style.display = 'none';
+          interviewPanel.style.display = 'block';
+          btnInterview.style.background = '#4F46E5';
+          btnInterview.style.color = '#FFFFFF';
+          btnInterview.style.boxShadow = '0 1px 3px rgba(79,70,229,0.3)';
+          btnDetails.style.background = 'transparent';
+          btnDetails.style.color = '#64748B';
+          btnDetails.style.boxShadow = 'none';
+        }
+      }
+    }
+    window.switchAssessmentModalTab = switchAssessmentModalTab;
+
+    function appendQuickEvalNote(talentId, snippet) {
+      const ta = document.getElementById(`modalInterviewNotes_${talentId}`) || document.getElementById('interviewQuickNotesInput');
+      if (!ta) return;
+      const current = ta.value.trim();
+      if (current) {
+        ta.value = current + '\n' + snippet;
+      } else {
+        ta.value = snippet;
+      }
+      ta.focus();
+      try {
+        localStorage.setItem(`pge_interview_notes_${talentId}`, ta.value);
+      } catch (e) {}
+    }
+    window.appendQuickEvalNote = appendQuickEvalNote;
+
+    async function saveModalLiveInterviewNotes(talentId, event) {
+      if (event && event.stopPropagation) {
+        event.stopPropagation();
+      }
+      const talent = state.talents.find(t => t.id === talentId);
+      if (!talent) return;
+
+      const notesTextarea = document.getElementById(`modalInterviewNotes_${talentId}`);
+      const stageSelect = document.getElementById(`modalInterviewStageSelect_${talentId}`);
+      const notesVal = notesTextarea ? notesTextarea.value.trim() : '';
+      const newStage = stageSelect ? stageSelect.value : (talent.stage || 'Interviewed');
+
+      talent.stage = newStage;
+      talent.notes = notesVal;
+
+      try {
+        localStorage.setItem(`pge_interview_notes_${talentId}`, notesVal);
+      } catch (e) {}
+
+      showToast('Menyimpan catatan & evaluasi wawancara...');
+
+      try {
+        if (typeof databases !== 'undefined' && APPWRITE_CONFIG) {
+          const docId = talent.appwriteId || (talentId || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+          await databases.updateDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            docId,
+            {
+              stage: newStage,
+              notes: packOutreachStatus(talent.notes || '', talent.outreachStatus || 'Confirmed')
+            }
+          ).catch(err => console.warn('Appwrite update note warning:', err));
+        }
+
+        if (typeof rtdb !== 'undefined' && rtdb) {
+          rtdb.ref('/talents/' + talentId).update({
+            stage: newStage,
+            notes: talent.notes || '',
+            outreachStatus: talent.outreachStatus || 'Confirmed'
+          }).catch(err => console.warn('Firebase RTDB update note warning:', err));
+        }
+
+        showToast(`✅ Evaluasi wawancara ${talent.name} berhasil disimpan! Tahap: ${newStage}`);
+        if (typeof renderCandidates === 'function') {
+          renderCandidates();
+        }
+      } catch (err) {
+        console.error('Save live interview evaluation error:', err);
+        showToast('Error saving evaluation: ' + err.message);
+      }
+    }
+    window.saveModalLiveInterviewNotes = saveModalLiveInterviewNotes;
+
+    function openAssessmentResultModal(talentId, defaultTab = 'details') {
       const talent = state.talents.find(t => t.id === talentId);
       if (!talent) return;
       const assessment = state.assessments[talent.id] || talent.assessment;
@@ -4229,10 +5480,17 @@ function renderPentagonMatrixSvg(dimensions) {
         return;
       }
 
+      currentModalActiveTab = defaultTab;
+      window.currentModalTalentId = talent.id;
+
       document.getElementById('resModalCandidateName').textContent = talent.name;
       document.getElementById('resModalCandidateId').textContent = talent.id;
       const dateStr = assessment.completedAt ? new Date(assessment.completedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }) : 'Baru saja';
       document.getElementById('resModalCandidateMeta').textContent = `Posisi: ${talent.role || 'Freelance Content Creator'} • Selesai: ${dateStr}`;
+
+      const probeQuestions = (window.AssessmentExtensions && window.AssessmentExtensions.generateInterviewProbeQuestions)
+        ? window.AssessmentExtensions.generateInterviewProbeQuestions(talent, assessment)
+        : [];
 
       const body = document.getElementById('resModalBody');
 
@@ -4285,7 +5543,10 @@ function renderPentagonMatrixSvg(dimensions) {
 
       // 3. Cognitive Aspect Bars
       let cogCardHtml = '';
-      if (assessment.cognitive) {
+      const hasTestedCog = (window.AssessmentExtensions && window.AssessmentExtensions.isCognitiveTested)
+        ? window.AssessmentExtensions.isCognitiveTested(assessment)
+        : (assessment.cognitive && typeof assessment.cognitive.score === 'number' && assessment.cognitive.score > 0);
+      if (hasTestedCog && assessment.cognitive) {
         cogCardHtml = `
           <div class="report-card" style="grid-column: 1 / -1;">
             <div class="report-card-title" style="display: flex; justify-content: space-between;">
@@ -4296,7 +5557,7 @@ function renderPentagonMatrixSvg(dimensions) {
                 Skor Akhir: ${assessment.cognitive.score} / ${assessment.cognitive.total} (${assessment.cognitive.percentage}%)
               </span>
             </div>
-            ${renderCognitiveAspectsBarsHtml(assessment.cognitive)}
+            ${renderCognitiveAspectsBarsHtml(assessment.cognitive, talent.id)}
           </div>
         `;
       }
@@ -4311,17 +5572,942 @@ function renderPentagonMatrixSvg(dimensions) {
         `;
       }
 
+      // 5. Panduan Pertanyaan Wawancara (Probing) Panel
+      let interviewPanelHtml = '';
+      if (probeQuestions.length > 0) {
+        interviewPanelHtml = `
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Candidate Psychometric Key Highlights Banner -->
+            <div style="background: #EEF2FF; border: 1.5px solid #C7D2FE; border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #312E81; display: flex; align-items: center; gap: 6px;">
+                  <span>🎯</span> Ringkasan Karakter: ${escapeHtml(talent.name)} (${escapeHtml(talent.role)})
+                </div>
+                <div style="font-size: 11.5px; color: #4338CA; margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap;">
+                  ${assessment.disc ? `<span style="background:#FFFFFF; border:1px solid #BFDBFE; padding:2px 8px; border-radius:4px; font-weight:600;">DISC: ${assessment.disc.profilePattern} (${assessment.disc.primaryName})</span>` : ''}
+                  ${hasTestedCog ? `<span style="background:#FFFFFF; border:1px solid #A7F3D0; padding:2px 8px; border-radius:4px; font-weight:600; color:#065F46;">Logika Bisnis: ${assessment.cognitive.percentage}%</span>` : ''}
+                  ${assessment.frexor && assessment.frexor.iq_estimate ? `<span style="background:#FFFFFF; border:1px solid #FDE68A; padding:2px 8px; border-radius:4px; font-weight:600; color:#92400E;">⚡ IQ: ${assessment.frexor.iq_estimate}</span>` : ''}
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="printCandidateDossier('${talent.id}')" style="font-size: 11.5px; font-weight: 700; color: #1E40AF; border-color: #BFDBFE; background: #FFFFFF;">
+                  🖨️ Cetak Lembar Wawancara
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="AssessmentExtensions.openWhatsAppModal('${talent.id}', event)" style="font-size: 11.5px; font-weight: 700; color: #16A34A; border-color: #BBF7D0; background: #FFFFFF;">
+                  💬 Chat WA
+                </button>
+              </div>
+            </div>
+
+            <!-- Probing Aspects Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+              ${probeQuestions.map((q, qIdx) => `
+                <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between;">
+                  <!-- Header -->
+                  <div style="margin-bottom: 10px; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px;">
+                    <div style="font-size: 13.5px; font-weight: 700; color: #1E1B4B; margin-bottom: 4px;">
+                      #${qIdx + 1}. ${escapeHtml(q.topic)}
+                    </div>
+                    <div style="display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 600; color: #4338CA; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 2px 8px; border-radius: 6px;">
+                      ${escapeHtml(q.indicator)}
+                    </div>
+                  </div>
+
+                  <!-- Tab Switcher A / B -->
+                  <div style="display: flex; gap: 4px; margin-bottom: 10px; background: #F1F5F9; padding: 3px; border-radius: 8px;">
+                    ${(q.options || []).map((opt, optIdx) => {
+                      const isFirst = optIdx === 0;
+                      const shortTitle = optIdx === 0 ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
+                      return `
+                        <button type="button" 
+                                class="probe-pill-btn probe-pill-${talent.id}-${qIdx}-${optIdx}" 
+                                onclick="AssessmentExtensions.switchProbeTab('${talent.id}', ${qIdx}, ${optIdx})"
+                                style="flex: 1; padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; ${isFirst ? 'background: #FFFFFF; color: #4338CA; box-shadow: 0 1px 2px rgba(0,0,0,0.06);' : 'background: transparent; color: #64748B;'}">
+                          ${shortTitle}
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+
+                  <!-- Questions Panel -->
+                  <div style="flex: 1;">
+                    ${(q.options || [{ label: 'Pertanyaan Wawancara', question: q.question, whatToLookFor: q.whatToLookFor }]).map((opt, optIdx) => `
+                      <div id="probePanel_${talent.id}_${qIdx}_${optIdx}" 
+                           style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px; display: ${optIdx === 0 ? 'block' : 'none'}; min-height: 130px;">
+                        <div style="font-size: 9.5px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                          ${escapeHtml(opt.label || `Pilihan ${optIdx + 1}`)}
+                        </div>
+                        <p style="font-size: 12.5px; color: #0F172A; font-weight: 600; line-height: 1.5; margin: 0 0 10px 0;">
+                          "${escapeHtml(opt.question)}"
+                        </p>
+                        <div style="font-size: 11px; color: #475569; line-height: 1.4; border-top: 1px dashed #CBD5E1; padding-top: 8px;">
+                          <strong style="color: #1E293B;">Fokus Penilaian:</strong> ${escapeHtml(opt.whatToLookFor)}
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+
+                  <!-- Quick Aspect Evaluation Rating -->
+                  <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 11px; font-weight: 600; color: #64748B;">Skor Aspek #${qIdx+1}:</span>
+                    <select class="form-select-sm" style="font-size: 11px; font-weight: 600; color: #1E40AF; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 2px 6px; cursor: pointer;">
+                      <option value="5">5.0 ★ Sangat Memuaskan</option>
+                      <option value="4" selected>4.0 ★ Sesuai Standar</option>
+                      <option value="3">3.0 ★ Cukup / Perlu Dilatih</option>
+                      <option value="2">2.0 ★ Di Bawah Ekspektasi</option>
+                      <option value="1">1.0 ★ Tidak Sesuai</option>
+                    </select>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        interviewPanelHtml = `
+          <div style="padding: 40px 20px; text-align: center; background: #FFFFFF; border-radius: 12px; border: 1px dashed #CBD5E1; color: #64748B;">
+            <div style="font-size: 36px; margin-bottom: 8px;">🎙️</div>
+            <div style="font-size: 15px; font-weight: 700; color: #0F172A;">Panduan Pertanyaan Probing Siap Dibuat</div>
+            <div style="font-size: 12px; margin-top: 4px;">Data asesmen kandidat sudah tersedia untuk evaluasi wawancara.</div>
+          </div>
+        `;
+      }
+
+      const isDetails = (defaultTab === 'details');
+
       body.innerHTML = `
-        <div class="report-grid-3col">
-          ${bigFiveCardHtml}
-          ${discCardHtml}
-          ${cogCardHtml}
-          ${frexorCardHtml}
+        <!-- Segmented Tab Switcher inside Modal -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #F1F5F9; padding: 4px; border-radius: 10px; border: 1px solid #E2E8F0; margin-bottom: 18px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; gap: 6px;">
+            <button type="button" 
+                    id="modalTabBtn_details"
+                    onclick="switchAssessmentModalTab('${talent.id}', 'details')"
+                    style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; ${isDetails ? 'background: #FFFFFF; color: #1E40AF; box-shadow: 0 1px 3px rgba(0,0,0,0.08);' : 'background: transparent; color: #64748B;'}">
+              <span>📊 1. Detail Hasil Asesmen</span>
+            </button>
+            <button type="button" 
+                    id="modalTabBtn_interview"
+                    onclick="switchAssessmentModalTab('${talent.id}', 'interview')"
+                    style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; ${!isDetails ? 'background: #4F46E5; color: #FFFFFF; box-shadow: 0 1px 3px rgba(79,70,229,0.3);' : 'background: transparent; color: #64748B;'}">
+              <span>🎙️ 2. Panduan Pertanyaan Wawancara (Probing)</span>
+              <span style="font-size: 10.5px; font-weight: 700; background: ${!isDetails ? 'rgba(255,255,255,0.25)' : '#EEF2FF'}; color: ${!isDetails ? '#FFFFFF' : '#4338CA'}; padding: 1px 7px; border-radius: 999px;">
+                ${probeQuestions.length} Aspek
+              </span>
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; padding-right: 6px;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeAssessmentResultModal(); switchPortalMode('interview', '${talent.id}');" style="font-size: 11.5px; padding: 5px 12px; font-weight: 700; background: #4F46E5; border-color: #4338CA; color: #FFFFFF;" title="Buka di Ruang Wawancara Layar Penuh">
+              🎙️ Mulai Wawancara (Layar Penuh) ↗
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="printCandidateDossier('${talent.id}')" style="font-size: 11.5px; padding: 4px 10px; font-weight: 700; color: #1E40AF; border-color: #BFDBFE;">
+              🖨️ Cetak PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel 1: Details -->
+        <div id="modalTabPanel_details" style="display: ${isDetails ? 'block' : 'none'};">
+          <div class="report-grid-3col">
+            ${bigFiveCardHtml}
+            ${discCardHtml}
+            ${cogCardHtml}
+            ${frexorCardHtml}
+          </div>
+        </div>
+
+        <!-- Panel 2: Interview Guide -->
+        <div id="modalTabPanel_interview" style="display: ${!isDetails ? 'block' : 'none'};">
+          ${interviewPanelHtml}
+        </div>
+
+        <!-- Universal Interviewer Scratchpad & Decision Station (Always Accessible) -->
+        <div style="margin-top: 20px; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 12px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 16px;">📝</span> 
+                <span>Catatan Observasi Hasil Wawancara &amp; Evaluasi Akhir</span>
+                <span style="font-size: 10px; font-weight: 700; background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; padding: 2px 8px; border-radius: 6px;">Live Sync</span>
+              </div>
+              <div style="font-size: 11.5px; color: #64748B; margin-top: 3px;">
+                Tuliskan impresi wawancara, respon studi kasus, kelebihan/kekurangan, dan kesepakatan gaji. Data langsung tersinkron ke database dan Report Card cetak.
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #475569;">Tahap Rekrutmen:</span>
+              <select id="modalInterviewStageSelect_${talent.id}" style="font-size: 12px; font-weight: 700; color: #0F172A; background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 6px 12px; cursor: pointer; outline: none;">
+                <option value="Shortlisted" ${talent.stage === 'Shortlisted' ? 'selected' : ''}>⭐ Shortlisted (Lolos)</option>
+                <option value="Offered" ${talent.stage === 'Offered' ? 'selected' : ''}>🎉 Offering (Penawaran)</option>
+                <option value="Hired" ${talent.stage === 'Hired' ? 'selected' : ''}>🤝 Hired (Diterima)</option>
+                <option value="Interviewed" ${(!talent.stage || talent.stage === 'Interviewed' || talent.stage === 'Invited' || talent.stage === 'Screening') ? 'selected' : ''}>🎙️ Interviewed (Dalam Proses)</option>
+                <option value="Screening" ${talent.stage === 'Screening' ? 'selected' : ''}>🔍 Screening</option>
+                <option value="Archived" ${talent.stage === 'Archived' ? 'selected' : ''}>📁 Tidak Lolos (Arsipkan)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quick Template Chips Bar -->
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+            <span style="font-size: 11px; font-weight: 600; color: #64748B;">Template Cepat:</span>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="appendQuickEvalNote('${talent.id}', '• Rekomendasi: DIREKOMENDASIKAN (HIRE) — Kemampuan teknis, komunikasi, & kesesuaian kultur sangat baik.')" style="font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #F0FDF4; color: #166534; border-color: #BBF7D0; cursor: pointer;">+ Rekomendasi HIRE</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="appendQuickEvalNote('${talent.id}', '• Rekomendasi: DIPERTIMBANGKAN — Perlu cross-check portofolio lanjutan & negosiasi ekspektasi gaji.')" style="font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #FEF3C7; color: #92400E; border-color: #FDE68A; cursor: pointer;">+ Dipertimbangkan</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="appendQuickEvalNote('${talent.id}', '• Observasi: Pola komunikasi lugas, struktur jawaban STAR teratur, sesuai skor Big Five & DISC.')" style="font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #EFF6FF; color: #1E40AF; border-color: #BFDBFE; cursor: pointer;">+ Jawaban STAR Jelas</button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="appendQuickEvalNote('${talent.id}', '• Catatan Khusus: Memerlukan pendampingan SOP teknis intensif pada 1 bulan pertama.')" style="font-size: 11px; padding: 3px 8px; border-radius: 999px; background: #F8FAFC; color: #475569; border-color: #CBD5E1; cursor: pointer;">+ Perlu Pendampingan SOP</button>
+          </div>
+
+          <textarea id="modalInterviewNotes_${talent.id}" 
+                    placeholder="Tuliskan impresi wawancara, respon kandidat terhadap pertanyaan situasional, catatan kelebihan/kekurangan, dan kesepakatan gaji/jadwal di sini..." 
+                    style="width: 100%; min-height: 105px; font-size: 12.5px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 12px 14px; outline: none; font-family: sans-serif; resize: vertical; box-sizing: border-box; background: #F8FAFC; line-height: 1.5;">${escapeHtml(talent.notes || '')}</textarea>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 11px; color: #94A3B8;">
+              💡 Catatan ini otomatis tercetak pada Lembar Report Card kandidat (Page 1).
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary" onclick="closeAssessmentResultModal()" style="font-size: 12px; padding: 7px 14px;">
+                Tutup
+              </button>
+              <button type="button" class="btn btn-primary" onclick="event.stopPropagation(); saveModalLiveInterviewNotes('${talent.id}', event)" style="font-size: 12.5px; padding: 7px 20px; font-weight: 700; background: #4F46E5; border-color: #4338CA; box-shadow: 0 2px 6px rgba(79,70,229,0.25); cursor: pointer;">
+                💾 Simpan Evaluasi &amp; Update Tahap
+              </button>
+            </div>
+          </div>
         </div>
       `;
 
       document.getElementById('assessmentResultModalBackdrop').classList.add('open');
     }
+
+    /* ---------------------------------------------------- */
+    /* 9. FULL-PAGE LIVE INTERVIEW WORKSPACE ENGINE (NO MODAL) */
+    /* ---------------------------------------------------- */
+    let liveInterviewDebounceTimers = {};
+
+    function getInterviewAnswer(talentId, qKey) {
+      if (!talentId || !qKey) return '';
+      try {
+        const stored = state.interviewSessionAnswers[talentId] || {};
+        if (stored[qKey] !== undefined) return stored[qKey];
+        const lsKey = `pge_interview_${talentId}_${qKey}`;
+        const localVal = localStorage.getItem(lsKey);
+        if (localVal !== null) return localVal;
+      } catch (e) {}
+      return '';
+    }
+
+    function autoSaveLiveInterviewAnswer(talentId, qKey, val) {
+      if (!talentId || !qKey) return;
+      if (!state.interviewSessionAnswers[talentId]) {
+        state.interviewSessionAnswers[talentId] = {};
+      }
+      state.interviewSessionAnswers[talentId][qKey] = val;
+      try {
+        localStorage.setItem(`pge_interview_${talentId}_${qKey}`, val);
+      } catch (e) {}
+
+      // Update visual save indicator
+      const statusPill = document.getElementById(`saveStatus_${talentId}_${qKey}`);
+      if (statusPill) {
+        statusPill.textContent = 'Menyimpan...';
+        statusPill.style.color = '#D97706';
+      }
+
+      clearTimeout(liveInterviewDebounceTimers[`${talentId}_${qKey}`]);
+      liveInterviewDebounceTimers[`${talentId}_${qKey}`] = setTimeout(async () => {
+        // Compile quick notes string
+        const talent = state.talents.find(t => t.id === talentId);
+        if (talent) {
+          const autoSummaryTag = `[Live Note ${qKey}: ${val.slice(0, 120)}]`;
+          if (!talent.notes) talent.notes = '';
+          if (!talent.notes.includes(qKey)) {
+            talent.notes = (talent.notes + '\n' + autoSummaryTag).trim();
+          }
+        }
+
+        // Sync to Appwrite Document
+        try {
+          const docId = (talent && (talent.appwriteId || talent.$id)) || (talentId || '').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+          if (typeof databases !== 'undefined' && typeof APPWRITE_CONFIG !== 'undefined') {
+            await databases.updateDocument(
+              APPWRITE_CONFIG.databaseId,
+              APPWRITE_CONFIG.collectionId,
+              docId,
+              { notes: (talent && talent.notes) || val }
+            );
+          }
+        } catch (err) {
+          console.warn('Live interview autosave Appwrite note:', err);
+        }
+
+        // Sync to Firebase RTDB
+        if (typeof rtdb !== 'undefined') {
+          rtdb.ref('/talents/' + talentId + '/interviewAnswers/' + qKey).set({
+            answer: val,
+            updatedAt: Date.now()
+          }).catch(() => {});
+        }
+
+        if (statusPill) {
+          statusPill.textContent = '✓ Tersimpan';
+          statusPill.style.color = '#16A34A';
+        }
+      }, 700);
+    }
+    window.autoSaveLiveInterviewAnswer = autoSaveLiveInterviewAnswer;
+
+    function autoSaveLiveInterviewScore(talentId, qKey, scoreVal) {
+      if (!talentId || !qKey) return;
+      if (typeof rtdb !== 'undefined') {
+        rtdb.ref('/talents/' + talentId + '/interviewScores/' + qKey).set({
+          score: Number(scoreVal),
+          updatedAt: Date.now()
+        }).catch(() => {});
+      }
+      showToast(`⭐ Skor Aspek disimpan: ${scoreVal} ★`);
+    }
+    window.autoSaveLiveInterviewScore = autoSaveLiveInterviewScore;
+
+    function selectActiveInterviewCandidate(talentId) {
+      state.activeInterviewCandidateId = talentId;
+      history.replaceState(null, null, `#interview?id=${talentId}`);
+      renderInterviewWorkspace();
+    }
+    window.selectActiveInterviewCandidate = selectActiveInterviewCandidate;
+
+    function switchInterviewSubMode(mode) {
+      state.interviewSubMode = mode;
+      renderInterviewWorkspace();
+    }
+    window.switchInterviewSubMode = switchInterviewSubMode;
+
+    function filterInterviewBankCategory(cat) {
+      state.interviewBankCategory = cat;
+      renderInterviewWorkspace();
+    }
+    window.filterInterviewBankCategory = filterInterviewBankCategory;
+
+    function searchInterviewBankQuestions(query) {
+      state.interviewBankSearch = query;
+      const wrap = document.getElementById('interviewBankCardsContainer');
+      if (wrap) {
+        wrap.innerHTML = renderInterviewBankCardsOnlyHtml(state.activeInterviewCandidateId, state.interviewBankCategory, query);
+      }
+    }
+    window.searchInterviewBankQuestions = searchInterviewBankQuestions;
+
+    async function saveInterviewFinalEvaluation(talentId) {
+      const talent = state.talents.find(t => t.id === talentId);
+      if (!talent) return;
+
+      const notesInput = document.getElementById(`finalInterviewNotes_${talentId}`);
+      const stageSelect = document.getElementById(`finalInterviewStage_${talentId}`);
+      const finalNotes = notesInput ? notesInput.value.trim() : (talent.notes || '');
+      const finalStage = stageSelect ? stageSelect.value : (talent.stage || 'Interviewed');
+
+      talent.notes = finalNotes;
+      talent.stage = finalStage;
+
+      try {
+        const docId = (talent.appwriteId || talent.$id) || talentId.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+        if (typeof databases !== 'undefined' && typeof APPWRITE_CONFIG !== 'undefined') {
+          await databases.updateDocument(
+            APPWRITE_CONFIG.databaseId,
+            APPWRITE_CONFIG.collectionId,
+            docId,
+            { notes: finalNotes, stage: finalStage }
+          );
+        }
+      } catch (err) {
+        console.warn('Appwrite final evaluation sync err:', err);
+      }
+
+      if (typeof rtdb !== 'undefined') {
+        rtdb.ref('/talents/' + talentId).update({
+          notes: finalNotes,
+          stage: finalStage,
+          lastInterviewEvaluatedAt: Date.now()
+        }).catch(() => {});
+      }
+
+      showToast(`✅ Evaluasi wawancara untuk ${talent.name} berhasil disimpan ke database (Tahap: ${finalStage})!`);
+      renderInterviewWorkspace();
+    }
+    window.saveInterviewFinalEvaluation = saveInterviewFinalEvaluation;
+
+    function printActiveInterviewForm() {
+      const talentId = state.activeInterviewCandidateId;
+      if (!talentId) {
+        alert('Silakan pilih kandidat terlebih dahulu.');
+        return;
+      }
+      if (typeof printCandidateReportCard === 'function') {
+        printCandidateReportCard(talentId);
+      } else {
+        window.print();
+      }
+    }
+    window.printActiveInterviewForm = printActiveInterviewForm;
+
+    function toggleInterviewBankAccordion(num) {
+      if (!state.expandedBankQuestions) {
+        state.expandedBankQuestions = {};
+      }
+      state.expandedBankQuestions[num] = !state.expandedBankQuestions[num];
+      const card = document.getElementById(`bankCardBody_${num}`);
+      const icon = document.getElementById(`bankCardIcon_${num}`);
+      const header = document.getElementById(`bankCardHeader_${num}`);
+      if (card && icon) {
+        const isOpen = state.expandedBankQuestions[num];
+        card.style.display = isOpen ? 'block' : 'none';
+        icon.textContent = isOpen ? '▲' : '▼';
+        if (header) {
+          header.style.background = isOpen ? '#F8FAFC' : '#FFFFFF';
+        }
+      }
+    }
+    window.toggleInterviewBankAccordion = toggleInterviewBankAccordion;
+
+    function toggleAllInterviewBankAccordions(expand) {
+      if (!state.expandedBankQuestions) {
+        state.expandedBankQuestions = {};
+      }
+      const cards = document.querySelectorAll('.bank-card-body');
+      const icons = document.querySelectorAll('.bank-card-toggle-icon');
+      const headers = document.querySelectorAll('.bank-card-header');
+      cards.forEach((c) => {
+        const num = c.getAttribute('data-num');
+        state.expandedBankQuestions[num] = expand;
+        c.style.display = expand ? 'block' : 'none';
+      });
+      icons.forEach(ic => { ic.textContent = expand ? '▲' : '▼'; });
+      headers.forEach(h => { h.style.background = expand ? '#F8FAFC' : '#FFFFFF'; });
+    }
+    window.toggleAllInterviewBankAccordions = toggleAllInterviewBankAccordions;
+
+    function renderInterviewBankCardsOnlyHtml(talentId, category, query) {
+      const data = window.PGE_INTERVIEW_DATA;
+      if (!data) return '<div style="padding: 20px; text-align: center; color: #64748B;">Data bank soal sedang dimuat...</div>';
+
+      if (category === 'rubric') {
+        const rubrics = data.rubrics || [];
+        const guides = data.competencyGuides || {};
+        return `
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 16px;">
+              <div style="font-weight: 700; font-size: 14px; color: #0F172A; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>⭐</span> Skala Standar Evaluasi Wawancara (1–5)
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${rubrics.map(r => `
+                  <div style="display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;">
+                    <div style="width: 30px; height: 30px; border-radius: 6px; background: #2563EB; color: #FFFFFF; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-mono);">
+                      ${r.score}
+                    </div>
+                    <div style="flex: 1;">
+                      <div style="font-weight: 700; font-size: 12.5px; color: #0F172A;">${escapeHtml(r.def)} - <span style="font-weight: 500; color: #64748B;">${escapeHtml(r.interp)}</span></div>
+                      <div style="font-size: 11.5px; color: #475569; margin-top: 3px;">${escapeHtml(r.evidence)}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 16px;">
+              <div style="font-weight: 700; font-size: 14px; color: #0F172A; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>🔍</span> Panduan Observasi Kompetensi (What Good Looks Like vs Warning Signs)
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;">
+                ${Object.entries(guides).map(([comp, g]) => `
+                  <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px 14px;">
+                    <div style="font-weight: 700; font-size: 13px; color: #1E40AF; margin-bottom: 6px;">${escapeHtml(comp)}</div>
+                    <div style="font-size: 11.5px; color: #166534; background: #F0FDF4; border: 1px solid #DCFCE7; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; line-height: 1.4;">
+                      <strong>🟢 Jawaban Baik:</strong> ${escapeHtml(g.good)}
+                    </div>
+                    <div style="font-size: 11.5px; color: #991B1B; background: #FEF2F2; border: 1px solid #FEE2E2; padding: 8px 10px; border-radius: 6px; line-height: 1.4;">
+                      <strong>🔴 Tanda Waspada:</strong> ${escapeHtml(g.warning)}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      let items = (data.formQuestions || []).map(q => ({
+        num: q.num,
+        tag: q.competency,
+        question: q.question,
+        probing: q.probing,
+        guide: (data.competencyGuides || {})[q.competency] || null
+      }));
+
+      if (category === 'bank') {
+        items = (data.bankQuestions || []).map(q => ({
+          num: q.num,
+          tag: q.area,
+          question: q.question,
+          probing: q.probing,
+          guide: (data.competencyGuides || {})[q.area] || null
+        }));
+      } else if (category === 'analytical') {
+        items = items.filter(it => it.tag.toLowerCase().includes('analyt') || it.tag.toLowerCase().includes('traffic') || it.tag.toLowerCase().includes('performance') || it.tag.toLowerCase().includes('decline'));
+      } else if (category === 'commercial') {
+        items = items.filter(it => it.tag.toLowerCase().includes('market') || it.tag.toLowerCase().includes('commercial') || it.tag.toLowerCase().includes('promo') || it.tag.toLowerCase().includes('competitor') || it.tag.toLowerCase().includes('price'));
+      } else if (category === 'excel') {
+        items = items.filter(it => it.tag.toLowerCase().includes('data') || it.tag.toLowerCase().includes('excel'));
+      } else if (category === 'problem') {
+        items = items.filter(it => it.tag.toLowerCase().includes('problem') || it.tag.toLowerCase().includes('initiative') || it.tag.toLowerCase().includes('agility') || it.tag.toLowerCase().includes('priorit') || it.tag.toLowerCase().includes('failure'));
+      }
+
+      if (query && query.trim()) {
+        const qLower = query.toLowerCase().trim();
+        items = items.filter(it =>
+          (it.question || '').toLowerCase().includes(qLower) ||
+          (it.probing || '').toLowerCase().includes(qLower) ||
+          (it.tag || '').toLowerCase().includes(qLower)
+        );
+      }
+
+      if (items.length === 0) {
+        return `
+          <div style="background: #FFFFFF; border: 1.5px dashed #CBD5E1; border-radius: 10px; padding: 30px; text-align: center; color: #64748B;">
+            <div style="font-size: 24px; margin-bottom: 6px;">🔍</div>
+            <div style="font-weight: 700; font-size: 13.5px; color: #1E293B;">Tidak ada pertanyaan yang sesuai dengan kriteria filter.</div>
+          </div>
+        `;
+      }
+
+      if (!state.expandedBankQuestions) {
+        state.expandedBankQuestions = { [items[0]?.num || 1]: true };
+      }
+
+      let answeredCount = 0;
+      items.forEach(item => {
+        const val = getInterviewAnswer(talentId, `bank_${item.num}`);
+        if (val && val.trim()) answeredCount++;
+      });
+
+      const topBarHtml = `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px 14px; border-radius: 8px; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 12px; font-weight: 700; color: #0F172A;">📋 Daftar Soal (${items.length})</span>
+            <span style="font-size: 11px; font-weight: 600; background: ${answeredCount > 0 ? '#DCFCE7' : '#F1F5F9'}; color: ${answeredCount > 0 ? '#166534' : '#64748B'}; border: 1px solid ${answeredCount > 0 ? '#BBF7D0' : '#E2E8F0'}; padding: 2px 8px; border-radius: 999px;">
+              ✍️ ${answeredCount} / ${items.length} Terjawab
+            </span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" class="btn btn-secondary btn-xs" onclick="toggleAllInterviewBankAccordions(true)" style="font-size: 11px; padding: 4px 9px; border-color: #CBD5E1; background: #FFFFFF;" title="Buka seluruh kartu pertanyaan">
+              📂 Buka Semua
+            </button>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="toggleAllInterviewBankAccordions(false)" style="font-size: 11px; padding: 4px 9px; border-color: #CBD5E1; background: #FFFFFF;" title="Ciutkan seluruh kartu menjadi 1 baris">
+              📁 Ciutkan Semua
+            </button>
+          </div>
+        </div>
+      `;
+
+      const cardsHtml = items.map((item, idx) => {
+        const qKey = `bank_${item.num}`;
+        const savedVal = getInterviewAnswer(talentId, qKey);
+        const hasAnswer = Boolean(savedVal && savedVal.trim());
+        const isOpen = Boolean(state.expandedBankQuestions[item.num]);
+
+        return `
+          <div class="bank-accordion-card" style="background: #FFFFFF; border: 1.5px solid ${isOpen ? '#93C5FD' : '#E2E8F0'}; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: all 0.15s ease;">
+            <!-- Header: Single Line Summary Row -->
+            <div id="bankCardHeader_${item.num}" 
+                 class="bank-card-header"
+                 onclick="toggleInterviewBankAccordion(${item.num})" 
+                 style="display: flex; justify-content: space-between; align-items: center; padding: 11px 14px; cursor: pointer; background: ${isOpen ? '#F8FAFC' : '#FFFFFF'}; gap: 10px; transition: background 0.15s ease; user-select: none;">
+              
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1;">
+                <span style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; background: ${hasAnswer ? '#DCFCE7' : '#EFF6FF'}; color: ${hasAnswer ? '#166534' : '#1D4ED8'}; border: 1px solid ${hasAnswer ? '#BBF7D0' : '#BFDBFE'}; padding: 2px 7px; border-radius: 4px; flex-shrink: 0;">
+                  #${item.num}
+                </span>
+                <span style="font-size: 10.5px; font-weight: 600; background: #F3F4F6; color: #374151; padding: 2px 7px; border-radius: 4px; font-family: var(--font-mono); flex-shrink: 0;">
+                  ${escapeHtml(item.tag)}
+                </span>
+                <span style="font-size: 12.5px; font-weight: 600; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;">
+                  ${escapeHtml(item.question)}
+                </span>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                ${hasAnswer ? `
+                  <span style="font-size: 10px; font-weight: 700; color: #16A34A; background: #DCFCE7; border: 1px solid #BBF7D0; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;">
+                    ✓ Dijawab
+                  </span>
+                ` : ''}
+                <span id="bankCardIcon_${item.num}" class="bank-card-toggle-icon" style="font-size: 11px; color: #64748B; font-weight: 700; width: 14px; text-align: center;">
+                  ${isOpen ? '▲' : '▼'}
+                </span>
+              </div>
+            </div>
+
+            <!-- Body: Question Details & Live Answer Box -->
+            <div id="bankCardBody_${item.num}" 
+                 class="bank-card-body" 
+                 data-num="${item.num}"
+                 style="display: ${isOpen ? 'block' : 'none'}; padding: 14px 16px 16px 16px; border-top: 1px solid #E2E8F0; background: #FFFFFF;">
+              
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                <div style="font-size: 13.5px; font-weight: 700; color: #0F172A; line-height: 1.45;">
+                  ${escapeHtml(item.question)}
+                </div>
+                <button type="button" class="btn btn-secondary btn-xs" onclick="navigator.clipboard.writeText('${escapeHtml(item.question).replace(/'/g, "\\'")}'); showToast('📋 Soal disalin ke clipboard');" style="font-size: 10.5px; padding: 3px 8px; color: #475569; border-color: #CBD5E1; cursor: pointer; flex-shrink: 0;">
+                  📋 Salin Soal
+                </button>
+              </div>
+
+              ${item.probing && item.probing !== '—' ? `
+                <div style="background: #EFF6FF; border: 1px solid #DBEAFE; border-left: 3px solid #2563EB; border-radius: 6px; padding: 8px 12px; font-size: 11.5px; color: #1E3A8A; line-height: 1.4; margin-bottom: 12px;">
+                  <strong>🔍 Pertanyaan Pendalaman (Probing):</strong>
+                  <div style="margin-top: 3px; color: #1E40AF;">${escapeHtml(item.probing)}</div>
+                </div>
+              ` : ''}
+
+              <!-- Dedicated Answer Box for this question -->
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px 12px;">
+                <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>✍️ Catatan Respon &amp; Jawaban Kandidat (Live):</span>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span id="saveStatus_${talentId}_${qKey}" style="font-size: 10.5px; font-weight: 700; color: #16A34A;"></span>
+                    <span style="font-weight: 500; font-size: 10px; color: #94A3B8;">Otomatis tersimpan saat mengetik</span>
+                  </div>
+                </div>
+                <textarea placeholder="Tuliskan respon kandidat untuk pertanyaan #${item.num} di sini..." 
+                          oninput="autoSaveLiveInterviewAnswer('${talentId}', '${qKey}', this.value)"
+                          style="width: 100%; min-height: 60px; font-size: 12px; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 10px; outline: none; font-family: var(--font-sans); background: #FFFFFF; resize: vertical; box-sizing: border-box; line-height: 1.45;">${escapeHtml(savedVal)}</textarea>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return topBarHtml + `<div style="display: flex; flex-direction: column; gap: 8px;">` + cardsHtml + `</div>`;
+    }
+
+    function renderInterviewWorkspace() {
+      const container = document.getElementById('interviewWorkspaceView');
+      if (!container) return;
+
+      // 1. Identify Candidate
+      if (state.talents && state.talents.length > 0) {
+        if (!state.activeInterviewCandidateId || !state.talents.some(t => t.id === state.activeInterviewCandidateId)) {
+          const firstInterviewed = state.talents.find(t => t.stage === 'Interviewed');
+          const firstCompleted = state.talents.find(t => {
+            const ass = state.assessments[t.id] || t.assessment;
+            return ass && ass.status === 'completed';
+          });
+          state.activeInterviewCandidateId = (firstInterviewed || firstCompleted || state.talents[0]).id;
+        }
+      }
+
+      const talent = (state.talents || []).find(t => t.id === state.activeInterviewCandidateId) || state.talents[0];
+      if (!talent) {
+        container.innerHTML = `
+          <div class="empty-card" style="padding: 48px 24px; text-align: center; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 12px; margin: 20px auto; max-width: 580px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div class="spinner" style="margin: 0 auto 14px; width: 32px; height: 32px; border: 3px solid #E2E8F0; border-top-color: #4F46E5; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+            <h3 style="font-size: 15px; font-weight: 700; color: #0F172A; margin-bottom: 4px;">Menghubungkan ke Ruang Wawancara...</h3>
+            <p style="font-size: 12.5px; color: #64748B; line-height: 1.45;">Memuat profil kandidat dan panduan pertanyaan wawancara dari database...</p>
+          </div>
+        `;
+        return;
+      }
+
+      const assessment = state.assessments[talent.id] || talent.assessment;
+      const roleStr = talent.role || 'Freelance Content Creator';
+      const isCompleted = Boolean(assessment && assessment.status === 'completed');
+      const discPattern = (assessment && assessment.disc && assessment.disc.profilePattern) ? assessment.disc.profilePattern.toUpperCase() : '-';
+      const cogPct = (assessment && assessment.cognitive && assessment.cognitive.percentage !== undefined) ? `${assessment.cognitive.percentage}%` : '-';
+      const cvLink = isValidDisplayUrl(talent.cvUrl) ? normalizeExternalUrl(talent.cvUrl) : '';
+      const phoneClean = formatToInternationalPhone(talent.phone);
+
+      const tName = (talent.name || 'Kandidat').trim();
+      const firstName = tName.split(' ')[0] || 'Kandidat';
+
+      // Update Topbar badge & Hero role tag
+      const modeBadge = document.getElementById('modeInterviewActiveBadge');
+      if (modeBadge) modeBadge.textContent = `Live: ${firstName}`;
+      const heroRoleTag = document.getElementById('interviewActiveRoleTag');
+      if (heroRoleTag) heroRoleTag.textContent = `${tName} (${roleStr})`;
+
+      // Build Candidate Selector Options (Sorted: Interviewed/Completed first)
+      const sortedTalents = [...state.talents].sort((a, b) => {
+        if (a.stage === 'Interviewed' && b.stage !== 'Interviewed') return -1;
+        if (b.stage === 'Interviewed' && a.stage !== 'Interviewed') return 1;
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      const candidateOptionsHtml = sortedTalents.map(t => {
+        const ass = state.assessments[t.id] || t.assessment;
+        const testStatus = (ass && ass.status === 'completed') ? '✓ Tes Selesai' : 'Belum Tes';
+        const isSel = t.id === talent.id;
+        return `<option value="${t.id}" ${isSel ? 'selected' : ''}>${isSel ? '🟢 ' : ''}${escapeHtml(t.name)} (${t.id}) • ${escapeHtml(t.role || 'Role')} [${t.stage || 'Prospect'} • ${testStatus}]</option>`;
+      }).join('');
+
+      // Generate 3-Axis Probing Questions
+      const probeQuestions = (window.AssessmentExtensions && window.AssessmentExtensions.generateInterviewProbeQuestions)
+        ? window.AssessmentExtensions.generateInterviewProbeQuestions(talent, assessment)
+        : [];
+
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 20px; max-width: 1080px; margin: 0 auto; padding-top: 10px;">
+          
+          <!-- TOP LIVE CANDIDATE COMMAND BAR -->
+          <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 12px; padding: 18px 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 14px;">
+            <!-- Row 1: Candidate Selector & Live Indicator -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid #F1F5F9; padding-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 10px; flex: 1 1 340px; min-width: 0; max-width: 100%;">
+                <span class="pulse-dot" style="background: #10B981; width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3); flex-shrink: 0;"></span>
+                <span style="font-size: 12.5px; font-weight: 700; color: #0F172A; white-space: nowrap; flex-shrink: 0;">Kandidat Aktif:</span>
+                <div style="flex: 1; min-width: 0; position: relative;">
+                  <select id="liveInterviewCandidateSelect" class="form-select" onchange="selectActiveInterviewCandidate(this.value)" style="width: 100%; min-width: 0; max-width: 100%; font-size: 12.5px; font-weight: 600; color: #1E40AF; background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 8px; padding: 6px 12px; cursor: pointer; outline: none; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; box-sizing: border-box; display: block;">
+                    ${candidateOptionsHtml}
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <span style="font-size: 11.5px; font-weight: 700; color: #475569; white-space: nowrap; flex-shrink: 0;">Tahap Lamaran:</span>
+                <select id="finalInterviewStage_${talent.id}" onchange="saveInterviewFinalEvaluation('${talent.id}')" style="font-size: 12px; font-weight: 700; color: #0F172A; background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 6px 10px; cursor: pointer; outline: none; flex-shrink: 0;">
+                  <option value="Interviewed" ${talent.stage === 'Interviewed' ? 'selected' : ''}>🎙️ Tahap Interviewed</option>
+                  <option value="Shortlisted" ${talent.stage === 'Shortlisted' ? 'selected' : ''}>⭐ Lolos ke Shortlisted</option>
+                  <option value="Offered" ${talent.stage === 'Offered' ? 'selected' : ''}>🎉 Lanjut ke Offering</option>
+                  <option value="Hired" ${talent.stage === 'Hired' ? 'selected' : ''}>🤝 Hired (Diterima)</option>
+                  <option value="Screening" ${talent.stage === 'Screening' ? 'selected' : ''}>🔍 Kembalikan ke Screening</option>
+                  <option value="Archived" ${talent.stage === 'Archived' ? 'selected' : ''}>📁 Tidak Lolos (Arsipkan)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Row 2: Candidate Quick Dossier & Links -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 320px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: #1E1B4B; color: #FFFFFF; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); flex-shrink: 0;">
+                  ${escapeHtml((talent.name || 'C').slice(0, 2).toUpperCase())}
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                  <div style="font-size: 15px; font-weight: 700; color: #0F172A; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span>${escapeHtml(talent.name)}</span>
+                    <span style="font-size: 11px; font-weight: 600; background: #F1F5F9; color: #475569; border: 1px solid #E2E8F0; padding: 1px 6px; border-radius: 4px; font-family: var(--font-mono);">${talent.id}</span>
+                  </div>
+                  <div style="font-size: 12px; color: #64748B; margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="color: #4338CA; font-weight: 600;">💼 ${escapeHtml(roleStr)}</span>
+                    <span>•</span>
+                    <span>📍 ${escapeHtml(talent.domisili || '-')}</span>
+                    <span>•</span>
+                    <span>🎓 ${escapeHtml(talent.education || '-')}</span>
+                    <span>•</span>
+                    <span>💰 ${escapeHtml(talent.expectedSalary || 'Standard')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Badges & Action Buttons -->
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; flex-shrink: 0;">
+                ${isCompleted ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openAssessmentResultModal('${talent.id}', true)" style="font-size: 11.5px; padding: 6px 12px; border-color: #CBD5E1;" title="Buka detail grafik psikotes">
+                    📊 Hasil Tes: DISC ${discPattern} • Logika ${cogPct}
+                  </button>
+                ` : `
+                  <span style="font-size: 11px; font-weight: 600; color: #B45309; background: #FEF3C7; border: 1px solid #FDE68A; padding: 4px 8px; border-radius: 6px;">
+                    ⏳ Belum Mengerjakan Tes
+                  </span>
+                `}
+
+                ${cvLink ? `
+                  <a href="${cvLink}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="font-size: 11.5px; padding: 6px 12px; background: #2563EB; border-color: #2563EB; color: #FFFFFF;" title="Buka PDF CV di Tab Baru">
+                    📄 Buka CV ↗
+                  </a>
+                ` : ''}
+
+                ${phoneClean ? `
+                  <a href="https://wa.me/${phoneClean.replace(/\+/g, '')}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11.5px; padding: 6px 12px; color: #16A34A; border-color: #BBF7D0;" title="Buka obrolan WhatsApp">
+                    💬 WhatsApp
+                  </a>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW SEGMENTED CONTROLLER -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 8px 12px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-sm ${state.interviewSubMode === 'probing' ? 'btn-primary' : 'btn-secondary'}" onclick="switchInterviewSubMode('probing')" style="font-size: 12px; font-weight: 700; border-radius: 6px; ${state.interviewSubMode === 'probing' ? 'background: #4F46E5; border-color: #4F46E5; color: #FFFFFF;' : ''}">
+                🎯 3-Aspek Probing Khusus (${escapeHtml(roleStr)})
+              </button>
+              <button type="button" class="btn btn-sm ${state.interviewSubMode === 'bank' ? 'btn-primary' : 'btn-secondary'}" onclick="switchInterviewSubMode('bank')" style="font-size: 12px; font-weight: 700; border-radius: 6px; ${state.interviewSubMode === 'bank' ? 'background: #2563EB; border-color: #2563EB; color: #FFFFFF;' : ''}">
+                📚 Bank Soal Standar &amp; Rubrik Kompetensi
+              </button>
+            </div>
+
+            <div style="font-size: 11.5px; color: #64748B; font-family: var(--font-mono);">
+              ${state.interviewSubMode === 'probing' ? '3 Aspek Evaluasi Terstruktur' : '40 Bank Soal Terstandarisasi'}
+            </div>
+          </div>
+
+          <!-- MODE 1: DEDICATED 3-AXIS PROBING WITH INDIVIDUAL ANSWER BOXES -->
+          ${state.interviewSubMode === 'probing' ? `
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              ${probeQuestions.map((q, qIdx) => {
+                const qKey = `prob_${qIdx}`;
+                const savedAns = getInterviewAnswer(talent.id, qKey);
+                return `
+                  <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 12px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 14px;">
+                    <!-- Card Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                      <div>
+                        <div style="font-size: 14.5px; font-weight: 800; color: #1E1B4B; display: flex; align-items: center; gap: 6px;">
+                          <span style="color: #4F46E5;">#Aspek ${qIdx + 1}:</span> ${escapeHtml(q.topic)}
+                        </div>
+                        <div style="display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 600; color: #4338CA; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 2px 8px; border-radius: 5px; margin-top: 4px;">
+                          ${escapeHtml(q.indicator)}
+                        </div>
+                      </div>
+                      
+                      <!-- Aspect Score Rating Selector -->
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #475569;">Nilai Aspek:</span>
+                        <select onchange="autoSaveLiveInterviewScore('${talent.id}', '${qKey}', this.value)" style="font-size: 11.5px; font-weight: 700; color: #1E40AF; background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 6px; padding: 4px 8px; cursor: pointer; outline: none;">
+                          <option value="5">5.0 ★ Sangat Memuaskan</option>
+                          <option value="4" selected>4.0 ★ Sesuai Standar</option>
+                          <option value="3">3.0 ★ Cukup / Perlu Dilatih</option>
+                          <option value="2">2.0 ★ Di Bawah Standar</option>
+                          <option value="1">1.0 ★ Tidak Sesuai</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Tab Switcher A (Situasional) / B (Strategis) -->
+                    <div style="display: flex; gap: 6px; background: #F1F5F9; padding: 4px; border-radius: 8px;">
+                      ${(q.options || []).map((opt, optIdx) => {
+                        const isFirst = optIdx === 0;
+                        const shortTitle = optIdx === 0 ? '🎯 Pilihan A (Situasional)' : '💡 Pilihan B (Strategis)';
+                        return `
+                          <button type="button" 
+                                  class="probe-pill-btn probe-pill-${talent.id}-${qIdx}-${optIdx}" 
+                                  onclick="AssessmentExtensions.switchProbeTab('${talent.id}', ${qIdx}, ${optIdx})"
+                                  style="flex: 1; padding: 7px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s ease; ${isFirst ? 'background: #FFFFFF; color: #4338CA; box-shadow: 0 1px 3px rgba(0,0,0,0.08);' : 'background: transparent; color: #64748B;'}">
+                            ${shortTitle}
+                          </button>
+                        `;
+                      }).join('')}
+                    </div>
+
+                    <!-- Tab Question Panels -->
+                    <div>
+                      ${(q.options || [{ label: 'Pertanyaan Wawancara', question: q.question, whatToLookFor: q.whatToLookFor }]).map((opt, optIdx) => `
+                        <div id="probePanel_${talent.id}_${qIdx}_${optIdx}" 
+                             style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 16px; display: ${optIdx === 0 ? 'block' : 'none'};">
+                          <div style="font-size: 10px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                            ${escapeHtml(opt.label || `Pilihan ${optIdx + 1}`)}
+                          </div>
+                          <p style="font-size: 13.5px; color: #0F172A; font-weight: 700; line-height: 1.5; margin: 0 0 12px 0;">
+                            "${escapeHtml(opt.question)}"
+                          </p>
+                          <div style="font-size: 11.5px; color: #334155; line-height: 1.5; border-top: 1px dashed #CBD5E1; padding-top: 10px; white-space: pre-line;">
+                            <strong style="color: #1E293B;">Fokus Penilaian (Rubrik Pewawancara):</strong>\n${escapeHtml(opt.whatToLookFor)}
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+
+                    <!-- DEDICATED LIVE ANSWER & OBSERVATION BOX FOR THIS ASPECT -->
+                    <div style="background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 12px 14px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <div style="font-size: 11.5px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
+                          <span>✍️</span> Catatan Respon &amp; Jawaban Kandidat (Aspek #${qIdx + 1}):
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <span id="saveStatus_${talent.id}_${qKey}" style="font-size: 10.5px; font-weight: 700; color: #16A34A;"></span>
+                          <span style="font-size: 10px; color: #94A3B8;">Auto-save ke cloud</span>
+                        </div>
+                      </div>
+                      <textarea placeholder="Ketik ringkasan jawaban kandidat, respon situasional, atau impresi interviewer untuk aspek ini..."
+                                oninput="autoSaveLiveInterviewAnswer('${talent.id}', '${qKey}', this.value)"
+                                style="width: 100%; min-height: 65px; font-size: 12px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 10px; outline: none; font-family: var(--font-sans); background: #F8FAFC; resize: vertical; box-sizing: border-box; line-height: 1.45;">${escapeHtml(savedAns)}</textarea>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : `
+            <!-- MODE 2: STANDARD 40 QUESTION BANK -->
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Toolbar & Chips -->
+              <div style="background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="position: relative; width: 100%;">
+                  <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 13px;">🔍</span>
+                  <input type="text" placeholder="Cari pertanyaan bank soal (e.g. traffic, promo, excel, komplain, deadline)..." 
+                         value="${escapeHtml(state.interviewBankSearch || '')}"
+                         oninput="searchInterviewBankQuestions(this.value)"
+                         style="width: 100%; font-size: 12px; padding: 8px 12px 8px 32px; border: 1.5px solid #CBD5E1; border-radius: 6px; outline: none; background: #F8FAFC; box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'all' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('all')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    ⭐ Soal Inti Form (15)
+                  </button>
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'bank' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('bank')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    📚 Bank Soal Lengkap (40)
+                  </button>
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'analytical' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('analytical')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    📊 Analisis &amp; Traffic
+                  </button>
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'commercial' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('commercial')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    🛍️ Marketplace &amp; Promo
+                  </button>
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'excel' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('excel')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    📈 Data &amp; Excel
+                  </button>
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'problem' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('problem')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    🧩 Problem Solving
+                  </button>
+                  <button type="button" class="btn btn-xs ${state.interviewBankCategory === 'rubric' ? 'btn-primary' : 'btn-secondary'}" onclick="filterInterviewBankCategory('rubric')" style="font-size: 11px; padding: 4px 10px; border-radius: 14px;">
+                    📋 Panduan Rubrik 1-5
+                  </button>
+                </div>
+              </div>
+
+              <!-- Question Cards Container -->
+              <div id="interviewBankCardsContainer" style="display: flex; flex-direction: column; gap: 12px;">
+                ${renderInterviewBankCardsOnlyHtml(talent.id, state.interviewBankCategory, state.interviewBankSearch)}
+              </div>
+            </div>
+          `}
+
+          <!-- BOTTOM EXECUTIVE EVALUATION & DECISION STATION -->
+          <div style="background: #FFFFFF; border: 2px solid #3B82F6; border-radius: 12px; padding: 20px 22px; box-shadow: 0 4px 18px rgba(37,99,235,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: #1E3A8A; display: flex; align-items: center; gap: 6px;">
+                  <span>📋</span> Catatan Ringkasan Evaluasi &amp; Rekomendasi Akhir
+                </div>
+                <div style="font-size: 11.5px; color: #64748B; margin-top: 2px;">
+                  Catatan ini akan tersimpan ke dossier profil kandidat dan dapat dilihat oleh seluruh tim rekrutmen.
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-primary" onclick="saveInterviewFinalEvaluation('${talent.id}')" style="background: #2563EB; border-color: #2563EB; font-size: 12px; padding: 7px 16px; font-weight: 700;">
+                  💾 Simpan Evaluasi Akhir
+                </button>
+              </div>
+            </div>
+
+            <textarea id="finalInterviewNotes_${talent.id}" 
+                      placeholder="Tuliskan kesimpulan akhir wawancara, kelebihan utama, potensi risiko/kelemahan, kesepakatan gaji/jadwal mulai kerja, dan rekomendasi tim di sini..."
+                      style="width: 100%; min-height: 90px; font-size: 12.5px; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 10px 12px; outline: none; font-family: var(--font-sans); background: #F8FAFC; resize: vertical; box-sizing: border-box; line-height: 1.45;">${escapeHtml(talent.notes || '')}</textarea>
+          </div>
+
+        </div>
+      `;
+    }
+    window.renderInterviewWorkspace = renderInterviewWorkspace;
 
     function closeAssessmentResultModal(e) {
       if (e && e.target !== e.currentTarget) return;
@@ -4331,7 +6517,17 @@ function renderPentagonMatrixSvg(dimensions) {
     window.addEventListener('DOMContentLoaded', () => {
       initRealtimeListeners();
       updateSelectedModules();
-      if (window.location.hash === '#results' || window.location.search.includes('view=results')) {
+      
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      if (hash.startsWith('#interview') || search.includes('view=interview')) {
+        const urlParams = new URLSearchParams(window.location.search);
+        let candidateId = urlParams.get('id');
+        if (!candidateId && hash.includes('?id=')) {
+          candidateId = hash.split('?id=')[1];
+        }
+        switchPortalMode('interview', candidateId);
+      } else if (hash === '#results' || search.includes('view=results')) {
         switchPortalMode('results');
       }
     });
@@ -4619,6 +6815,34 @@ function renderPentagonMatrixSvg(dimensions) {
         </button>
         <button type="button" class="btn btn-primary" onclick="executeDispatchAdditionalTest('wa')" style="font-size: 13px; padding: 8px 18px; background: #16A34A; border-color: #16A34A;">
           📲 Generate OTP &amp; Kirim WA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cognitive Answer Correction & Override Modal -->
+  <div class="assessment-modal-backdrop" id="cognitiveCorrectionModalBackdrop" style="display: none; z-index: 2500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px);" onclick="if(event.target === this) closeCognitiveAnswerCorrectionModal()">
+    <div class="granular-modal-card" style="max-width: 640px; width: 95%; max-height: 92vh; border-radius: 14px; overflow: hidden; background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35); display: flex; flex-direction: column;">
+      <div class="assessment-modal-header" style="padding: 16px 20px; border-bottom: 1px solid #E2E8F0; background: #F8FAFC; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #2563EB; font-weight: 700;">
+            Koreksi Asesmen • Evaluator Override
+          </div>
+          <h2 id="cogCorrectModalTitle" style="font-size: 16px; font-weight: 700; color: #0F172A; margin: 2px 0 0 0;">
+            Koreksi Jawaban Butir Soal Logika &amp; Kognitif
+          </h2>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeCognitiveAnswerCorrectionModal()" style="padding: 4px 8px; font-size: 13px;">✕</button>
+      </div>
+
+      <div class="assessment-modal-body" id="cogCorrectModalBody" style="padding: 20px; overflow-y: auto; flex: 1;">
+        <!-- Injected via openCognitiveAnswerCorrectionModal() -->
+      </div>
+
+      <div style="padding: 14px 20px; border-top: 1px solid #E2E8F0; background: #F8FAFC; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeCognitiveAnswerCorrectionModal()">Batal</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveCognitiveCorrection" onclick="submitCognitiveAnswerCorrection()" style="background: #2563EB; font-weight: 700; padding: 7px 16px;">
+          💾 Simpan &amp; Hitung Ulang Skor
         </button>
       </div>
     </div>

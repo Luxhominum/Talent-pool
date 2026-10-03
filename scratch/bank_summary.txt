@@ -1,0 +1,225 @@
+Total Questions in Bank: 40
+
+==================================================
+### CATEGORY: Deret Angka (8 questions)
+==================================================
+
+[COG_NUM_01] Q: Berapakah angka selanjutnya pada deret berikut: 3, 6, 12, 24, 48, ... ?
+    Options: ['72', '84', '96', '108', '120']
+    Correct: 96
+    Explanation: Pola perkalian 2: setiap angka dikali 2 (48 x 2 = 96).
+
+[COG_NUM_02] Q: Perhatikan deret berikut: 5, 8, 14, 23, 35, ... Angka berikutnya adalah?
+    Options: ['48', '50', '52', '54', '56']
+    Correct: 50
+    Explanation: Pola selisih bertingkat kelipatan 3 (+3, +6, +9, +12). Selanjutnya adalah +15 (35 + 15 = 50).
+
+[COG_NUM_03] Q: Berapakah angka selanjutnya pada deret berikut: 100, 95, 85, 70, 50, ... ?
+    Options: ['20', '25', '30', '35', '40']
+    Correct: 25
+    Explanation: Pola pengurangan bertingkat: -5, -10, -15, -20. Selanjutnya adalah -25 (50 - 25 = 25).
+
+[COG_NUM_04] Q: Perhatikan deret berikut: 4, 9, 16, 25, 36, ... Angka berikutnya adalah?
+    Options: ['45', '47', '49', '52', '64']
+    Correct: 49
+    Explanation: Pola kuadrat bilangan bulat: 2┬▓, 3┬▓, 4┬▓, 5┬▓, 6┬▓. Selanjutnya adalah 7┬▓ = 49.
+
+[COG_NUM_05] Q: Berapakah angka selanjutnya: 1, 2, 6, 24, 120, ... ?
+    Options: ['240', '360', '480', '600', '720']
+    Correct: 720
+    Explanation: Pola faktorial/perkalian bertingkat: x2, x3, x4, x5. Selanjutnya adalah x6 (120 x 6 = 720).
+
+[COG_NUM_06] Q: Perhatikan barisan berikut: 2, 3, 5, 8, 13, 21, ... Angka berikutnya adalah?
+    Options: ['29', '31', '34', '36', '42']
+    Correct: 34
+    Explanation: Pola Fibonacci (penjumlahan dua angka sebelumnya): 13 + 21 = 34.
+
+[COG_NUM_07] Q: Berapakah angka selanjutnya: 80, 40, 44, 22, 26, 13, ... ?
+    Options: ['15', '17', '18', '20', '26']
+    Correct: 17
+    Explanation: Pola selang-seling operasi bagi 2 lalu tambah 4: 80/2=40, 40+4=44, 44/2=22, 22+4=26, 26/2=13. Selanjutnya 13+4 = 17.
+
+[COG_NUM_08] Q: Perhatikan deret berikut: 7, 12, 10, 15, 13, 18, ... Angka berikutnya adalah?
+    Options: ['14', '16', '20', '21', '23']
+    Correct: 16
+    Explanation: Pola operasi berulang (+5, -2, +5, -2, +5). Selanjutnya adalah 18 - 2 = 16.
+
+==================================================
+### CATEGORY: Aritmatika Dasar (8 questions)
+==================================================
+
+[COG_ARI_01] Q: Sebuah produk memiliki harga awal Rp50.000. Produk tersebut didiskon 20%, kemudian pada saat flash sale didiskon lagi sebesar 10% dari harga setelah diskon pertama. Berapakah harga akhirnya?
+    Options: ['Rp35.000', 'Rp36.000', 'Rp37.500', 'Rp40.000', 'Rp45.000']
+    Correct: Rp36.000
+    Explanation: Diskon 20% dari 50.000 = 40.000. Diskon tambahan 10% dari 40.000 = 4.000. Harga akhir = 40.000 - 4.000 = 36.000.
+
+[COG_ARI_02] Q: Rasio penjualan produk A dan produk B adalah 3:2. Jika total penjualan kedua produk tersebut dalam sebulan adalah 150 unit, berapakah jumlah produk A yang terjual?
+    Options: ['60', '75', '80', '90', '100']
+    Correct: 90
+    Explanation: Bagian produk A = 3 / (3+2) x 150 = (3/5) x 150 = 90 unit.
+
+[COG_ARI_03] Q: 5 orang admin dapat memproses 100 pesanan dalam waktu 2 jam. Jika hanya ada 2 orang admin, berapa waktu yang dibutuhkan untuk memproses 40 pesanan dengan kecepatan yang sama?
+    Options: ['1 jam', '1,5 jam', '2 jam', '2,5 jam', '3 jam']
+    Correct: 2 jam
+    Explanation: 1 admin = 20 pesanan / 2 jam = 10 pesanan/jam. 2 admin = 20 pesanan/jam. Waktu untuk 40 pesanan = 40 / 20 = 2 jam.
+
+[COG_ARI_04] Q: Seorang host live streaming menghasilkan rata-rata omzet Rp1.200.000 per 2 jam sesi siaran. Jika target omzet harian toko adalah Rp6.000.000, berapa total jam siaran yang dibutuhkan per hari?
+    Options: ['6 jam', '8 jam', '10 jam', '12 jam', '15 jam']
+    Correct: 10 jam
+    Explanation: Omzet per jam = Rp1.200.000 / 2 = Rp600.000. Total jam = Rp6.000.000 / Rp600.000 = 10 jam.
+
+[COG_ARI_05] Q: Harga jual per unit produk adalah Rp150.000 dengan modal produksi Rp90.000 per unit. Jika toko memberikan voucher potongan Rp15.000 per unit kepada pembeli, berapakah margin laba kotor toko per unit dari harga jual efektif?
+    Options: ['25,0%', '30,0%', '33,3%', '40,0%', '45,0%']
+    Correct: 33,3%
+    Explanation: Harga jual efektif = 150.000 - 15.000 = 135.000. Laba kotor = 135.000 - 90.000 = 45.000. Margin = (45.000 / 135.000) x 100% = 33,3%.
+
+[COG_ARI_06] Q: Dalam sebuah gudang, terdapat 240 paket pesanan. Tim packing Shift Pagi menyelesaikan 3/8 bagian paket, dan Shift Siang menyelesaikan 1/3 bagian paket. Berapakah sisa paket yang belum terselesaikan?
+    Options: ['60 paket', '70 paket', '75 paket', '80 paket', '90 paket']
+    Correct: 70 paket
+    Explanation: Shift Pagi = 3/8 x 240 = 90. Shift Siang = 1/3 x 240 = 80. Total selesai = 170. Sisa = 240 - 170 = 70 paket.
+
+[COG_ARI_07] Q: Sebuah tim beranggotakan 4 content creator menghasilkan rata-rata 36 video TikTok per minggu. Perusahaan ingin menaikkan target menjadi 54 video per minggu dengan ritme kerja per orang yang sama. Berapa tambahan anggota tim creator yang harus direkrut?
+    Options: ['1 orang', '2 orang', '3 orang', '4 orang', '5 orang']
+    Correct: 2 orang
+    Explanation: Kapasitas 1 creator = 36 / 4 = 9 video/minggu. Target 54 butuh 54 / 9 = 6 creator. Tambahan yang direkrut = 6 - 4 = 2 orang.
+
+[COG_ARI_08] Q: Toko online membeli 500 pcs kemasan kardus dengan biaya total Rp1.000.000. Karena pemesanan jumlah banyak, supplier memberikan bonus 100 pcs kardus gratis. Berapakah harga pokok kemasan per pcs setelah bonus dihitung?
+    Options: ['Rp1.500', 'Rp1.667', 'Rp1.800', 'Rp2.000', 'Rp2.200']
+    Correct: Rp1.667
+    Explanation: Total kardus diperoleh = 500 + 100 = 600 pcs. Biaya total tetap Rp1.000.000. HPP per pcs = 1.000.000 / 600 = Rp1.667 per pcs.
+
+==================================================
+### CATEGORY: Logika Komersial (8 questions)
+==================================================
+
+[COG_BIZ_01] Q: Toko Anda menghabiskan anggaran iklan (Ads) Rp2.000.000 dan berhasil menghasilkan omzet penjualan kotor (Revenue) sebesar Rp8.000.000. Berapakah nilai Return on Ad Spend (ROAS) kampanye tersebut?
+    Options: ['2x (200%)', '3x (300%)', '4x (400%)', '5x (500%)', '8x (800%)']
+    Correct: 4x (400%)
+    Explanation: ROAS = Pendapatan Kotor / Biaya Iklan = Rp8.000.000 / Rp2.000.000 = 4x (400%).
+
+[COG_BIZ_02] Q: Rata-rata nilai belanja per pelanggan (Average Order Value / AOV) toko saat ini adalah Rp80.000. Untuk menaikkan AOV tanpa mengorbankan margin keuntungan, strategi komersial mana yang paling tepat?
+    Options: ['Memberikan diskon harga 50% untuk semua produk satuan', 'Membuat paket bundling 2 produk seharga Rp145.000 dengan bonus pouch eksklusif', 'Menaikkan biaya tarif ongkos kirim ke pembeli', 'Menghentikan penjualan produk terlaris toko', 'Mengubah sistem toko menjadi sistem lelang']
+    Correct: Membuat paket bundling 2 produk seharga Rp145.000 dengan bonus pouch eksklusif
+    Explanation: Bundling menaikkan nominal transaksi pembeli sekaligus menjaga margin laba tanpa perang harga diskon ekstrem.
+
+[COG_BIZ_03] Q: Data bulan ini menunjukkan Gross Margin turun drastis dari 30% menjadi 24%, sementara Average Selling Price (harga jual) hampir tidak berubah. Manakah faktor yang paling mungkin menjadi penyebabnya?
+    Options: ['Penurunan jumlah pengunjung (traffic)', 'Kenaikan harga pokok barang atau biaya produksi', 'Peningkatan anggaran iklan secara berlebihan', 'Kenaikan conversion rate', 'Banyak pelanggan menggunakan fitur gratis ongkir']
+    Correct: Kenaikan harga pokok barang atau biaya produksi
+    Explanation: Jika Gross Margin turun sementara harga jual stabil, otomatis biaya pokok barang (COGS) yang meningkat.
+
+[COG_BIZ_04] Q: Biaya operasional tetap toko adalah Rp5.000.000 per bulan. Rata-rata keuntungan bersih dari setiap produk yang terjual adalah Rp25.000. Berapa jumlah minimal produk yang harus terjual agar perusahaan mencapai Break Even Point (balik modal)?
+    Options: ['100', '150', '200', '250', '300']
+    Correct: 200
+    Explanation: BEP Unit = Biaya Tetap / Margin Kontribusi per unit = 5.000.000 / 25.000 = 200 produk.
+
+[COG_BIZ_05] Q: Sebuah dompet kulit dijual seharga Rp100.000. Biaya admin marketplace adalah 5% dan biaya layanan gratis ongkir adalah 3% yang dipotong langsung dari harga jual. Berapa nominal uang yang akan diterima masuk ke saldo perusahaan?
+    Options: ['Rp100.000', 'Rp95.000', 'Rp92.000', 'Rp85.000', 'Rp82.000']
+    Correct: Rp92.000
+    Explanation: Total potongan = 5% + 3% = 8%. Potongan = 8% x 100.000 = 8.000. Uang diterima = 100.000 - 8.000 = 92.000.
+
+[COG_BIZ_06] Q: Perusahaan menghabiskan Rp500.000 untuk biaya iklan (Ads). Iklan tersebut menghasilkan 20 transaksi baru. Jika profit kotor dari setiap transaksi adalah Rp40.000, berapakah laba bersih yang didapat dari kampanye iklan ini?
+    Options: ['Rp300.000', 'Rp400.000', 'Rp500.000', 'Rp800.000', '-Rp100.000 (Rugi)']
+    Correct: Rp300.000
+    Explanation: Total profit kotor = 20 x 40.000 = 800.000. Laba bersih = Profit kotor - Biaya iklan = 800.000 - 500.000 = Rp300.000.
+
+[COG_BIZ_07] Q: Perusahaan memiliki produk best-seller yang saat ini menyumbang 70% laba perusahaan, namun tren minat pasar diperkirakan hanya bertahan 6 bulan lagi. Tindakan komersial strategis manakah yang paling bijak dilakukan saat ini?
+    Options: ['Segera menghentikan stok produk best-seller hari ini juga', 'Mengalokasikan sebagian arus kas saat ini untuk riset dan peluncuran produk baru sebelum tren berakhir', 'Menaikkan harga produk 200% agar mendapat laba instan sebelum tren hilang', 'Mengganti seluruh tim penjualan dengan tim baru', 'Menunggu hingga penjualan benar-benar habis baru mulai meriset produk lain']
+    Correct: Mengalokasikan sebagian arus kas saat ini untuk riset dan peluncuran produk baru sebelum tren berakhir
+    Explanation: Diversifikasi portofolio produk dan reinvestasi cash cow sebelum siklus hidup produk memasuki tahap decline.
+
+[COG_BIZ_08] Q: Marketplace A mengenakan komisi 4% dengan potensi omzet Rp100.000.000. Marketplace B mengenakan komisi 8% namun memiliki traffic besar dengan estimasi omzet Rp150.000.000. Asumsikan HPP dan biaya lain 60% dari omzet. Pilihan manakah yang memberikan nominal profit bersih lebih tinggi?
+    Options: ['Marketplace A, karena komisinya jauh lebih murah', 'Marketplace B, karena volume penjualan lebih besar sehingga nominal laba bersih absolut lebih tinggi', 'Keduanya menghasilkan nominal laba bersih yang sama persis', 'Marketplace A, karena omzet 100 juta lebih mudah diatur', 'Tidak bisa ditentukan karena tidak ada rincian ekspedisi']
+    Correct: Marketplace B, karena volume penjualan lebih besar sehingga nominal laba bersih absolut lebih tinggi
+    Explanation: Marketplace A: Net Margin = 40% - 4% = 36% x 100 jt = Rp36 jt. Marketplace B: Net Margin = 40% - 8% = 32% x 150 jt = Rp48 jt. Nominal laba B lebih tinggi Rp12 jt.
+
+==================================================
+### CATEGORY: Analisis Data (8 questions)
+==================================================
+
+[COG_DAT_01] Q: Data penjualan menunjukkan bahwa ketika perusahaan melipatgandakan anggaran iklan, jumlah pengunjung toko (traffic) naik tajam, tetapi total transaksi harian tetap sama seperti sebelumnya. Apa simpulan metrik yang paling akurat?
+    Options: ['Conversion rate menurun', 'Average order value meningkat', 'Margin keuntungan meningkat', 'Pembeli menghabiskan lebih banyak uang', 'Iklan mendatangkan target pasar yang tepat']
+    Correct: Conversion rate menurun
+    Explanation: Conversion Rate = Transaksi / Traffic. Jika traffic naik namun pembagi (transaksi) tetap, persentasenya pasti mengecil.
+
+[COG_DAT_02] Q: Anda menyadari satu lini produk tiba-tiba melonjak penjualannya 300% dalam sehari tanpa ada promosi. Sistem pelaporan belum selesai memproses asal sumber pengunjung tersebut. Apa tindakan komersial terbaik yang harus segera dilakukan?
+    Options: ['Menunggu hingga data pelaporan selesai 100% besok pagi', 'Segera mengecek tren viral di sosial media dan mengamankan ketersediaan stok fisik', 'Menghentikan penjualan produk agar stok tidak habis', 'Menurunkan harga agar semakin banyak yang beli', 'Melaporkan adanya kesalahan sistem kepada tim IT']
+    Correct: Segera mengecek tren viral di sosial media dan mengamankan ketersediaan stok fisik
+    Explanation: Toleransi ambiguitas saat mengambil keputusan dengan data belum lengkap untuk mengamankan momentum komersial.
+
+[COG_DAT_03] Q: Tingkat pembatalan (Cancellation Rate) mendadak naik dari 2% menjadi 6%. Bersamaan dengan itu, traffic dan conversion rate pesanan di awal bulan sangat tinggi. Apa hipotesis yang paling masuk akal?
+    Options: ['Sistem pembayaran pelanggan sedang error', 'Stok fisik barang tidak cukup untuk memenuhi lonjakan pesanan sehingga sistem otomatis membatalkan', 'Kurir pengiriman mogok kerja', 'Kualitas produk memburuk', 'Harga produk terlalu mahal']
+    Correct: Stok fisik barang tidak cukup untuk memenuhi lonjakan pesanan sehingga sistem otomatis membatalkan
+    Explanation: Lonjakan pesanan memicu overselling jika sinkronisasi stok telat, berujung pembatalan otomatis.
+
+[COG_DAT_04] Q: Sebuah video promosi mendapatkan 200.000 penayangan (views), 8.000 likes, 1.200 shares, dan 800 komentar. Berapakah Engagement Rate (ER) video tersebut berdasarkan rasio interaksi terhadap views?
+    Options: ['2,5%', '3,8%', '4,2%', '5,0%', '6,0%']
+    Correct: 5,0%
+    Explanation: Total interaksi = 8.000 + 1.200 + 800 = 10.000. Engagement Rate = (10.000 / 200.000) x 100% = 5,0%.
+
+[COG_DAT_05] Q: Dari 10.000 pengunjung yang mengklik link produk, 600 orang memasukkan produk ke keranjang (Add to Cart), dan 150 orang akhirnya menyelesaikan pembayaran (Checkout). Berapakah Cart-to-Checkout Conversion Rate?
+    Options: ['1,5%', '6,0%', '15,0%', '25,0%', '30,0%']
+    Correct: 25,0%
+    Explanation: Cart-to-Checkout Rate = (Jumlah Checkout / Jumlah Add to Cart) x 100% = (150 / 600) x 100% = 25,0%.
+
+[COG_DAT_06] Q: Return on Ad Spend (ROAS) iklan turun dari 4.5x ke 1.8x, padahal Cost per Click (CPC) stabil. Data mencatat rasio klik-ke-beli (CR) anjlok tepat setelah perubahan foto produk dan copy deskripsi. Apa akar masalah paling mungkin?
+    Options: ['Platform iklan mengalami gangguan server global', 'Visual atau copywriting deskripsi baru kurang meyakinkan atau tidak sesuai ekspektasi audiens yang mengklik', 'Kompetitor melakukan serangan bot klik iklan', 'Algoritma demografi audiens bergeser total', 'Tarif jasa ekspedisi kurir tiba-tiba naik']
+    Correct: Visual atau copywriting deskripsi baru kurang meyakinkan atau tidak sesuai ekspektasi audiens yang mengklik
+    Explanation: CPC stabil berarti minat klik awal tetap, tetapi konversi di halaman produk drop tepat setelah foto dan copy diganti.
+
+[COG_DAT_07] Q: Influencer X (biaya Rp5.000.000) menghasilkan 100 pembeli baru. Influencer Y (biaya Rp9.000.000) menghasilkan 200 pembeli baru. Berapakah Customer Acquisition Cost (CAC) per pembeli masing-masing influencer?
+    Options: ['X: Rp50.000, Y: Rp45.000', 'X: Rp45.000, Y: Rp50.000', 'X: Rp50.000, Y: Rp90.000', 'X: Rp100.000, Y: Rp45.000', 'X: Rp25.000, Y: Rp45.000']
+    Correct: X: Rp50.000, Y: Rp45.000
+    Explanation: CAC X = Rp5.000.000 / 100 = Rp50.000. CAC Y = Rp9.000.000 / 200 = Rp45.000.
+
+[COG_DAT_08] Q: Data mencatat 85% keluhan ulasan bintang 1 disebabkan keterlambatan kurir reguler. Tim operasional mengusulkan mengganti bubble wrap menjadi 3 lapis lebih tebal. Apakah rekomendasi tersebut menyelesaikan akar masalah?
+    Options: ['Ya, karena kemasan tebal membuat pembeli lebih bahagia', 'Tidak, solusi tersebut tidak menyelesaikan akar masalah yaitu SLA penyerahan paket dan kecepatan ekspedisi kurir', 'Ya, karena ulasan buruk selalu terselesaikan dengan packaging', 'Tidak, sebaiknya langsung hapus produk dari etalase', 'Ya, bubble wrap tebal otomatis membuat kurir mengantar lebih cepat']
+    Correct: Tidak, solusi tersebut tidak menyelesaikan akar masalah yaitu SLA penyerahan paket dan kecepatan ekspedisi kurir
+    Explanation: Solusi harus selaras dengan root cause yang teridentifikasi dalam data.
+
+==================================================
+### CATEGORY: Silogisme (4 questions)
+==================================================
+
+[COG_SIL_01] Q: Semua produk yang diskon diletakkan di etalase kategori 'Promo'. Beberapa gantungan kunci diletakkan di etalase kategori 'Promo'. Kesimpulan yang paling tepat adalah:
+    Options: ['Semua gantungan kunci adalah produk diskon', 'Gantungan kunci pasti produk paling murah', 'Tidak ada gantungan kunci yang diskon', 'Beberapa gantungan kunci mungkin adalah produk diskon', 'Gantungan kunci bukan produk diskon']
+    Correct: Beberapa gantungan kunci mungkin adalah produk diskon
+    Explanation: Premis tidak secara eksklusif menyatakan HANYA produk diskon yang ada di etalase Promo. Jadi 'beberapa' mengindikasikan kemungkinan.
+
+[COG_SIL_02] Q: Semua konten yang masuk FYP memiliki rasio retensi tontonan di atas 60%. Sebagian konten video unboxing masuk FYP. Kesimpulan yang sah adalah:
+    Options: ['Semua konten video unboxing memiliki retensi di atas 60%', 'Sebagian konten video unboxing memiliki rasio retensi tontonan di atas 60%', 'Tidak ada video unboxing yang memiliki retensi rendah', 'Semua konten dengan retensi di atas 60% pasti video unboxing', 'Video unboxing pasti selalu masuk FYP']
+    Correct: Sebagian konten video unboxing memiliki rasio retensi tontonan di atas 60%
+    Explanation: Jika semua P adalah Q, dan sebagian R adalah P, maka sebagian R pasti adalah Q.
+
+[COG_SIL_03] Q: Tidak ada pesanan sistem yang diproses tanpa verifikasi pembayaran. Semua pesanan COD (Bayar di Tempat) telah diverifikasi otomatis oleh sistem. Kesimpulan yang valid:
+    Options: ['Semua pesanan COD diproses oleh sistem', 'Beberapa pesanan COD tidak diproses', 'Pesanan non-COD tidak memerlukan verifikasi', 'Sistem hanya memproses pesanan COD', 'Pesanan COD tidak perlu membayar uang']
+    Correct: Semua pesanan COD diproses oleh sistem
+    Explanation: Karena seluruh pesanan COD telah diverifikasi, maka seluruh pesanan COD memenuhi syarat untuk diproses.
+
+[COG_SIL_04] Q: Semua anggota tim kreatif menguasai aplikasi CapCut. Beberapa anggota tim kreatif juga mahir menggunakan Adobe Premiere. Kesimpulan yang benar adalah:
+    Options: ['Semua anggota tim kreatif menguasai Adobe Premiere', 'Sebagian pengguna mahir Adobe Premiere dalam tim tersebut juga menguasai CapCut', 'Anggota yang memakai CapCut tidak boleh memakai Premiere', 'Hanya tim kreatif yang boleh mengedit video', 'Aplikasi CapCut lebih sulit dibanding Adobe Premiere']
+    Correct: Sebagian pengguna mahir Adobe Premiere dalam tim tersebut juga menguasai CapCut
+    Explanation: Karena seluruh tim menguasai CapCut, maka anggota yang mahir Premiere pun otomatis menguasai CapCut.
+
+==================================================
+### CATEGORY: Penalaran Kritis (4 questions)
+==================================================
+
+[COG_LOG_01] Q: Anda menemukan kompetitor menjual produk identik dengan harga 10% lebih murah. Produk kompetitor memiliki rating 3.5 dari 5, sedangkan produk perusahaan Anda memiliki rating 4.9 dari 5. Apa rekomendasi harga (pricing) yang paling logis?
+    Options: ['Ikut menurunkan harga 10% agar tidak kalah saing', 'Menurunkan harga 15% untuk mematikan kompetitor', 'Pertahankan harga saat ini dan jadikan ulasan/kualitas sebagai nilai jual utama', 'Menaikkan harga 10% karena kualitas lebih bagus', 'Berhenti menjual produk tersebut']
+    Correct: Pertahankan harga saat ini dan jadikan ulasan/kualitas sebagai nilai jual utama
+    Explanation: Penurunan harga tidak rasional jika produk memiliki keunggulan kompetitif pada trust (rating tinggi).
+
+[COG_LOG_02] Q: Toko menerima keluhan publik di kolom komentar TikTok karena salah mengirimkan warna baju. Pelanggan tersebut memiliki 50.000 followers dan videonya mulai ramai. Respon pertama yang paling tepat?
+    Options: ['Menghapus komentar pelanggan dan memblokir akunnya', 'Menyalahkan pihak bagian gudang packing di depan umum', 'Meminta maaf secara santun di kolom komentar, mengakui kelalaian, dan segera mengirimkan barang yang benar via ekspedisi instan tanpa membebani pelanggan', 'Mengabaikan komentar karena keluhan adalah hal biasa', 'Menantang pelanggan untuk membuktikan video rekaman pembukaan paket']
+    Correct: Meminta maaf secara santun di kolom komentar, mengakui kelalaian, dan segera mengirimkan barang yang benar via ekspedisi instan tanpa membebani pelanggan
+    Explanation: Respons cepat, transparan, dan berorientasi solusi memitigasi krisis PR dan justru membangun reputasi positif brand.
+
+[COG_LOG_03] Q: Perusahaan memiliki anggaran promosi Rp30 juta dan membidik direct sales. Opsi A: endorse 1 artis besar (jangkauan luas tapi umum). Opsi B: endorse 10 micro-creator segmented (engagement tinggi & niche relevan). Opsi mana yang lebih rasional untuk direct sales?
+    Options: ['Opsi A, karena artis besar membuat toko terlihat bergengsi', 'Opsi B, karena komunitas niche dengan keterikatan tinggi memiliki tingkat konversi pembelian langsung yang lebih kuat', 'Keduanya memiliki performa yang sama persis', 'Tidak memilih keduanya dan membiarkan produk terjual organik', 'Membagikan voucher acak ke 100 orang lewat direct message']
+    Correct: Opsi B, karena komunitas niche dengan keterikatan tinggi memiliki tingkat konversi pembelian langsung yang lebih kuat
+    Explanation: Untuk tujuan direct sales pada budget terbatas, micro-influencer niche memberikan conversion rate dan efisiensi biaya (CAC) yang lebih tinggi dibanding artis umum.
+
+[COG_LOG_04] Q: Dua insiden terjadi serentak: (1) Printer resi gudang offline sehingga 50 paket tertunda cetak, dan (2) Akun media sosial utama diretas dan menyebarkan tautan penipuan ke followers. Bagaimana prioritas tindakan PIC?
+    Options: ['Prioritaskan penanganan akun media sosial secepatnya guna menghentikan penipuan terhadap publik, sambil mengarahkan gudang memakai printer cadangan / manual', 'Fokus cetak resi terlebih dahulu karena jam jemput kurir sudah dekat', 'Menunggu kedatangan pimpinan yang sedang rapat di luar kota', 'Mematikan daya listrik seluruh kantor', 'Membiarkan keduanya ditangani pihak luar']
+    Correct: Prioritaskan penanganan akun media sosial secepatnya guna menghentikan penipuan terhadap publik, sambil mengarahkan gudang memakai printer cadangan / manual
+    Explanation: Peretasan akun publik menimbulkan risiko reputasi masif dan potensi kerugian finansial pihak ketiga (followers), sehingga merupakan krisis prioritas darurat.
